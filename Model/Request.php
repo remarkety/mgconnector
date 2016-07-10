@@ -16,7 +16,7 @@ use \Magento\Customer\Model\Session;
 class Request
 
 {
-    const REMARKETY_URI = 'http://remarkety-trunk.local/public/install/notify';
+    const REMARKETY_URI = 'https://app.remarkety.com/public/install/notify';
     const REMARKETY_METHOD = 'POST';
     const REMARKETY_TIMEOUT = 10;
     const REMARKETY_VERSION = 0.9;

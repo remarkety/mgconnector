@@ -1,7 +1,4 @@
 <?php
+use \Magento\Framework\Component\ComponentRegistrar;
 
-\Magento\Framework\Component\ComponentRegistrar::register(
-    \Magento\Framework\Component\ComponentRegistrar::MODULE,
-    'Remarkety_Mgconnector',
-    __DIR__
-);
+ComponentRegistrar::register(ComponentRegistrar::MODULE, 'Remarkety_Mgconnector', __DIR__);

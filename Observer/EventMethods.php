@@ -12,7 +12,7 @@ use \Magento\Framework\App\Config\ScopeConfigInterface;
 
 class EventMethods {
 
-    const REMARKETY_EVENTS_ENDPOINT = 'http://remarkety-trunk.local/events';
+    const REMARKETY_EVENTS_ENDPOINT = 'https://api-events.remarkety.com/v1';
     const REMARKETY_METHOD = 'POST';
     const REMARKETY_TIMEOUT = 2;
     const REMARKETY_VERSION = 0.9;
