@@ -10,4 +10,4 @@ On the web server user, run the following command:
 
 ## Activation
 - Login to Magento's backend
-- Go to Remarkety > Remarkety Installtion
+- Go to Remarkety > Remarkety Installation
