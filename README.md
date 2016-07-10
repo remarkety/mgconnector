@@ -2,7 +2,7 @@
 
 ## Installation
 To install the connector using composer, run the following commands:
-- cd <Magento 2 installation path>
+- cd < Magento 2 installation path >
 - composer require remarkety/mgconnector
 
 On the web server user, run the following command:
