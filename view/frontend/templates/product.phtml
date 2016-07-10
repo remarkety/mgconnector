@@ -1,0 +1,13 @@
+<?php
+/* @var $block Remarkety\Mgconnector\Block\Frontend\Tracking\Product */
+?>
+<?php if ($block->isWebtrackingActivated()): ?>
+    <script>
+        var _rmData = _rmData || [];
+        _rmData.push(['productView', {
+            productId: <?php echo json_encode($block->getActiveProduct()->getId()); ?>,
+            productCategories: <?php echo json_encode($block->getCategoryNames()); ?>,
+            productCategoriesIds: <?php echo json_encode($block->getCategoryIds()); ?>,
+        }]);
+    </script>
+<?php endif; ?>

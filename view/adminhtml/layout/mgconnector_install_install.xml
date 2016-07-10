@@ -1,0 +1,15 @@
+<?xml version="1.0"?>
+<page xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:View/Layout/etc/page_configuration.xsd">
+    <body>
+        <referenceContainer name="content">
+            <block class="Remarkety\Mgconnector\Block\Adminhtml\Install\Install" name="remarkety_installation">
+                <block class="Remarkety\Mgconnector\Block\Adminhtml\Install\Install\Create" name="remarkety_install_create" />
+                <block class="Remarkety\Mgconnector\Block\Adminhtml\Install\Install\Login" name="remarkety_install_login" />
+                <block class="Remarkety\Mgconnector\Block\Adminhtml\Install\Welcome\Form\Form" name="remarkety_welcome" />
+                <block class="Remarkety\Mgconnector\Block\Adminhtml\Install\Welcome\Store\Store" name="remarkety_store" />
+                <block class="Remarkety\Mgconnector\Block\Adminhtml\Install\Upgrade" name="remarkety_upgrade" />
+                <block class="Remarkety\Mgconnector\Block\Adminhtml\Install\Complete" name="remarkety_complete" />
+            </block>
+        </referenceContainer>
+    </body>
+</page>

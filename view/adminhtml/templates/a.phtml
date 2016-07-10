@@ -1,0 +1,26 @@
+<?php
+//$params = $this->getRequest()->getParam('mode');
+if($this->getHelperMode() == 'install_create') {
+    echo $block->getChildHtml('remarkety_install_create');
+}
+if($this->getHelperMode() == 'install_login') {
+    echo $block->getChildHtml('remarkety_install_login');
+}
+if($this->getHelperMode() == 'upgrade'){
+    echo $block->getChildHtml('remarkety_upgrade');
+}
+if($this->getHelperMode() == 'complete'){
+    echo $block->getChildHtml('remarkety_complete');
+}
+if($this->getHelperMode() == 'welcome') {
+    echo $block->getChildHtml('remarkety_welcome');
+    echo $block->getChildHtml('remarkety_store');
+}
+?>
+<script>
+    require(["jquery"], function ($) {
+        $('#submit-form').click(function(){
+            $('#edit_form').submit();
+        });
+    });
+</script>

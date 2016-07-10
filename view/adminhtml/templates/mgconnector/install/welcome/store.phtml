@@ -1,0 +1,48 @@
+<?php $stores = $this->getStoresStatus(); ?>
+<div class="entry-edit">
+    <div class="entry-edit-head">
+        <h4 class="icon-head head-edit-form fieldset-legend"><?php echo __('Stores Configuration') ?></h4>
+        <div class="form-buttons"></div>
+    </div>
+    <div class="fieldset " id="general">
+        <div class="hor-scroll">
+            <table cellspacing="0" class="form-list">
+                <tbody>
+                    <tr>
+                        <td colspan="2" class="value" style="padding: 5px 0;">
+                            <ul style="list-style-type:none;margin-left:20px;font-weight:bold;font-size:16px;">
+                                <?php foreach($stores as $_website): ?>
+                                <li style="margin-bottom:20px;">
+                                    <?php echo $_website['name']; ?>
+                                    <ul>
+                                    <?php foreach($_website['store_groups'] as $_group): ?>
+                                        <li style="list-style-type:none;margin-left:20px;font-weight:bold;font-size:14px;">
+                                            <?php echo $_group['name']; ?>
+                                            <ul>
+                                                <?php foreach($_group['store_views'] as $_store): ?>
+                                                    <li style="list-style-type:none;margin-left:20px;font-weight:bold;font-size:12px;">
+                                                        <?php echo $_store['name']; ?>
+
+                                                        <?php if($_store['isInstalled']): ?>
+                                                            <span style="color:green">(<?php echo __('Installed') ?>)</span>
+                                                        <?php else: ?>
+                                                            <button id="install_button_<?php echo $_store['id'] ?>" title="Save Category" type="button" class="scalable save" onclick="window.location = '<?php echo $this->getUrl('*/install/install', array('mode' => \Remarkety\Mgconnector\Model\Install::MODE_INSTALL_LOGIN, 'store' => $_store['id'])) ?>'" style="">
+                                                                <span><span><span><?php echo __('Install') ?></span></span></span>
+                                                            </button>
+                                                        <?php endif; ?>
+                                                    </li>
+                                                <?php endforeach; ?>
+                                            </ul>
+                                        </li>
+                                    <?php endforeach; ?>
+                                    </ul>
+                                </li>
+                                <?php endforeach; ?>
+                            </ul>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

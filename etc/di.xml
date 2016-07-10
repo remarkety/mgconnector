@@ -1,0 +1,11 @@
+<?xml version="1.0"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:ObjectManager/etc/config.xsd">
+    <preference for="Remarkety\Mgconnector\Api\DataInterface" type="Remarkety\Mgconnector\Model\Api\Data" />
+    <preference for="Remarkety\Mgconnector\Api\Data\ProductCollectionInterface" type="Magento\Framework\Api\SearchResults" />
+    <preference for="Remarkety\Mgconnector\Api\Data\CustomerCollectionInterface" type="Magento\Framework\Api\SearchResults" />
+    <preference for="Remarkety\Mgconnector\Api\Data\OrderCollectionInterface" type="Magento\Framework\Api\SearchResults" />
+    <preference for="Remarkety\Mgconnector\Api\Data\QuoteCollectionInterface" type="Magento\Framework\Api\SearchResults" />
+    <preference for="Remarkety\Mgconnector\Api\Data\StoreOrderStatusesCollectionInterface" type="Magento\Framework\Api\SearchResults" />
+    <preference for="Remarkety\Mgconnector\Api\Data\StoreSettingsInterface" type="Magento\Framework\DataObject" />
+    <preference for="Remarkety\Mgconnector\Api\Data\CouponCollectionInterface" type="Magento\Framework\Api\SearchResults" />
+</config>

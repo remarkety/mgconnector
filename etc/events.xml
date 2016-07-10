@@ -1,0 +1,21 @@
+<?xml version="1.0"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:Event/etc/events.xsd">
+    <event name="customer_save_after">
+        <observer name="remarkety_customer_save_after_observer" instance="Remarkety\Mgconnector\Observer\TriggerCustomerUpdateObserver"/>
+    </event>
+    <event name="customer_address_save_after">
+        <observer name="remarkety_customer_address_save_after_observer" instance="Remarkety\Mgconnector\Observer\TriggerCustomerAddressUpdateObserver"/>
+    </event>
+    <event name="customer_address_save_before">
+        <observer name="remarkety_customer_address_save_before_observer" instance="Remarkety\Mgconnector\Observer\TriggerCustomerAddressBeforeUpdateObserver"/>
+    </event>
+    <event name="newsletter_subscriber_save_after">
+        <observer name="remarkety_newsletter_subscriber_save_after_observer" instance="Remarkety\Mgconnector\Observer\TriggerSubscribeUpdateObserver"/>
+    </event>
+    <event name="newsletter_subscriber_delete_after">
+        <observer name="remarkety_newsletter_subscriber_delete_after_observer" instance="Remarkety\Mgconnector\Observer\TriggerSubscribeDeleteObserver"/>
+    </event>
+    <event name="customer_delete_commit_after">
+        <observer name="remarkety_customer_delete_commit_after_observer" instance="Remarkety\Mgconnector\Observer\TriggerCustomerDeleteObserver"/>
+    </event>
+</config>

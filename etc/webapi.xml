@@ -1,0 +1,58 @@
+<?xml version="1.0"?>
+<routes xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Webapi:etc/webapi.xsd">
+    <route url="/V1/mgconnector/products" method="GET">
+        <service class="Remarkety\Mgconnector\Api\DataInterface" method="getProducts"/>
+        <resources>
+            <resource ref="Magento_Backend::all"/>
+        </resources>
+    </route>
+    <route url="/V1/mgconnector/customers" method="GET">
+        <service class="Remarkety\Mgconnector\Api\DataInterface" method="getCustomers"/>
+        <resources>
+            <resource ref="Magento_Catalog::products"/>
+        </resources>
+    </route>
+    <route url="/V1/mgconnector/orders" method="GET">
+        <service class="Remarkety\Mgconnector\Api\DataInterface" method="getOrders"/>
+        <resources>
+            <resource ref="Magento_Backend::all"/>
+        </resources>
+    </route>
+    <route url="/V1/mgconnector/products/count" method="GET">
+        <service class="Remarkety\Mgconnector\Api\DataInterface" method="getProductsCount"/>
+        <resources>
+            <resource ref="Magento_Backend::all"/>
+        </resources>
+    </route>
+    <route url="/V1/mgconnector/customers/count" method="GET">
+        <service class="Remarkety\Mgconnector\Api\DataInterface" method="getCustomersCount"/>
+        <resources>
+            <resource ref="Magento_Backend::all"/>
+        </resources>
+    </route>
+    <route url="/V1/mgconnector/orders/count" method="GET">
+        <service class="Remarkety\Mgconnector\Api\DataInterface" method="getOrdersCount"/>
+        <resources>
+            <resource ref="Magento_Backend::all"/>
+        </resources>
+    </route>
+    <route url="/V1/mgconnector/carts" method="GET">
+        <service class="Remarkety\Mgconnector\Api\DataInterface" method="getQuotes"/>
+        <resources>
+            <resource ref="Magento_Backend::all"/>
+        </resources>
+    </route>
+    <route url="/V1/mgconnector/store/settings" method="GET">
+        <service class="Remarkety\Mgconnector\Api\DataInterface" method="getStoreSettings"/>
+        <resources>
+            <resource ref="Magento_Backend::all"/>
+        </resources>
+    </route>
+    <route url="/V1/mgconnector/createCoupon" method="GET">
+        <service class="Remarkety\Mgconnector\Api\DataInterface" method="createCoupon"/>
+        <resources>
+            <resource ref="Magento_Backend::all"/>
+        </resources>
+    </route>
+</routes>
