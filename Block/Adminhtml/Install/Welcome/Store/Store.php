@@ -3,7 +3,6 @@
 namespace Remarkety\Mgconnector\Block\Adminhtml\Install\Welcome\Store;
 
 //use \Magento\Store\Model\Store;
-use \Magento\Framework\App\Config\ScopeConfigInterface;
 use \Magento\Store\Model\StoreManager;
 
 class Store extends \Magento\Framework\View\Element\Template
@@ -12,11 +11,11 @@ class Store extends \Magento\Framework\View\Element\Template
     public function __construct(
         \Magento\Backend\Block\Template\Context $context,
         \Magento\Framework\Registry $registry,
-        StoreManager $storeManager,
-        ScopeConfigInterface $scopeConfig
+        StoreManager $storeManager
     ){
         $this->storeManager = $storeManager;
-        $this->_configResource = $scopeConfig;
+        $this->_configResource = $context->getScopeConfig();
+
         parent::__construct($context);
     }
     public function _toHtml(){
