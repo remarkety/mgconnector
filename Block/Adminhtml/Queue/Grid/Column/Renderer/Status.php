@@ -1,7 +1,5 @@
 <?php
 
-use Magento\Framework\DataObject;
-
 /**
  * Adminhtml queue grid status column renderer block
  *
@@ -9,7 +7,9 @@ use Magento\Framework\DataObject;
  * @package    Remarkety_Mgconnector
  * @author     Piotr Pierzak <piotrek.pierzak@gmail.com>
  */
-namespace Remarkety\Mgconnector\Block\Adminhtml\Queue\Grid\Column\Renderer; class Status
+namespace Remarkety\Mgconnector\Block\Adminhtml\Queue\Grid\Column\Renderer;
+use Magento\Framework\DataObject;
+class Status
     extends \Magento\Backend\Block\Widget\Grid\Column\Renderer\AbstractRenderer
 {
     /**
