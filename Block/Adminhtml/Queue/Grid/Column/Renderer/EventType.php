@@ -1,5 +1,7 @@
 <?php
 
+use Magento\Framework\DataObject;
+
 /**
  * Adminhtml queue grid status column renderer block
  *
@@ -13,10 +15,10 @@ namespace Remarkety\Mgconnector\Block\Adminhtml\Queue\Grid\Column\Renderer; clas
     /**
      * Column renderer
      *
-     * @param Varien_Object $row
+     * @param DataObject $row
      * @return string
      */
-    public function render(Varien_Object $row)
+    public function render(DataObject $row)
     {
         $value = $row->getData($this->getColumn()->getIndex());
         try {
