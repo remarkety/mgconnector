@@ -9,5 +9,8 @@ use Magento\Framework\DB\Ddl\Table;
 
 class Setup implements InstallSchemaInterface
 {
+    public function install(SchemaSetupInterface $setup, ModuleContextInterface $context)
+    {
 
+    }
 }
