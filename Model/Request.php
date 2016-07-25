@@ -49,7 +49,9 @@ class Request
         $domain = $this->store->getBaseUrl(UrlInterface::URL_TYPE_WEB);
 
         $domain = substr($domain, 7, -1);
-        $version = \Magento\Framework\AppInterface::VERSION;
+        $objectManager = \Magento\Framework\App\ObjectManager::getInstance();
+        $productMetadata = $objectManager->get('Magento\Framework\App\ProductMetadataInterface');
+        $version = $productMetadata->getVersion(); //will return the magento version
 
         $arr = array(
             'domain' => $domain,
