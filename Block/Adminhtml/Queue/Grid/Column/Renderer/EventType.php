@@ -7,16 +7,19 @@
  * @package    Remarkety_Mgconnector
  * @author     Piotr Pierzak <piotrek.pierzak@gmail.com>
  */
-namespace Remarkety\Mgconnector\Block\Adminhtml\Queue\Grid\Column\Renderer; class EventType
+namespace Remarkety\Mgconnector\Block\Adminhtml\Queue\Grid\Column\Renderer;
+use Magento\Framework\DataObject;
+
+class EventType
     extends \Magento\Backend\Block\Widget\Grid\Column\Renderer\AbstractRenderer
 {
     /**
      * Column renderer
      *
-     * @param Varien_Object $row
+     * @param DataObject $row
      * @return string
      */
-    public function render(Varien_Object $row)
+    public function render(DataObject $row)
     {
         $value = $row->getData($this->getColumn()->getIndex());
         try {

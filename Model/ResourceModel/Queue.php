@@ -1,6 +1,6 @@
 <?php
 
-namespace Remarkety\Mgconnector\Model\Resource;
+namespace Remarkety\Mgconnector\Model\ResourceModel;
 
 use \Magento\Framework\Model\ResourceModel\Db\AbstractDb;
 

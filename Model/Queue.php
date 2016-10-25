@@ -4,7 +4,7 @@ namespace Remarkety\Mgconnector\Model; class Queue extends \Magento\Framework\Mo
 {
     protected function _construct()
     {
-        $this->_init('Remarkety\Mgconnector\Model\Resource\Queue');
+        $this->_init('Remarkety\Mgconnector\Model\ResourceModel\Queue');
     }
 
     /**
