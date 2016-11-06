@@ -10,7 +10,7 @@
     <route url="/V1/mgconnector/customers" method="GET">
         <service class="Remarkety\Mgconnector\Api\DataInterface" method="getCustomers"/>
         <resources>
-            <resource ref="Magento_Catalog::products"/>
+            <resource ref="Magento_Backend::all"/>
         </resources>
     </route>
     <route url="/V1/mgconnector/orders" method="GET">

@@ -50,6 +50,7 @@ class Data implements DataInterface
             ],
             "created_at" => 'created_at',
             "id" => 'entity_id',
+            'price' => 'price',
             "image" => [
                 "id",
                 "product_id",

@@ -35,13 +35,13 @@ interface DataInterface
     /**
      * Get All customers from catalog
      *
-     * @param int|null $customer_id
      * @param int|null $mage_store_id
      * @param string|null $updated_at_min
      * @param string|null $updated_at_max
      * @param int|null $limit
      * @param int|null $page
      * @param int|null $since_id
+     * @param int|null $customer_id
      * @return \Remarkety\Mgconnector\Api\Data\CustomerCollectionInterface
      */
     public function getCustomers(
