@@ -60,6 +60,7 @@ class TriggerCustomerAddressBeforeUpdateObserver extends EventMethods implements
         if(!empty($address)) {
             $this->_origAddressData = $address->getData();
         }
+        $this->_coreRegistry->unregister( 'customer_orig_address' );
         $this->_coreRegistry->register('customer_orig_address', $this->_origAddressData);
         return $this;
     }

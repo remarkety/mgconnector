@@ -71,10 +71,14 @@ class TriggerCustomerAddressUpdateObserver extends EventMethods implements Obser
         if (!$isDefaultBilling || !$this->_customer->getId()) {
             return $this;
         }
+
+        $this->_coreRegistry->unregister( 'customer_address_object_observer' );
+        $this->_coreRegistry->unregister( 'customer_data_object_observer' );
         $this->_coreRegistry->register('customer_address_object_observer', $this->_address);
         $this->_coreRegistry->register('customer_data_object_observer', $this->_customer);
         $this->_customerUpdate();
 
+        $this->_coreRegistry->unregister( 'remarkety_customer_save_observer_executed_'.$this->_customer->getId() );
         $this->_coreRegistry->register('remarkety_customer_save_observer_executed_'.$this->_customer->getId(),true);
         return $this;
     }

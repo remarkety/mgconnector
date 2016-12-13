@@ -113,7 +113,10 @@ class EventMethods {
                 'country_id',
                 'telephone',
             );
-            $addressDiffKeys = array_keys( array_diff($this->_coreRegistry->registry('customer_address_object_observer')->getData(), $this->_coreRegistry->registry('customer_orig_address')->getData()) );
+
+            $addressObs = $this->_coreRegistry->registry('customer_address_object_observer')->getData();
+            $originalAddressObs = $this->_coreRegistry->registry('customer_orig_address');
+            $addressDiffKeys = array_keys( array_diff($addressObs, $originalAddressObs));
 
             if(array_intersect($addressDiffKeys, $validate)) {
                 $this->_hasDataChanged = true;
