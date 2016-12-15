@@ -51,7 +51,11 @@ class EventMethods {
 
         $this->_token = $this->scopeConfigInterface->getValue('remarkety/mgconnector/api_key');
         $intervals = $this->scopeConfigInterface->getValue('remarkety/mgconnector/intervals');
-        $this->_intervals = explode(',', $intervals);
+        if(empty($intervals)){
+            $this->_intervals = [1,3,10];
+        } else {
+            $this->_intervals = explode(',', $intervals);
+        }
     }
 
     protected function _customerRegistration()
@@ -169,7 +173,6 @@ class EventMethods {
                 ->setRawData($json, 'application/json')
                 ->request(self::REMARKETY_METHOD);
 
-//            Mage::log("Sent event to endpoint: ".$json."; Response (".$response->getStatus()."): ".$response->getBody(), \Zend_Log::DEBUG, REMARKETY_LOG);
             switch ($response->getStatus()) {
                 case '200':
                     return true;
@@ -206,6 +209,7 @@ class EventMethods {
                     'attempts' => $attempt,
                     'last_attempt' => date("Y-m-d H:i:s", $now),
                     'next_attempt' => date("Y-m-d H:i:s", $nextAttempt),
+                    'status' => 1,
                 ));
             }
             return $queueModel->save();

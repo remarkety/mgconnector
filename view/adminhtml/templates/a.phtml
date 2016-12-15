@@ -1,22 +1,24 @@
-<?php
-//$params = $this->getRequest()->getParam('mode');
-if($this->getHelperMode() == 'install_create') {
-    echo $block->getChildHtml('remarkety_install_create');
-}
-if($this->getHelperMode() == 'install_login') {
-    echo $block->getChildHtml('remarkety_install_login');
-}
-if($this->getHelperMode() == 'upgrade'){
-    echo $block->getChildHtml('remarkety_upgrade');
-}
-if($this->getHelperMode() == 'complete'){
-    echo $block->getChildHtml('remarkety_complete');
-}
-if($this->getHelperMode() == 'welcome') {
-    echo $block->getChildHtml('remarkety_welcome');
-    echo $block->getChildHtml('remarkety_store');
-}
-?>
+<div class="remarkety-install">
+    <?php
+    //$params = $this->getRequest()->getParam('mode');
+    if($this->getHelperMode() == 'install_create') {
+        echo $block->getChildHtml('remarkety_install_create');
+    }
+    if($this->getHelperMode() == 'install_login') {
+        echo $block->getChildHtml('remarkety_install_login');
+    }
+    if($this->getHelperMode() == 'upgrade'){
+        echo $block->getChildHtml('remarkety_upgrade');
+    }
+    if($this->getHelperMode() == 'complete'){
+        echo $block->getChildHtml('remarkety_complete');
+    }
+    if($this->getHelperMode() == 'welcome') {
+        echo $block->getChildHtml('remarkety_welcome');
+        echo $block->getChildHtml('remarkety_store');
+    }
+    ?>
+</div>
 <script>
     require(["jquery"], function ($) {
         $('#submit-form').click(function(){
@@ -24,3 +26,8 @@ if($this->getHelperMode() == 'welcome') {
         });
     });
 </script>
+<style>
+    .remarkety-install legend {
+        display: none;
+    }
+</style>

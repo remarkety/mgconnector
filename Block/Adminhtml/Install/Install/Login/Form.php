@@ -28,7 +28,7 @@ class Form extends Generic
             [
                 'data' => [
                     'id'    => 'edit_form',
-                    'action' => $this->getUrl('/*/complete'),
+                    'action' => $this->getUrl('*/*/complete'),
                     'method' => 'post'
                 ]
             ]

@@ -135,9 +135,13 @@ interface DataInterface
      */
     public function getStoreOrderStatuses();
     /**
-     * Get All customers from catalog
+     * Create coupon
      *
-     * @return int The sum of the numbers.
+     * @param int     $ruleId
+     * @param string $couponCode
+     * @param string $expiration
+     *
+     * @return array $response
      */
-    public function createCoupon();
+    public function createCoupon($ruleId, $couponCode, $expiration  = null);
 }

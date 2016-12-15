@@ -49,7 +49,7 @@
             <resource ref="Magento_Backend::all"/>
         </resources>
     </route>
-    <route url="/V1/mgconnector/createCoupon" method="GET">
+    <route url="/V1/mgconnector/createCoupon" method="POST">
         <service class="Remarkety\Mgconnector\Api\DataInterface" method="createCoupon"/>
         <resources>
             <resource ref="Magento_Backend::all"/>
