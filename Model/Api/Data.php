@@ -18,6 +18,8 @@ use Magento\SalesRule\Model\RuleFactory;
 use Magento\SalesRule\Model\CouponFactory;
 use Magento\SalesRule\Helper\Coupon;
 use Magento\Framework\Exception\LocalizedException;
+use Magento\Catalog\Model\Product\Attribute\Source\Status;
+use Magento\Catalog\Model\Product\Visibility;
 
 class Data implements DataInterface
 {
@@ -423,6 +425,16 @@ class Data implements DataInterface
                     }
                 }
             }
+
+            //product_exists
+            $visibility = array_key_exists('visibility', $mappedArray) ? $mappedArray['visibility'] : 1;
+            $status = array_key_exists('status', $mappedArray) ? $mappedArray['status'] : 1;
+
+            $active = true;
+            if($status == Status::STATUS_DISABLED || $visibility == Visibility::VISIBILITY_NOT_VISIBLE){
+                $active = false;
+            }
+            $prod['product_exists'] = $active;
 
             $prod['image'] = $this->getImage($row);
             $prod['images'] = $this->getMediaGalleryImages($row);
