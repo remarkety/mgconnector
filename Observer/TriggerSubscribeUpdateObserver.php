@@ -44,7 +44,8 @@ class TriggerSubscribeUpdateObserver extends EventMethods implements ObserverInt
     public function execute(\Magento\Framework\Event\Observer $observer){
         $this->_subscriber = $observer->getEvent()->getSubscriber();
 
-        $this->_coreRegistry->register('subscriber_object_data_observer', $this->_subscriber);
+        if(!$this->_coreRegistry->registry('subscriber_object_data_observer'))
+            $this->_coreRegistry->register('subscriber_object_data_observer', $this->_subscriber);
 
         if($this->_subscriber->getId() && !$this->session->isLoggedIn()) {
             if($this->_subscriber->getCustomerId() && $this->_coreRegistry->registry('remarkety_customer_save_observer_executed_'.$this->_subscriber->getCustomerId())) {
