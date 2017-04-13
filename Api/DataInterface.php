@@ -141,7 +141,7 @@ interface DataInterface
      * @param string $couponCode
      * @param string $expiration
      *
-     * @return array $response
+     * @return mixed $response
      */
     public function createCoupon($ruleId, $couponCode, $expiration  = null);
 }
