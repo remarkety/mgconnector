@@ -2,8 +2,7 @@
 namespace Remarkety\Mgconnector\Api;
 
 /**
- * Defines a data structure representing a point, to demonstrating passing
- * more complex types in and out of a function call.
+ * API Methods to support Remarkety's store sync
  */
 interface DataInterface
 {
