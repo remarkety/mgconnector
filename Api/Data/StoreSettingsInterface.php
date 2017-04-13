@@ -55,7 +55,7 @@ interface StoreSettingsInterface extends \Magento\Framework\Api\ExtensibleDataIn
     public function getAddress();
 
     /**
-     * @return object[]
+     * @return mixed[]
      */
     public function getOrder_statuses();
 }
