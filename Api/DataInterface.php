@@ -143,4 +143,54 @@ interface DataInterface
      * @return mixed $response
      */
     public function createCoupon($ruleId, $couponCode, $expiration  = null);
+
+    /**
+     * @param int|null $mage_store_id
+     * @param string $configName
+     * @param string $scope
+     * @return string
+     */
+    public function getConfig($mage_store_id, $configName, $scope);
+
+    /**
+     * @param int|null $mage_store_id
+     * @param string $configName
+     * @param string $scope
+     * @param string $newValue
+     * @return string
+     */
+    public function setConfig($mage_store_id, $configName, $scope, $newValue);
+
+    /**
+     * @return string
+     */
+    public function getVersion();
+
+    /**
+     * @param int $mage_store_id
+     * @param int|null $limit
+     * @param int|null $page
+     * @param int|null $minId
+     * @param int|null $maxId
+     * @return \Remarkety\Mgconnector\Api\Data\QueueCollectionInterface
+     */
+    public function getQueueItems($mage_store_id, $limit = null, $page = null, $minId = null, $maxId = null);
+
+    /**
+     * @param int $mage_store_id
+     * @param int|null $minId
+     * @param int|null $maxId
+     * @return mixed
+     */
+    public function deleteQueueItems($mage_store_id, $minId = null, $maxId = null);
+
+    /**
+     * @param int $mage_store_id
+     * @param int|null $limit
+     * @param int|null $page
+     * @param int|null $minId
+     * @param int|null $maxId
+     * @return int
+     */
+    public function retryQueueItems($mage_store_id, $limit = null, $page = null, $minId = null, $maxId = null);
 }

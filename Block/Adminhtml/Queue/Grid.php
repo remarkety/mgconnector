@@ -118,6 +118,41 @@ class Grid extends \Magento\Backend\Block\Widget\Grid\Extended
             'index' => 'next_attempt'
         ));
 
+        $this->addColumn('last_error_message', array(
+            'header' => __('Last error'),
+            'width' => '200px',
+            'index' => 'last_error_message'
+        ));
+
         return parent::_prepareColumns();
+    }
+
+    /**
+     * @return $this
+     */
+    protected function _prepareMassaction()
+    {
+        $this->setMassactionIdField('queue_id');
+        $this->getMassactionBlock()->setFormFieldName('queue');
+
+        $this->getMassactionBlock()->addItem(
+            'resend',
+            [
+                'label' => __('Resend'),
+                'url' => $this->getUrl('/*/resend')
+            ]
+        );
+
+        $this->getMassactionBlock()->addItem(
+            'delete',
+            [
+                'label' => __('Delete'),
+                'url' => $this->getUrl('/*/delete'),
+                'confirm' => __('Are you sure?')
+            ]
+        );
+
+
+        return $this;
     }
 }

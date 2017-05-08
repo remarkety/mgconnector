@@ -66,10 +66,14 @@ class Form extends Generic
             'class' => 'required-entry admin__control-text'
         ));
 
+        $options = $this->_systemStore->getStoreValuesForForm(false, false);
+        $selected_store_id = $this->getRequest()->getParam('store');
+
         $fieldset->addField('store_id', 'select', array(
             'name' => 'data[store_id]',
             'label' =>__('Sync Remarkety with this view:'),
-            'values' => $this->_systemStore->getStoreValuesForForm(false, false)
+            'values' => $options,
+            'value' => $selected_store_id
         ));
 
       $fieldset->addField('button', 'note', array(

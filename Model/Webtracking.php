@@ -3,7 +3,6 @@ namespace Remarkety\Mgconnector\Model;
 
 use \Magento\Config\Model\ResourceModel\Config;
 use Magento\Store\Model\StoreManager;
-use \Magento\Store\Model\Store;
 use \Magento\Framework\App\Config\ScopeConfigInterface;
 
 Class Webtracking extends \Magento\Framework\Model\AbstractModel

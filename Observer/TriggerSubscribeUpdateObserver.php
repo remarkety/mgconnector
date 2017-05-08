@@ -2,38 +2,65 @@
 
 namespace Remarkety\Mgconnector\Observer;
 
+use Magento\Customer\Model\CustomerRegistry;
+use Magento\Customer\Model\ResourceModel\CustomerRepository;
+use Magento\Framework\App\Request\Http;
 use Magento\Framework\Event\ObserverInterface;
 use \Magento\Customer\Model\Session;
+use Magento\Framework\HTTP\PhpEnvironment\RemoteAddress;
 use \Magento\Framework\Registry;
 use \Magento\Newsletter\Model\Subscriber;
 use \Magento\Customer\Model\Group;
-use \Remarkety\Mgconnector\Model\Queue;
+use Magento\Quote\Api\CartRepositoryInterface;
+use Remarkety\Mgconnector\Model\QueueRepository;
+use Remarkety\Mgconnector\Helper\ConfigHelper;
 use \Magento\Store\Model\Store;
 use Magento\Store\Model\StoreManager;
 use \Magento\Framework\App\Config\ScopeConfigInterface;
 use \Magento\Checkout\Model\Session as CheckoutSession;
+use Remarkety\Mgconnector\Serializer\AddressSerializer;
+use Remarkety\Mgconnector\Serializer\CustomerSerializer;
+use Remarkety\Mgconnector\Serializer\OrderSerializer;
+use Remarkety\Mgconnector\Serializer\ProductSerializer;
+use Psr\Log\LoggerInterface;
 
 class TriggerSubscribeUpdateObserver extends EventMethods implements ObserverInterface {
 
     protected $_subscriber = null;
     protected $_checkoutSession;
-//    protected $_coreRegistry;
+    protected $cartRepository;
+    protected $session;
+    protected $remoteAddress;
 
     public function __construct(
+        LoggerInterface $logger,
         Session $customerSession,
         CheckoutSession $CheckoutSession,
         Registry $registry,
         Subscriber $subscriber,
         Group $customerGroupModel,
-        Queue $remarketyQueue,
+        QueueRepository $remarketyQueueRepo,
         Store $store,
         ScopeConfigInterface $scopeConfig,
-        StoreManager $sManager
+        StoreManager $sManager,
+        OrderSerializer $orderSerializer,
+        CustomerSerializer $customerSerializer,
+        AddressSerializer $addressSerializer,
+        ConfigHelper $configHelper,
+        ProductSerializer $productSerializer,
+        CartRepositoryInterface $cartRepository,
+        Http $request,
+        CustomerRepository $customerRepository,
+        \Remarkety\Mgconnector\Model\QueueFactory $queueFactory,
+        CustomerRegistry $customerRegistry,
+        RemoteAddress $remoteAddress
     ){
-        parent::__construct($registry, $subscriber, $customerGroupModel, $remarketyQueue, $store, $scopeConfig);
+        parent::__construct($logger, $registry, $subscriber, $customerGroupModel, $remarketyQueueRepo, $queueFactory, $store, $scopeConfig, $orderSerializer, $customerSerializer, $addressSerializer, $configHelper, $productSerializer, $request, $customerRepository, $customerRegistry);
         $this->session = $customerSession;
         $this->_checkoutSession = $CheckoutSession;
         $this->_store = $sManager->getStore();
+        $this->cartRepository = $cartRepository;
+        $this->remoteAddress = $remoteAddress;
     }
     /**
      * Apply catalog price rules to product in admin
@@ -42,31 +69,53 @@ class TriggerSubscribeUpdateObserver extends EventMethods implements ObserverInt
      * @return $this
      */
     public function execute(\Magento\Framework\Event\Observer $observer){
-        $this->_subscriber = $observer->getEvent()->getSubscriber();
+        try {
+            /**
+             * @var $subscriber Subscriber
+             */
+            $subscriber = $observer->getEvent()->getSubscriber();
 
-        if(!$this->_coreRegistry->registry('subscriber_object_data_observer'))
-            $this->_coreRegistry->register('subscriber_object_data_observer', $this->_subscriber);
+            if(!$this->_coreRegistry->registry('subscriber_object_data_observer'))
+                $this->_coreRegistry->register('subscriber_object_data_observer', 1);
 
-        if($this->_subscriber->getId() && !$this->session->isLoggedIn()) {
-            if($this->_subscriber->getCustomerId() && $this->_coreRegistry->registry('remarkety_customer_save_observer_executed_'.$this->_subscriber->getCustomerId())) {
-                return $this;
-            }
-            if ($this->_coreRegistry->registry('remarkety_subscriber_deleted'))
-                return $this;
-            $this->makeRequest('customers/create', $this->_prepareCustomerSubscribtionUpdateData());
+            if($subscriber->getId()) {
+                if ($this->_coreRegistry->registry('remarkety_subscriber_deleted_' . $subscriber->getSubscriberEmail()))
+                    return $this;
 
-            $email = $this->_subscriber->getSubscriberEmail();
-            if(!empty($email)){
-                //for webtracking use
-                $this->session->setSubscriberEmail($email);
-                //add email to cart
-                $cart = $this->_checkoutSession->getQuote();
-                if($cart && !is_null($cart->getId()) && is_null($cart->getCustomerEmail())){
-                    $cart->setCustomerEmail($email)->save();
+                $status = $subscriber->getStatus();
+                $eventType = 'newsletter/subscribed';
+                switch($status){
+                    case Subscriber::STATUS_SUBSCRIBED:
+                        $eventType = 'newsletter/subscribed';
+                        break;
+                    case Subscriber::STATUS_UNSUBSCRIBED:
+                        $eventType = 'newsletter/unsubscribed';
+                        break;
+                    case Subscriber::STATUS_UNCONFIRMED:
+                        return $this;
+                    case Subscriber::STATUS_NOT_ACTIVE:
+                        return $this;
+                }
+
+                $this->makeRequest($eventType, $this->_prepareCustomerSubscribtionUpdateData($subscriber, $this->remoteAddress->getRemoteAddress()));
+
+                if($this->_store->getId() != 0){
+                    $email = $subscriber->getSubscriberEmail();
+                    if(!empty($email)){
+                        //for webtracking use
+                        $this->session->setSubscriberEmail($email);
+                        //add email to cart
+                        $cart = $this->_checkoutSession->getQuote();
+                        if($cart && !is_null($cart->getId()) && is_null($cart->getCustomerEmail())){
+                            $cart->setCustomerEmail($email);
+                            $this->cartRepository->save($cart);
+                        }
+                    }
                 }
             }
+        } catch (\Exception $ex){
+            $this->logError($ex);
         }
-
         return $this;
     }
 }

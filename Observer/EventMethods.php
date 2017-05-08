@@ -1,14 +1,23 @@
 <?php
 namespace Remarkety\Mgconnector\Observer;
 
+use Magento\Customer\Model\CustomerRegistry;
+use Magento\Customer\Model\ResourceModel\CustomerRepository;
+use Magento\Framework\App\Request\Http;
 use \Magento\Framework\Registry;
 use \Magento\Newsletter\Model\Subscriber;
 use \Magento\Customer\Model\Group;
+use Remarkety\Mgconnector\Helper\ConfigHelper;
 use \Remarkety\Mgconnector\Model\Queue;
 use \Magento\Store\Model\Store;
 use \Magento\Framework\UrlInterface;
 use \Magento\Framework\App\Config\ScopeConfigInterface;
-
+use Remarkety\Mgconnector\Model\QueueRepository;
+use Remarkety\Mgconnector\Serializer\AddressSerializer;
+use Remarkety\Mgconnector\Serializer\CustomerSerializer;
+use Remarkety\Mgconnector\Serializer\OrderSerializer;
+use Remarkety\Mgconnector\Serializer\ProductSerializer;
+use Psr\Log\LoggerInterface;
 
 class EventMethods {
 
@@ -17,6 +26,16 @@ class EventMethods {
     const REMARKETY_TIMEOUT = 2;
     const REMARKETY_VERSION = 0.9;
     const REMARKETY_PLATFORM = 'MAGENTO';
+
+    const EVENT_ORDERS_CREATED = 'orders/create';
+    const EVENT_ORDERS_UPDATED = 'orders/updated';
+    const EVENT_ORDERS_DELETE = 'orders/delete';
+    const EVENT_PRODUCTS_CREATED = 'products/created';
+    const EVENT_PRODUCTS_UPDATED = 'products/updated';
+    const EVENT_PRODUCTS_DELETE = 'products/delete';
+    const EVENT_CUSTOMERS_CREATE = 'customers/create';
+    const EVENT_CUSTOMERS_UPDATED = 'customers/updated';
+    const EVENT_CUSTOMERS_DELETED = 'customers/deleted';
 
     protected $_token = null;
     protected $_intervals = null;
@@ -30,24 +49,61 @@ class EventMethods {
 
     protected $_coreRegistry;
     protected $_customerGroup;
-    protected $_remarketyQueue;
+    protected $_remarketyQueueRepo;
     protected $_store;
+    protected $customerRepository;
+
+    protected $orderSerializer;
+    protected $customerSerializer;
+    protected $addressSerializer;
+    protected $productSerializer;
+
+    protected $configHelper;
+    protected $queueFactory;
+    protected $request;
+    protected $customerRegistry;
+
+    /**
+     * @var LoggerInterface
+     */
+    protected $logger;
 
     public function __construct(
+        LoggerInterface $logger,
         Registry $coreRegistry,
         Subscriber $subscriber,
         Group $customerGroupModel,
-        Queue $remarketyQueue,
+        QueueRepository $remarketyQueueRepo,
+        \Remarkety\Mgconnector\Model\QueueFactory $queueFactory,
         Store $store,
-        ScopeConfigInterface $scopeConfig
+        ScopeConfigInterface $scopeConfig,
+        OrderSerializer $orderSerializer,
+        CustomerSerializer $customerSerializer,
+        AddressSerializer $addressSerializer,
+        ConfigHelper $configHelper,
+        ProductSerializer $productSerializer,
+        Http $request,
+        CustomerRepository $customerRepository,
+        CustomerRegistry $customerRegistry
+        ){
+        $this->customerRegistry = $customerRegistry;
+        $this->customerRepository = $customerRepository;
+        $this->request = $request;
+        $this->logger = $logger;
+        $this->customerSerializer = $customerSerializer;
+        $this->orderSerializer = $orderSerializer;
+        $this->addressSerializer = $addressSerializer;
+        $this->productSerializer = $productSerializer;
 
-){
         $this->_coreRegistry = $coreRegistry;
         $this->subscriber = $subscriber;
         $this->_customerGroup = $customerGroupModel;
-        $this->_remarketyQueue = $remarketyQueue;
+        $this->_remarketyQueueRepo = $remarketyQueueRepo;
         $this->_store = $store;
         $this->scopeConfigInterface = $scopeConfig;
+
+        $this->configHelper = $configHelper;
+        $this->queueFactory = $queueFactory;
 
         $this->_token = $this->scopeConfigInterface->getValue('remarkety/mgconnector/api_key');
         $intervals = $this->scopeConfigInterface->getValue('remarkety/mgconnector/intervals');
@@ -58,76 +114,29 @@ class EventMethods {
         }
     }
 
-    protected function _customerRegistration()
-    {
-        $this->makeRequest('customers/create', $this->_prepareCustomerUpdateData());
-        return $this;
+    protected function isWebhooksEnabled($store){
+        if(!$this->configHelper->isWebhooksGloballyEnabled()){
+            return false;
+        }
+        return !empty($this->configHelper->getRemarketyPublicId($store));
     }
 
-    protected function _customerUpdate()
-    {
-        if($this->_hasDataChanged()) {
-            $this->makeRequest('customers/update', $this->_prepareCustomerUpdateData());
-        }
-        return $this;
+    protected function shouldSendProductUpdates(){
+        return $this->configHelper->shouldSendProductUpdates();
     }
 
-    protected function _hasDataChanged()
+    protected function _customerUpdate(\Magento\Customer\Api\Data\CustomerInterface $customer, $isNew = false)
     {
-        $customerReg = $this->_coreRegistry->registry('customer_data_object_observer');
-
-        if(!$this->_hasDataChanged && $customerReg) {
-            $validate = array(
-                'firstname',
-                'lastname',
-                'title',
-                'birthday',
-                'gender',
-                'email',
-                'group_id',
-                'default_billing',
-                'is_subscribed',
-            );
-            $originalData = $customerReg->getOrigData();
-            $currentData = $customerReg->getData();
-            foreach ($validate as $field) {
-                if (isset($originalData[$field])) {
-                    if (!isset($currentData[$field]) || $currentData[$field] != $originalData[$field]) {
-                        $this->_hasDataChanged = true;
-                        break;
-                    }
-                }
+        if($this->isWebhooksEnabled($customer->getStoreId())) {
+            $eventType = self::EVENT_CUSTOMERS_UPDATED;
+            if($isNew){
+                $eventType = self::EVENT_CUSTOMERS_CREATE;
             }
-            $customerData = $customerReg->getData();
-            if(!$this->_hasDataChanged && isset($customerData['is_subscribed'])) {
-                $subscriber = $this->subscriber->loadByEmail($customerReg->getEmail());
-                $isSubscribed = $subscriber->getId() ? $subscriber->getData('subscriber_status') == \Magento\Newsletter\Model\Subscriber::STATUS_SUBSCRIBED : false;
+            $data = $this->customerSerializer->serialize($customer);
 
-                if($customerData['is_subscribed'] !== $isSubscribed) {
-                    $this->_hasDataChanged = true;
-                }
-            }
+            $this->makeRequest($eventType, $data, $customer->getStoreId());
         }
-        if(!$this->_hasDataChanged && $this->_coreRegistry->registry('customer_address_object_observer') && $this->_coreRegistry->registry('customer_orig_address')) {
-            $validate = array(
-                'street',
-                'city',
-                'region',
-                'postcode',
-                'country_id',
-                'telephone',
-            );
-
-            $addressObs = $this->_coreRegistry->registry('customer_address_object_observer')->getData();
-            $originalAddressObs = $this->_coreRegistry->registry('customer_orig_address');
-            $addressDiffKeys = array_keys( array_diff($addressObs, $originalAddressObs));
-
-            if(array_intersect($addressDiffKeys, $validate)) {
-                $this->_hasDataChanged = true;
-            }
-        }
-
-        return $this->_hasDataChanged;
+        return $this;
     }
 
     protected function _getRequestConfig($eventType)
@@ -135,41 +144,66 @@ class EventMethods {
         return array(
             'adapter' => 'Zend_Http_Client_Adapter_Curl',
             'curloptions' => array(
-//                CURLOPT_FOLLOWLOCATION => true,
                 CURLOPT_HEADER => true,
                 CURLOPT_CONNECTTIMEOUT => self::REMARKETY_TIMEOUT
-//	            CURLOPT_SSL_CIPHER_LIST => "RC4-SHA"
             ),
         );
     }
 
-    protected function _getHeaders($eventType,$payload)
+    protected function _getHeaders($eventType,$payload, $storeId = null)
     {
         $domain = $this->_store->getBaseUrl(UrlInterface::URL_TYPE_WEB);
         $domain = substr($domain, 7, -1);
 
-        $headers = array(
+        if(empty($storeId) && isset($payload['storeId'])){
+            $storeId = $payload['storeId'];
+        }
+
+        $headers = [
             'X-Domain: ' . $domain,
             'X-Token: ' . $this->_token,
             'X-Event-Type: ' . $eventType,
             'X-Platform: ' . self::REMARKETY_PLATFORM,
             'X-Version: ' . self::REMARKETY_VERSION,
-            'X-Magento-Store-Id: ' . $this->_store->getId()
-        );
-        if (isset($payload['storeId']))
-            $headers[] = 'X-Magento-Store-Id: ' . $payload['storeId'];
+            'X-Magento-Store-Id: ' . (empty($storeId) ? $this->_store->getId() : $storeId)
+        ];
         return $headers;
     }
 
-    public function makeRequest($eventType, $payload, $attempt = 1, $queueId = null)
+    protected function shouldSendEvent($eventType, $payload, $storeId){
+        $data = array(
+            'eventType' => $eventType,
+            'payload' => $payload,
+            'storeId' => $storeId
+        );
+        $hash = md5(serialize($data));
+        if($this->_coreRegistry->registry($hash)){
+            return false;
+        }
+        $this->_coreRegistry->register($hash, 1);
+        return true;
+    }
+
+    public function makeRequest($eventType, $payload, $storeId = null, $attempt = 0, $queueId = null)
     {
         try {
-            $client = new \Zend_Http_Client(self::REMARKETY_EVENTS_ENDPOINT, $this->_getRequestConfig($eventType));
+            if(!$this->shouldSendEvent($eventType, $payload, $storeId)){
+                //safety for not sending the same event on same event
+                $this->logger->debug('Event already sent ' . $eventType);
+                return true;
+            }
+
+            $url = self::REMARKETY_EVENTS_ENDPOINT;
+            if(!empty($storeId)){
+                $remarketyId = $this->configHelper->getRemarketyPublicId($storeId);
+                $url .= '?debug=1&storeId=' . $remarketyId;
+            }
+            $client = new \Zend_Http_Client($url, $this->_getRequestConfig($eventType));
             $payload = array_merge($payload, $this->_getPayloadBase($eventType));
             $json = json_encode($payload);
 
             $response = $client
-                ->setHeaders($this->_getHeaders($eventType, $payload))
+                ->setHeaders($this->_getHeaders($eventType, $payload, $storeId))
                 ->setRawData($json, 'application/json')
                 ->request(self::REMARKETY_METHOD);
 
@@ -181,42 +215,55 @@ class EventMethods {
                 case '401':
                     throw new \Exception('Request failed, probably wrong API key or inactive account.');
                 default:
-                    $this->_queueRequest($eventType, $payload, $attempt, $queueId);
+                    $err = $response->getStatus() . ' - ' . $response->getRawBody();
+                    $this->_queueRequest($eventType, $payload, $attempt+1, $queueId, $storeId, $err);
             }
         } catch(\Exception $e) {
-            $this->_queueRequest($eventType, $payload, $attempt, $queueId);
+            $err = $e->getCode() . ' - ' . $e->getMessage();
+            $this->_queueRequest($eventType, $payload, $attempt+1, $queueId, $storeId, $err);
         }
 
         return false;
     }
 
-    protected function _queueRequest($eventType, $payload, $attempt, $queueId)
+    protected function _queueRequest($eventType, $payload, $attempt, $queueId, $storeId, $err = null)
     {
-        $queueModel = $this->_remarketyQueue;
 
+        $queueModel = null;
         if(!empty($this->_intervals[$attempt-1])) {
             $now = time();
             $nextAttempt = $now + (int)$this->_intervals[$attempt-1] * 60;
             if($queueId) {
-                $queueModel->load($queueId);
+                $queueModel = $this->_remarketyQueueRepo->getById($queueId);
                 $queueModel->setAttempts($attempt);
                 $queueModel->setLastAttempt( date("Y-m-d H:i:s", $now) );
                 $queueModel->setNextAttempt( date("Y-m-d H:i:s", $nextAttempt) );
+                $queueModel->setStoreId($storeId);
+                if(!empty($err)){
+                    $queueModel->setLastErrorMessage($err);
+                }
             } else {
+                $queueModel = $this->queueFactory->create();
+                $this->_remarketyQueueRepo->save($queueModel);
                 $queueModel->setData(array(
                     'event_type' => $eventType,
-                    'payload' => serialize($payload),
+                    'payload' => json_encode($payload),
                     'attempts' => $attempt,
                     'last_attempt' => date("Y-m-d H:i:s", $now),
                     'next_attempt' => date("Y-m-d H:i:s", $nextAttempt),
                     'status' => 1,
+                    'store_id' => $storeId
                 ));
+                if(!empty($err)){
+                    $queueModel->setLastErrorMessage($err);
+                }
             }
-            return $queueModel->save();
+            return $this->_remarketyQueueRepo->save($queueModel);
         } elseif($queueId) {
-            $queueModel->load($queueId);
+            $queueModel = $this->_remarketyQueueRepo->getById($queueId);
+            $queueModel->setAttempts($attempt);
             $queueModel->setStatus(0);
-            return $queueModel->save();
+            return $this->_remarketyQueueRepo->save($queueModel);
         }
         return false;
     }
@@ -231,121 +278,39 @@ class EventMethods {
         return $arr;
     }
 
-    protected function _prepareCustomerUpdateData()
+
+    protected function _prepareCustomerSubscribtionUpdateData(Subscriber $subscriber, $clientIp = null)
     {
-        $customerReg = $this->_coreRegistry->registry('customer_data_object_observer');
-        if($customerReg) {
-            $arr = array(
-                'id' => (int)$customerReg->getId(),
-                'email' => $customerReg->getEmail(),
-                'created_at' => date('c', strtotime($customerReg->getCreatedAt())),
-                'first_name' => $customerReg->getFirstname(),
-                'last_name' => $customerReg->getLastname(),
-                'store_id' => $customerReg->getStoreId(),
-                //'extra_info' => array(),
-            );
-
-            $isSubscribed = $customerReg->getIsSubscribed();
-            if ($isSubscribed === null) {
-                $subscriber = $this->subscriber->loadByEmail($customerReg->getEmail());
-                if ($subscriber->getId()) {
-                    $isSubscribed = $subscriber->getData('subscriber_status') == \Magento\Newsletter\Model\Subscriber::STATUS_SUBSCRIBED;
-                } else {
-                    $isSubscribed = false;
-                }
-            }
-            $arr = array_merge($arr, array('accepts_marketing' => (bool)$isSubscribed));
-
-            if ($title = $customerReg->getPrefix()) {
-                $arr = array_merge($arr, array('title' => $title));
-            }
-
-            if ($dob = $customerReg->getDob()) {
-                $arr = array_merge($arr, array('birthdate' => $dob));
-            }
-
-            if ($gender = $customerReg->getGender()) {
-                $arr = array_merge($arr, array('gender' => $gender));
-            }
-
-            if ($address = $customerReg->getDefaultBillingAddress()) {
-                $street = $address->getStreet();
-                $arr = array_merge($arr, array('default_address' => array(
-                    'address1' => isset($street[0]) ? $street[0] : '',
-                    'address2' => isset($street[1]) ? $street[1] : '',
-                    'city' => $address->getCity(),
-                    'province' => $address->getRegion(),
-                    'phone' => $address->getTelephone(),
-                    'country_code' => $address->getCountryId(),
-                    'zip' => $address->getPostcode(),
-                )));
-            }
-
-
-            if ($group = $this->_customerGroup->load($customerReg->getGroupId())) {
-                $arr = array_merge($arr, array('groups' => array(
-                    array(
-                        'id' => (int)$customerReg->getGroupId(),
-                        'name' => $group->getCustomerGroupCode(),
-                    )
-                )));
-            }
-
-            return $arr;
-        }
-        return array();
-    }
-
-
-    protected function _prepareCustomerSubscribtionUpdateData()
-    {
-        $subscriber = $this->_coreRegistry->registry('subscriber_object_data_observer');
         $arr = array(
             'email' => $subscriber->getSubscriberEmail(),
-            'accepts_marketing' => $subscriber->getData('subscriber_status') == \Magento\Newsletter\Model\Subscriber::STATUS_SUBSCRIBED,
-            'storeId' => $this->_store->getId()
+            'accepts_marketing' => $subscriber->getSubscriberStatus() == \Magento\Newsletter\Model\Subscriber::STATUS_SUBSCRIBED,
+            'storeId' => $subscriber->getStoreId()
         );
+
+        if(!empty($clientIp)){
+            $arr['client_ip'] = $clientIp;
+        }
 
         return $arr;
     }
 
-    protected function _prepareCustomerSubscribtionDeleteData()
+    protected function _prepareCustomerSubscribtionDeleteData(Subscriber $subscriber)
     {
-        $subscriber = $this->_coreRegistry->registry('subscriber_object_data_observer');
         $arr = array(
             'email' => $subscriber->getSubscriberEmail(),
             'accepts_marketing' => false,
-            'storeId' => $this->_store->getId()
+            'storeId' => $subscriber->getStoreId()
         );
 
         return $arr;
     }
 
-    public function resend($queueItems,$resetAttempts = false) {
-        $sent=0;
-        foreach($queueItems as $_queue) {
-            $result = $this->makeRequest($_queue->getEventType(), unserialize($_queue->getPayload()), $resetAttempts ? 1 : ($_queue->getAttempts()+1), $_queue->getId());
-            if($result) {
-                $this->_remarketyQueue
-                    ->load($_queue->getId())
-                    ->delete();
-                $sent++;
-            }
-        }
-        return $sent;
+    public function logError(\Exception $exception){
+        $this->logger->error("Remarkety:".self::class." - " . $exception->getMessage(), [
+            'message' => $exception->getMessage(),
+            'line' => $exception->getLine(),
+            'file' => $exception->getFile(),
+            'trace' => $exception->getTraceAsString()
+        ]);
     }
-
-    public function run()
-    {
-        $collection = $this->_remarketyQueue->getCollection();
-        $nextAttempt = date("Y-m-d H:i:s");
-        $collection
-            ->getSelect()
-            ->where('next_attempt <= ?', $nextAttempt)
-            ->where('status = 1')
-            ->order('main_table.next_attempt asc');
-        $this->resend($collection);
-        return $this;
-    }
-
 }

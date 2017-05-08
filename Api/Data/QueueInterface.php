@@ -1,7 +1,7 @@
 <?php
 namespace Remarkety\Mgconnector\Api\Data;
 
-interface QueueInterface {
+interface QueueInterface extends \Magento\Framework\Api\ExtensibleDataInterface {
     /**
      * Get ID
      *
@@ -19,7 +19,7 @@ interface QueueInterface {
     /**
      * Get URL Key
      *
-     * @return array|null
+     * @return string|null
      */
     public function getPayload();
 
@@ -97,4 +97,25 @@ interface QueueInterface {
      * @return \Remarkety\Mgconnector\Api\Data\QueueInterface
      */
     public function setStatus($status);
+
+    /**
+     * @return string|null
+     */
+    public function getLastErrorMessage();
+
+    /**
+     * @return \Remarkety\Mgconnector\Api\Data\QueueInterface
+     */
+    public function setLastErrorMessage($message);
+
+    /**
+     * @return int
+     */
+    public function getStoreId();
+
+    /**
+     * @param int $storeId
+     * @return \Remarkety\Mgconnector\Api\Data\QueueInterface
+     */
+    public function setStoreId($storeId);
 }

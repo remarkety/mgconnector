@@ -6,7 +6,6 @@
                 <block class="Remarkety\Mgconnector\Block\Adminhtml\Install\Install\Create" name="remarkety_install_create" />
                 <block class="Remarkety\Mgconnector\Block\Adminhtml\Install\Install\Login" name="remarkety_install_login" />
                 <block class="Remarkety\Mgconnector\Block\Adminhtml\Install\Welcome\Form\Form" name="remarkety_welcome" />
-                <block class="Remarkety\Mgconnector\Block\Adminhtml\Install\Welcome\Store\Store" name="remarkety_store" />
                 <block class="Remarkety\Mgconnector\Block\Adminhtml\Install\Upgrade" name="remarkety_upgrade" />
                 <block class="Remarkety\Mgconnector\Block\Adminhtml\Install\Complete" name="remarkety_complete" />
             </block>

@@ -3,6 +3,7 @@
 
 namespace Remarkety\Mgconnector\Model;
 
+use Magento\Framework\App\Cache\TypeList;
 use \Magento\Framework\Model\Context;
 use \Magento\Framework\App\Config\ScopeConfigInterface;
 use \Magento\Framework\App\Config\Data as ConfigData;
@@ -89,6 +90,8 @@ class Install extends \Magento\Framework\Model\AbstractModel
 
     protected $_webtracking;
 
+    protected $_cache;
+
     public function __construct(Context $context,
                                 \Magento\Framework\Registry $registry,
                                 ScopeConfigInterface $scopeConfig,
@@ -104,9 +107,11 @@ class Install extends \Magento\Framework\Model\AbstractModel
                                 Config $config,
                                 \Magento\Integration\Model\IntegrationService $integrationService,
                                 \Magento\Integration\Model\OauthService $oauthService,
-                                Session $session
+                                Session $session,
+                                TypeList $cache
 ){
         parent::__construct($context, $registry);
+        $this->_cache = $cache;
         $this->context = $context;
         $this->scopeConfigInterface = $scopeConfig;
         $this->_resourceConfig = $resourceConfig;
@@ -344,7 +349,7 @@ class Install extends \Magento\Framework\Model\AbstractModel
             $this->_webtracking->setRemarketyPublicId($storeId, $response['storePublicId']);
         }
 
-
+        $this->_cache->cleanType('config');
         return $this;
     }
 

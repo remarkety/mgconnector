@@ -2,23 +2,36 @@
 
 
 namespace Remarkety\Mgconnector\Helper;
+use Magento\Catalog\Api\Data\ProductAttributeMediaGalleryEntryInterface;
+use Magento\Catalog\Api\Data\ProductInterface;
 use Magento\TestFramework\Inspection\Exception;
 use \Remarkety\Mgconnector\Model\Install as InstallModel;
 
 class Data extends \Magento\Framework\App\Helper\AbstractHelper
 {
+    protected $storeManager;
+    protected $galleryManagement;
+    protected $_catalogProductTypeConfigurable;
+    private $categoryMapCache = [];
+    protected $categoryFactory;
     public function __construct(\Magento\Framework\App\Helper\Context $context,
                                 \Magento\Framework\Module\ModuleResource $moduleResource,
                                 \Magento\Integration\Model\Integration $integration,
                                 \Magento\Customer\Model\Session $session,
-                                InstallModel $installModel
-
+                                InstallModel $installModel,
+                                \Magento\Store\Model\StoreManagerInterface $storeManager,
+                                \Magento\Catalog\Model\Product\Gallery\GalleryManagement $galleryManagement,
+                                \Magento\ConfigurableProduct\Model\ResourceModel\Product\Type\Configurable $catalogProductTypeConfigurable,
+                                \Magento\Catalog\Model\CategoryFactory $categoryFactory
     ){
-
         $this->integration = $integration;
         $this->moduleResource = $moduleResource;
         $this->session = $session;
         $this->installModel = $installModel;
+        $this->storeManager = $storeManager;
+        $this->galleryManagement = $galleryManagement;
+        $this->_catalogProductTypeConfigurable = $catalogProductTypeConfigurable;
+        $this->categoryFactory = $categoryFactory;
         parent::__construct($context);
     }
 
@@ -63,5 +76,87 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
             throw new \Exception('Installation mode can not be handled.');
         }
         return $mode;
+    }
+
+    public function getMediaUrl()
+    {
+        $mediaUrl = $this->storeManager->getStore()->getBaseUrl(\Magento\Framework\UrlInterface::URL_TYPE_MEDIA);
+        return $mediaUrl;
+    }
+
+    public function getMediaGalleryImages(ProductInterface $product)
+    {
+        /**
+         * @var $images ProductAttributeMediaGalleryEntryInterface[]
+         */
+        $images = $this->galleryManagement->getList($product->getSku());
+        $ret = [];
+        $imagesData = [];
+        if ($images) {
+            foreach ($images as $imageAttr) {
+                if($imageAttr->getMediaType() == "image"){
+                    $types = $imageAttr->getTypes();
+                    if(empty($types)){
+                        $imagesData['id'] = $imageAttr->getId();
+                        $imagesData['product_id'] = $imageAttr->getEntityId();
+                        $imagesData['src'] = $this->getMediaUrl() . 'catalog/product' . $imageAttr->getFile();
+                        $ret[] = $imagesData;
+                    } else {
+                        foreach ($types as $type){
+                            $imagesData['id'] = $imageAttr->getId();
+                            $imagesData['type'] = $type;
+                            $imagesData['product_id'] = $imageAttr->getEntityId();
+                            $imagesData['src'] = $this->getMediaUrl() . 'catalog/product' . $imageAttr->getFile();
+                            $ret[] = $imagesData;
+                        }
+                    }
+                }
+            }
+        }
+        return $ret;
+    }
+
+    public function getImage($product)
+    {
+        $images = $this->galleryManagement->getList($product->getSku());
+        $imageDet = [];
+        $imagesData = [];
+        if($images) {
+            foreach ($images as $imageAttr) {
+                if ($imageAttr['types']) {
+                    foreach ($imageAttr['types'] as $type) {
+                        if ($type == 'image') {
+                            $imagesData['id'] = $imageAttr['id'];
+                            $imagesData['product_id'] = $imageAttr['entity_id'];
+                            $imagesData['src'] = $this->getMediaUrl() . 'catalog/product' . $imageAttr['file'];
+                            $imageDet = $imagesData;
+                        }
+
+                    }
+                }
+            }
+            return $imageDet;
+        }
+    }
+
+    public function getCategory($category_id)
+    {
+        if (!isset($this->categoryMapCache[$category_id])) {
+            $category = $this->categoryFactory->create()->load($category_id);
+            $this->categoryMapCache[$category_id] = $category->getName();
+        }
+        if (!isset($this->categoryMapCache[$category_id])) return false;
+
+        return ['code' => $category_id, 'name' => $this->categoryMapCache[$category_id]];
+    }
+
+    public function getParentId($id)
+    {
+        $parentByChild = $this->_catalogProductTypeConfigurable->getParentIdsByChild($id);
+        if (isset($parentByChild[0])) {
+            $id = $parentByChild[0];
+            return $id;
+        }
+        return false;
     }
 }

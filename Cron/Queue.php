@@ -4,6 +4,7 @@ namespace Remarkety\Mgconnector\Cron;
 
 use Psr\Log\LoggerInterface;
 use Remarkety\Mgconnector\Model\Queue as QueueModel;
+use Remarkety\Mgconnector\Model\QueueRepository;
 use Remarkety\Mgconnector\Observer\EventMethods;
 
 class Queue
@@ -24,21 +25,26 @@ class Queue
      */
     protected $eventMethods;
 
+    protected $queueRepository;
+
     /**
      * Queue constructor.
      *
      * @param LoggerInterface $logger
-     * @param QueueModel      $queueModel
-     * @param EventMethods    $eventMethods
+     * @param QueueModel $queueModel
+     * @param EventMethods $eventMethods
+     * @param QueueRepository $queueRepository
      */
     public function __construct(
         LoggerInterface $logger,
         QueueModel      $queueModel,
-        EventMethods    $eventMethods
+        EventMethods    $eventMethods,
+        QueueRepository $queueRepository
     ) {
         $this->logger       = $logger;
         $this->queueModel   = $queueModel;
         $this->eventMethods = $eventMethods;
+        $this->queueRepository = $queueRepository;
     }
 
     /**
@@ -54,14 +60,13 @@ class Queue
         foreach($queueItems as $queue) {
             $result = $this->eventMethods->makeRequest(
                 $queue->getEventType(),
-                unserialize($queue->getPayload()),
-                $resetAttempts ? 1 : ($queue->getAttempts()+1),
+                json_decode($queue->getPayload(), true),
+                $queue->getStoreId(),
+                $resetAttempts ? 0 : $queue->getAttempts(),
                 $queue->getId()
             );
             if($result) {
-                $this->queueModel
-                    ->load($queue->getId())
-                    ->delete();
+                $this->queueRepository->deleteById($queue->getId());
                 $sent++;
             }
         }

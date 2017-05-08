@@ -55,4 +55,40 @@
             <resource ref="Magento_Backend::all"/>
         </resources>
     </route>
+    <route url="/V1/mgconnector/config" method="GET">
+        <service class="Remarkety\Mgconnector\Api\DataInterface" method="getConfig"/>
+        <resources>
+            <resource ref="Magento_Backend::all"/>
+        </resources>
+    </route>
+    <route url="/V1/mgconnector/config" method="POST">
+        <service class="Remarkety\Mgconnector\Api\DataInterface" method="setConfig"/>
+        <resources>
+            <resource ref="Magento_Backend::all"/>
+        </resources>
+    </route>
+    <route url="/V1/mgconnector/version" method="GET">
+        <service class="Remarkety\Mgconnector\Api\DataInterface" method="getVersion"/>
+        <resources>
+            <resource ref="Magento_Backend::all"/>
+        </resources>
+    </route>
+    <route url="/V1/mgconnector/queue" method="GET">
+        <service class="Remarkety\Mgconnector\Api\DataInterface" method="getQueueItems"/>
+        <resources>
+            <resource ref="Magento_Backend::all"/>
+        </resources>
+    </route>
+    <route url="/V1/mgconnector/queue" method="DELETE">
+        <service class="Remarkety\Mgconnector\Api\DataInterface" method="deleteQueueItems"/>
+        <resources>
+            <resource ref="Magento_Backend::all"/>
+        </resources>
+    </route>
+    <route url="/V1/mgconnector/queue" method="POST">
+        <service class="Remarkety\Mgconnector\Api\DataInterface" method="retryQueueItems"/>
+        <resources>
+            <resource ref="Magento_Backend::all"/>
+        </resources>
+    </route>
 </routes>

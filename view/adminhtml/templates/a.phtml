@@ -13,11 +13,28 @@
     if($this->getHelperMode() == 'complete'){
         echo $block->getChildHtml('remarkety_complete');
     }
-    if($this->getHelperMode() == 'welcome') {
-        echo $block->getChildHtml('remarkety_welcome');
-        echo $block->getChildHtml('remarkety_store');
-    }
-    ?>
+    if($this->getHelperMode() == 'welcome'): ?>
+        <?php echo $block->getChildHtml('remarkety_welcome'); ?>
+
+        <div class="actions" style="height: 50px;">
+            <?php if($this->configHelper->isWebhooksGloballyEnabled()): ?>
+                <button id="disableWebhooks" style="float: left;" type="button" class="scalable save" onclick="window.location = '<?php echo $this->getUrl('*/install/webhooks', ['enabled' => 0]) ?>'">
+                    <span><?php echo __('Disable Webhooks') ?></span>
+                </button>
+            <?php else: ?>
+                <button id="enableWebhooks" style="float: left;" type="button" class="scalable save" onclick="window.location = '<?php echo $this->getUrl('*/install/webhooks', ['enabled' => 1]) ?>'">
+                    <span><?php echo __('Enable Webhooks') ?></span>
+                </button>
+            <?php endif; ?>
+
+            <button id="enableWebhooks" style="float: right;" type="button" class="scalable save" onclick="window.location = '<?php echo $this->getUrl('*/install/reinstall') ?>'">
+                <span><?php echo __('Reinstall') ?></span>
+            </button>
+        </div>
+
+        <?php echo $this->getStoresGrid(); ?>
+
+    <?php endif; ?>
 </div>
 <script>
     require(["jquery"], function ($) {

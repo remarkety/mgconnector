@@ -1,13 +1,15 @@
 <?php
-namespace Remarkety\Mgconnector\Model;
-class Queue extends \Magento\Framework\Model\AbstractModel implements \Remarkety\Mgconnector\Api\Data\QueueInterface, \Magento\Framework\DataObject\IdentityInterface
-{
-    const CACHE_TAG = 'remarkety_mgconnector_queue';
 
-    protected function _construct()
-    {
-        $this->_init('Remarkety\Mgconnector\Model\ResourceModel\Queue');
-    }
+namespace Remarkety\Mgconnector\Model\Data;
+
+/**
+ * Created by PhpStorm.
+ * User: bnaya
+ * Date: 4/27/17
+ * Time: 3:41 PM
+ */
+class Queue extends \Magento\Framework\Api\AbstractExtensibleObject implements \Remarkety\Mgconnector\Api\Data\QueueInterface
+{
 
     /**
      * Get ID
@@ -16,12 +18,7 @@ class Queue extends \Magento\Framework\Model\AbstractModel implements \Remarkety
      */
     public function getQueueId()
     {
-        return $this->getData('queue_id');
-    }
-
-    public function getIdentities()
-    {
-        return [self::CACHE_TAG . '_' . $this->getId()];
+        return $this->_get('queue_id');
     }
 
     /**
@@ -31,17 +28,19 @@ class Queue extends \Magento\Framework\Model\AbstractModel implements \Remarkety
      */
     public function getEventType()
     {
-        return $this->getData('event_type');
+        return $this->_get('event_type');
     }
+
     /**
      * Get URL Key
      *
-     * @return array|null
+     * @return string|null
      */
     public function getPayload()
     {
-        return $this->getData('payload');
+        return $this->_get('payload');
     }
+
     /**
      * Get URL Key
      *
@@ -49,8 +48,9 @@ class Queue extends \Magento\Framework\Model\AbstractModel implements \Remarkety
      */
     public function getAttempts()
     {
-        return $this->getData('attempts');
+        return $this->_get('attempts');
     }
+
     /**
      * Get URL Key
      *
@@ -58,8 +58,9 @@ class Queue extends \Magento\Framework\Model\AbstractModel implements \Remarkety
      */
     public function getLastAttempt()
     {
-        return $this->getData('last_attempt');
+        return $this->_get('last_attempt');
     }
+
     /**
      * Get URL Key
      *
@@ -67,8 +68,9 @@ class Queue extends \Magento\Framework\Model\AbstractModel implements \Remarkety
      */
     public function getNextAttempt()
     {
-        return $this->getData('next_attempt');
+        return $this->_get('next_attempt');
     }
+
     /**
      * Get URL Key
      *
@@ -76,7 +78,7 @@ class Queue extends \Magento\Framework\Model\AbstractModel implements \Remarkety
      */
     public function getStatus()
     {
-        return $this->getData('status');
+        return $this->_get('status');
     }
 
     /**
@@ -87,19 +89,20 @@ class Queue extends \Magento\Framework\Model\AbstractModel implements \Remarkety
      */
     public function setQueueId($queueId)
     {
-
         return $this->setData('queue_id', $queueId);
-}
+    }
+
     /**
      * Set ID
      *
-     * @param int $eventType
+     * @param string $eventType
      * @return \Remarkety\Mgconnector\Api\Data\QueueInterface
      */
     public function setEventType($eventType)
     {
         return $this->setData('event_type', $eventType);
     }
+
     /**
      * Set ID
      *
@@ -110,6 +113,7 @@ class Queue extends \Magento\Framework\Model\AbstractModel implements \Remarkety
     {
         return $this->setData('payload', $payload);
     }
+
     /**
      * Set ID
      *
@@ -120,30 +124,33 @@ class Queue extends \Magento\Framework\Model\AbstractModel implements \Remarkety
     {
         return $this->setData('attempts', $attempts);
     }
+
     /**
      * Set ID
      *
-     * @param int $lastAttempt
+     * @param string $lastAttempt
      * @return \Remarkety\Mgconnector\Api\Data\QueueInterface
      */
     public function setLastAttempt($lastAttempt)
     {
         return $this->setData('last_attempt', $lastAttempt);
     }
+
     /**
      * Set ID
      *
-     * @param int $nextAttempt
+     * @param string $nextAttempt
      * @return \Remarkety\Mgconnector\Api\Data\QueueInterface
      */
     public function setNextAttempt($nextAttempt)
     {
         return $this->setData('next_attempt', $nextAttempt);
     }
+
     /**
      * Set ID
      *
-     * @param int $status
+     * @param string $status
      * @return \Remarkety\Mgconnector\Api\Data\QueueInterface
      */
     public function setStatus($status)
@@ -152,11 +159,28 @@ class Queue extends \Magento\Framework\Model\AbstractModel implements \Remarkety
     }
 
     /**
+     * @return int|null
+     */
+    public function getStoreId()
+    {
+        return $this->_get('store_id');
+    }
+
+    /**
+     * @param $storeId
+     * @return \Remarkety\Mgconnector\Api\Data\QueueInterface
+     */
+    public function setStoreId($storeId)
+    {
+        return $this->setData('store_id', $storeId);
+    }
+
+    /**
      * @return string|null
      */
     public function getLastErrorMessage()
     {
-        return $this->getData('last_error_message');
+        return $this->_get('last_error_message');
     }
 
     /**
@@ -165,22 +189,5 @@ class Queue extends \Magento\Framework\Model\AbstractModel implements \Remarkety
     public function setLastErrorMessage($message)
     {
         return $this->setData('last_error_message', $message);
-    }
-
-    /**
-     * @return int
-     */
-    public function getStoreId()
-    {
-        return $this->getData('store_id' );
-    }
-
-    /**
-     * @param int $storeId
-     * @return \Remarkety\Mgconnector\Api\Data\QueueInterface
-     */
-    public function setStoreId($storeId)
-    {
-        return $this->setData( 'store_id', $storeId );
     }
 }

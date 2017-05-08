@@ -1,7 +1,9 @@
 <?php
 namespace Remarkety\Mgconnector\Model\Api;
 
+use Magento\Framework\App\Cache\TypeListInterface;
 use Magento\Framework\DataObject;
+use Remarkety\Mgconnector\Api\Data\QueueInterface;
 use Remarkety\Mgconnector\Api\DataInterface;
 use \Magento\Catalog\Model\ProductFactory;
 use \Magento\Customer\Model\CustomerFactory;
@@ -20,11 +22,18 @@ use Magento\SalesRule\Helper\Coupon;
 use Magento\Framework\Exception\LocalizedException;
 use Magento\Catalog\Model\Product\Attribute\Source\Status;
 use Magento\Catalog\Model\Product\Visibility;
+use Magento\Config\Model\ResourceModel\Config;
+use Remarkety\Mgconnector\Model\QueueRepository;
+use Remarkety\Mgconnector\Model\ResourceModel\Queue\Collection;
+use Remarkety\Mgconnector\Observer\EventMethods;
+use Remarkety\Mgconnector\Helper\Data as DataHelper;
 
 class Data implements DataInterface
 {
     private $_productCache = [];
-
+    protected $eventMethods;
+    protected $queueRepo;
+    protected $queueCollection;
     protected $productCollection = false;
     protected $productCollectionFactory = false;
     protected $collectionFactory;
@@ -48,6 +57,9 @@ class Data implements DataInterface
     protected $quoteFactory;
     protected $ruleFactory;
     protected $couponFactory;
+    protected $resourceConfig;
+    protected $cacheTypeList;
+    protected $dataHelper;
 
     protected $response_mask = [
         'products' => [
@@ -291,9 +303,21 @@ class Data implements DataInterface
                                 CustomerCollectionFactory $customerCollectionFactory,
                                 \Magento\Sales\Model\ResourceModel\Order\CollectionFactory $salesOrderResourceCollectionFactory,
                                 RuleFactory $ruleFactory,
-                                CouponFactory $couponFactory
+                                CouponFactory $couponFactory,
+                                Config $resourceConfig,
+                                TypeListInterface $cacheTypeList,
+                                Collection $queueCollection,
+                                QueueRepository $queueRepository,
+                                EventMethods $eventMethods,
+                                DataHelper $dataHelper
     )
     {
+        $this->dataHelper = $dataHelper;
+        $this->eventMethods = $eventMethods;
+        $this->queueRepo = $queueRepository;
+        $this->queueCollection = $queueCollection;
+        $this->cacheTypeList = $cacheTypeList;
+        $this->resourceConfig = $resourceConfig;
         $this->productFactory = $productFactory;
         $this->productCollectionFactory = $searchResultFactory;
         $this->customerFactory = $customerFactory;
@@ -322,15 +346,6 @@ class Data implements DataInterface
         $this->couponFactory = $couponFactory;
     }
 
-    public function getParentId($id)
-    {
-        $parentByChild = $this->_catalogProductTypeConfigurable->getParentIdsByChild($id);
-        if (isset($parentByChild[0])) {
-            $id = $parentByChild[0];
-            return $id;
-        }
-        return false;
-    }
     /**
      * Get All products from catalog
      *
@@ -436,13 +451,13 @@ class Data implements DataInterface
             }
             $prod['product_exists'] = $active;
 
-            $prod['image'] = $this->getImage($row);
-            $prod['images'] = $this->getMediaGalleryImages($row);
+            $prod['image'] = $this->dataHelper->getImage($row);
+            $prod['images'] = $this->dataHelper->getMediaGalleryImages($row);
 
             $prod['body_html'] = $row->getDescription();
             $prod['id'] = $row->getId();
 
-            $parent_id = $this->getParentId($row->getId());
+            $parent_id = $this->dataHelper->getParentId($row->getId());
             if ($row->getTypeId() == 'simple' && $parent_id) {
                 $parentProductData = $this->productFactory->create()->load($parent_id);
                 if ($parentProductData->getId()) {
@@ -462,7 +477,7 @@ class Data implements DataInterface
         return $object;
     }
 
-    private function getCategory($category_id)
+    public function getCategory($category_id)
     {
         if (!isset($this->categoryMapCache[$category_id])) {
             $category = $this->categoryFactory->create()->load($category_id);
@@ -471,51 +486,6 @@ class Data implements DataInterface
         if (!isset($this->categoryMapCache[$category_id])) return false;
 
         return ['code' => $category_id, 'name' => $this->categoryMapCache[$category_id]];
-    }
-
-    public function getMediaGalleryImages($product)
-    {
-        $images = $this->entryFactory->getList($product->getSku());
-        $imageDet = [];
-        $imagesData = [];
-        if ($images) {
-            foreach ($images as $imageAttr) {
-                $imagesData['id'] = $imageAttr['id'];
-                $imagesData['product_id'] = $imageAttr['entity_id'];
-                $imagesData['src'] = $this->getMediaUrl() . 'catalog/product' . $imageAttr['file'];;
-                $imageDet[] = $imagesData;
-            }
-            return $imageDet;
-        } return;
-    }
-
-    public function getImage($product)
-    {
-        $images = $this->entryFactory->getList($product->getSku());
-        $imageDet = [];
-        $imagesData = [];
-        if($images) {
-            foreach ($images as $imageAttr) {
-                if ($imageAttr['types']) {
-                    foreach ($imageAttr['types'] as $type) {
-                        if ($type == 'image') {
-                            $imagesData['id'] = $imageAttr['id'];
-                            $imagesData['product_id'] = $imageAttr['entity_id'];
-                            $imagesData['src'] = $this->getMediaUrl() . 'catalog/product' . $imageAttr['file'];
-                            $imageDet = $imagesData;
-                        }
-
-                    }
-                }
-            }
-            return $imageDet;
-        }
-    }
-
-    public function getMediaUrl()
-    {
-        $mediaUrl = $this->_storeManagerInterface->getStore()->getBaseUrl(\Magento\Framework\UrlInterface::URL_TYPE_MEDIA);
-        return $mediaUrl;
     }
 
     /**
@@ -787,6 +757,7 @@ class Data implements DataInterface
                     }
                 }
             }
+            $ord['id'] = empty($order->getOriginalIncrementId()) ? $order->getIncrementId() : $order->getOriginalIncrementId();
             if ($order->getCustomerId()) {
                 $ord['customer'] = $this->getCustomerDataById($order->getCustomerId());
             } else {
@@ -1138,5 +1109,202 @@ class Data implements DataInterface
         ];
 
         return $response;
+    }
+
+    /**
+     * @param int|null $mage_store_id
+     * @param string $configName
+     * @param string $scope
+     * @return string
+     */
+    public function getConfig($mage_store_id, $configName, $scope)
+    {
+        $store_id = 0;
+        if($scope == 'stores'){
+            $store_id = $mage_store_id;
+        } else {
+            $scope = 'default';
+        }
+        return $this->scopeConfig->getValue('remarkety/mgconnector/' . $configName, $scope, $store_id);
+    }
+
+    /**
+     * @param int|null $mage_store_id
+     * @param string $configName
+     * @param string $scope
+     * @param string $newValue
+     * @return string
+     */
+    public function setConfig($mage_store_id, $configName, $scope, $newValue)
+    {
+        $store_id = 0;
+        if($scope == 'stores'){
+            $store_id = $mage_store_id;
+        } else {
+            $scope = 'default';
+        }
+        $this->resourceConfig->saveConfig(
+            'remarkety/mgconnector/' . $configName,
+            $newValue,
+            $scope,
+            $store_id
+        );
+
+        $this->cacheTypeList->cleanType('config');
+        return 1;
+    }
+
+
+    /**
+     * @return string
+     */
+    public function getVersion()
+    {
+        return '2.2.0';
+    }
+
+    /**
+     * @param int $mage_store_id
+     * @param int|null $limit
+     * @param int|null $page
+     * @param int|null $minId
+     * @param int|null $maxId
+     * @return \Remarkety\Mgconnector\Api\Data\QueueCollectionInterface
+     */
+    public function getQueueItems($mage_store_id, $limit = null, $page = null, $minId = null, $maxId = null)
+    {
+        $sel = $this->queueCollection
+            ->getSelect();
+        $sel->where('store_id', $mage_store_id)
+            ->order('queue_id asc');
+
+        if(empty($limit) || !is_numeric($limit)){
+            $limit = 10;
+        }
+
+        if(empty($limit) || !is_numeric($limit)){
+            $page = 0;
+        }
+
+        if(is_numeric($limit) && is_numeric($page)){
+            $page++;
+            $sel->limitPage($page, $limit);
+        }
+
+        if(is_numeric($minId)){
+            $sel->where('queue_id >= ' . $minId);
+        }
+
+        if(is_numeric($maxId)){
+            $sel->where('queue_id <= ' . $maxId);
+        }
+
+        $object = new \Remarkety\Mgconnector\Model\Api\Data\QueueCollection();
+        $data = $this->queueCollection->toArray();
+        $object->setQueueItems($data['items']);
+
+        return $object;
+    }
+
+    /**
+     * @param int $mage_store_id
+     * @param int|null $minId
+     * @param int|null $maxId
+     * @return array
+     */
+    public function deleteQueueItems($mage_store_id, $minId = null, $maxId = null)
+    {
+        $sel = $this->queueCollection
+            ->getSelect();
+        $sel->where('store_id = '. $mage_store_id)
+            ->order('queue_id asc');
+
+        if(is_numeric($minId)){
+            $sel->where('queue_id >= ' . $minId);
+        }
+
+        if(is_numeric($maxId)){
+            $sel->where('queue_id <= ' . $maxId);
+        }
+        $toDelete = $this->queueCollection->count();
+        $itemsDeleted = 0;
+        foreach ($this->queueCollection as $item){
+            try {
+                $this->queueRepo->delete($item);
+                $itemsDeleted++;
+            } catch (\Exception $ex){
+            }
+        }
+        $ret = [
+            'response' => [
+                'totalMatching' => $toDelete,
+                'totalDeleted' => $itemsDeleted
+            ]
+        ];
+        return $ret;
+    }
+
+    /**
+     * @param int $mage_store_id
+     * @param int|null $limit
+     * @param int|null $page
+     * @param int|null $minId
+     * @param int|null $maxId
+     * @return int
+     */
+    public function retryQueueItems($mage_store_id, $limit = null, $page = null, $minId = null, $maxId = null)
+    {
+        $sel = $this->queueCollection
+            ->getSelect();
+        $sel->where('store_id = '. $mage_store_id)
+            ->order('queue_id asc');
+
+        if(is_numeric($minId)){
+            $sel->where('queue_id >= ' . $minId);
+        }
+
+        if(is_numeric($maxId)){
+            $sel->where('queue_id <= ' . $maxId);
+        }
+
+        if(empty($limit) || !is_numeric($limit)){
+            $limit = 10;
+        }
+
+        if(empty($limit) || !is_numeric($limit)){
+            $page = 0;
+        }
+
+        if(is_numeric($limit) && is_numeric($page)){
+            $page++;
+            $sel->limitPage($page, $limit);
+        }
+
+        $itemsSent = 0;
+        /**
+         * @var $item QueueInterface
+         */
+        foreach ($this->queueCollection as $item){
+            try {
+                if($this->eventMethods->makeRequest(
+                    $item->getEventType(),
+                    json_decode($item->getPayload(), true),
+                    $item->getStoreId(),
+                    $item->getAttempts(),
+                    $item->getQueueId()
+                )) {
+                    $itemsSent++;
+                    $this->queueRepo->delete($item);
+                }
+            } catch (\Exception $ex){
+            }
+        }
+        $ret = [
+            'response' => [
+                'totalMatching' => $this->queueCollection->count(),
+                'sentSuccessfully' => $itemsSent
+            ]
+        ];
+        return $ret;
     }
 }
