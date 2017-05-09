@@ -21,7 +21,7 @@ use Psr\Log\LoggerInterface;
 
 class EventMethods {
 
-    const REMARKETY_EVENTS_ENDPOINT = 'https://api-events.remarkety.com/v1';
+    const REMARKETY_EVENTS_ENDPOINT = 'https://webhooks.remarkety.com/webhooks';
     const REMARKETY_METHOD = 'POST';
     const REMARKETY_TIMEOUT = 2;
     const REMARKETY_VERSION = 0.9;
