@@ -25,7 +25,7 @@ class EventMethods {
     const REMARKETY_METHOD = 'POST';
     const REMARKETY_TIMEOUT = 2;
     const REMARKETY_VERSION = 0.9;
-    const REMARKETY_PLATFORM = 'MAGENTO';
+    const REMARKETY_PLATFORM = 'MAGENTO_2';
 
     const EVENT_ORDERS_CREATED = 'orders/create';
     const EVENT_ORDERS_UPDATED = 'orders/updated';
