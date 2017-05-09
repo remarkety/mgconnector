@@ -97,7 +97,7 @@ class TriggerSubscribeUpdateObserver extends EventMethods implements ObserverInt
                         return $this;
                 }
 
-                $this->makeRequest($eventType, $this->_prepareCustomerSubscribtionUpdateData($subscriber, $this->remoteAddress->getRemoteAddress()));
+                $this->makeRequest($eventType, $this->_prepareCustomerSubscribtionUpdateData($subscriber, $this->remoteAddress->getRemoteAddress()), $subscriber->getStoreId());
 
                 if($this->_store->getId() != 0){
                     $email = $subscriber->getSubscriberEmail();
