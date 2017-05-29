@@ -26,7 +26,20 @@ class AddressSerializer
      */
     public function serialize($address){
         $country = $this->_countryFactory->create()->loadByCode($address->getCountryId());
-        $region = $address->getRegion();
+        $region = null;
+        $regionStr = null;
+        if($address instanceof \Magento\Sales\Model\Order\Address){
+            $region = $address->getRegionCode();
+        } else {
+            $region = $address->getRegion();
+        }
+        if(!empty($region)){
+            if(is_object($region)){
+                $regionStr = $region->getRegionCode();
+            } else {
+                $regionStr = $region;
+            }
+        }
         $data = [
             'first_name' => $address->getFirstname(),
             'last_name' => $address->getLastname(),
@@ -36,7 +49,7 @@ class AddressSerializer
             'country' => $country->getName(),
             'zip' => $address->getPostcode(),
             'phone' => $address->getTelephone(),
-            'region' => !empty($region) ? $region->getRegionCode() : null
+            'region' => $regionStr
         ];
         return $data;
     }
