@@ -10,14 +10,14 @@ interface ProductCollectionInterface
     /**
      * Get rules.
      *
-     * @return \Remarkety\Mgconnector\Api\Data\ProductInterface
+     * @return \Remarkety\Mgconnector\Api\Data\ProductInterface[]
      */
     public function getProducts();
 
     /**
      * Set rules .
      *
-     * @param \Remarkety\Mgconnector\Api\Data\ProductInterface $items
+     * @param \Remarkety\Mgconnector\Api\Data\ProductInterface[] $items
      * @return $this
      */
     public function setProducts($items = null);

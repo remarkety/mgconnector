@@ -27,6 +27,9 @@ use Remarkety\Mgconnector\Model\QueueRepository;
 use Remarkety\Mgconnector\Model\ResourceModel\Queue\Collection;
 use Remarkety\Mgconnector\Observer\EventMethods;
 use Remarkety\Mgconnector\Helper\Data as DataHelper;
+use Magento\ConfigurableProduct\Model\Product\Type\Configurable;
+use Magento\Catalog\Model\ProductRepository;
+use Magento\CatalogInventory\Api\StockRegistryInterface;
 
 class Data implements DataInterface
 {
@@ -60,6 +63,8 @@ class Data implements DataInterface
     protected $resourceConfig;
     protected $cacheTypeList;
     protected $dataHelper;
+    protected $productRepository;
+    protected $stockRegistry;
 
     protected $response_mask = [
         'products' => [
@@ -309,7 +314,9 @@ class Data implements DataInterface
                                 Collection $queueCollection,
                                 QueueRepository $queueRepository,
                                 EventMethods $eventMethods,
-                                DataHelper $dataHelper
+                                DataHelper $dataHelper,
+                                ProductRepository $productRepository,
+                                StockRegistryInterface $stockRegistry
     )
     {
         $this->dataHelper = $dataHelper;
@@ -344,6 +351,8 @@ class Data implements DataInterface
         $this->_salesOrderResourceCollectionFactory = $salesOrderResourceCollectionFactory;
         $this->ruleFactory = $ruleFactory;
         $this->couponFactory = $couponFactory;
+        $this->stockRegistry = $stockRegistry;
+        $this->productRepository = $productRepository;
     }
 
     /**
@@ -470,11 +479,48 @@ class Data implements DataInterface
                 $prod['title'] = $row->getName();
             }
 
+            $variants = [];
+            if($row->getTypeId() == Configurable::TYPE_CODE){
+                //configurable products sends variants
+                $childrenIdsGroups = $this->_catalogProductTypeConfigurable->getChildrenIds($row->getId());
+                if(isset($childrenIdsGroups[0])) {
+                    $childrenIds = $childrenIdsGroups[0];
+                    foreach ($childrenIds as $childId) {
+                        $childProd = $this->loadProduct($childId);
+                        $stock = $this->stockRegistry->getStockItem($childId);
+
+                        $created_at_child = new \DateTime($childProd->getCreatedAt());
+                        $updated_at_child = new \DateTime($childProd->getUpdatedAt());
+
+                        $variants[] = [
+                            'id' => $childProd->getId(),
+                            'sku' => $childProd->getSku(),
+                            'title' => $childProd->getName(),
+                            'created_at' => $created_at_child->format(\DateTime::ATOM),
+                            'updated_at' => $updated_at_child->format(\DateTime::ATOM),
+                            'inventory_quantity' => $stock->getQty(),
+                            'price' => (float)$childProd->getPrice()
+                        ];
+                    }
+                }
+            } else {
+                $stock = $this->stockRegistry->getStockItem($row->getId());
+                $variants[] = [
+                    'inventory_quantity' => $stock->getQty(),
+                    'price' => (float)$row->getPrice()
+                ];
+            }
+            $prod['variants'] = $variants;
+
             $productsArray[] = $prod;
         }
         $object = new DataObject();
         $object->setProducts($productsArray);
         return $object;
+    }
+
+    private function loadProduct($product_id){
+        return $this->productRepository->getById($product_id);
     }
 
     public function getCategory($category_id)
@@ -1160,7 +1206,7 @@ class Data implements DataInterface
      */
     public function getVersion()
     {
-        return '2.2.5';
+        return '2.2.6';
     }
 
     /**
