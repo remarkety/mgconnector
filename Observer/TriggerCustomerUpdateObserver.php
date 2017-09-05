@@ -32,15 +32,33 @@ class TriggerCustomerUpdateObserver extends EventMethods implements ObserverInte
                 return $this;
             }
             /**
+             * @var $backendModel \Magento\Customer\Model\Backend\Customer
+             */
+            $backendModel = $observer->getEvent()->getData('customer');
+            /**
              * @var $customer \Magento\Customer\Api\Data\CustomerInterface
              */
-            $customer = $this->customerRepository->getById($observer->getEvent()->getCustomer()->getId());
+            $customer = $backendModel->getDataModel();
+            $customerOld = $this->customerRepository->getById($customer->getId());
+
             if($this->_coreRegistry->registry('remarkety_customer_save_observer_executed_'.$customer->getId()) || !$customer->getId()) {
                 return $this;
             }
             $this->_coreRegistry->register('remarkety_customer_save_observer_executed_'.$customer->getId(),true);
 
             $isNew = $customer->getCreatedAt() == $customer->getUpdatedAt();
+
+            if($customerOld && $customerOld->getStoreId() !== $customer->getStoreId()){
+                //customer moved to a new store, send delete event to previous store
+                $oldStore = $this->storeManager->getStore($customerOld->getStoreId());
+                if($this->isWebhooksEnabled($oldStore)) {
+                    $this->makeRequest(self::EVENT_CUSTOMERS_DELETED, array(
+                        'id' => (int)$customer->getId(),
+                        'email' => $customer->getEmail(),
+                    ), $oldStore->getId());
+                }
+            }
+
             $this->_customerUpdate($customer, $isNew);
         } catch (\Exception $ex){
             $this->logError($ex);

@@ -7,6 +7,7 @@ use Magento\Framework\App\Request\Http;
 use \Magento\Framework\Registry;
 use \Magento\Newsletter\Model\Subscriber;
 use \Magento\Customer\Model\Group;
+use Magento\Store\Model\StoreManager;
 use Remarkety\Mgconnector\Helper\ConfigHelper;
 use \Remarkety\Mgconnector\Model\Queue;
 use \Magento\Store\Model\Store;
@@ -52,6 +53,7 @@ class EventMethods {
     protected $_remarketyQueueRepo;
     protected $_store;
     protected $customerRepository;
+    protected $storeManager;
 
     protected $orderSerializer;
     protected $customerSerializer;
@@ -84,8 +86,10 @@ class EventMethods {
         ProductSerializer $productSerializer,
         Http $request,
         CustomerRepository $customerRepository,
-        CustomerRegistry $customerRegistry
+        CustomerRegistry $customerRegistry,
+        StoreManager $storeManager
         ){
+        $this->storeManager = $storeManager;
         $this->customerRegistry = $customerRegistry;
         $this->customerRepository = $customerRepository;
         $this->request = $request;
@@ -196,7 +200,7 @@ class EventMethods {
             $url = self::REMARKETY_EVENTS_ENDPOINT;
             if(!empty($storeId)){
                 $remarketyId = $this->configHelper->getRemarketyPublicId($storeId);
-                $url .= '?debug=1&storeId=' . $remarketyId;
+                $url .= '?storeId=' . $remarketyId;
             }
             $client = new \Zend_Http_Client($url, $this->_getRequestConfig($eventType));
             $payload = array_merge($payload, $this->_getPayloadBase($eventType));

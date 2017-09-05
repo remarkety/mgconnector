@@ -53,9 +53,10 @@ class TriggerSubscribeUpdateObserver extends EventMethods implements ObserverInt
         CustomerRepository $customerRepository,
         \Remarkety\Mgconnector\Model\QueueFactory $queueFactory,
         CustomerRegistry $customerRegistry,
-        RemoteAddress $remoteAddress
+        RemoteAddress $remoteAddress,
+        StoreManager $storeManager
     ){
-        parent::__construct($logger, $registry, $subscriber, $customerGroupModel, $remarketyQueueRepo, $queueFactory, $store, $scopeConfig, $orderSerializer, $customerSerializer, $addressSerializer, $configHelper, $productSerializer, $request, $customerRepository, $customerRegistry);
+        parent::__construct($logger, $registry, $subscriber, $customerGroupModel, $remarketyQueueRepo, $queueFactory, $store, $scopeConfig, $orderSerializer, $customerSerializer, $addressSerializer, $configHelper, $productSerializer, $request, $customerRepository, $customerRegistry, $storeManager);
         $this->session = $customerSession;
         $this->_checkoutSession = $CheckoutSession;
         $this->_store = $sManager->getStore();
