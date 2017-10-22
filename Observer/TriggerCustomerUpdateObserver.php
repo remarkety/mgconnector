@@ -48,7 +48,7 @@ class TriggerCustomerUpdateObserver extends EventMethods implements ObserverInte
 
             $isNew = $customer->getCreatedAt() == $customer->getUpdatedAt();
 
-            if($customerOld && $customerOld->getStoreId() !== $customer->getStoreId()){
+            if($customerOld && $customerOld->getStoreId() != $customer->getStoreId()){
                 //customer moved to a new store, send delete event to previous store
                 $oldStore = $this->storeManager->getStore($customerOld->getStoreId());
                 if($this->isWebhooksEnabled($oldStore)) {
