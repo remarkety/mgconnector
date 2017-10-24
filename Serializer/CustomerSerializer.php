@@ -54,6 +54,7 @@ class CustomerSerializer
 
         $address = $customer->getAddresses();
         $customerInfo = [
+            'id' => (int)$customer->getId(),
             'email' => $customer->getEmail(),
             'accepts_marketing' => $checkSubscriber->isSubscribed(),
             'title' => $customer->getPrefix(),
