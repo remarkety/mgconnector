@@ -42,6 +42,7 @@ class OrderSerializer
         $items = $order->getAllVisibleItems();
         $line_items = [];
         foreach($items as $item){
+            $product = $item->getProduct();
             $itemArr = [
                 //'product_parent_id' => $rmCore->getProductParentId($item->getProduct()),
                 'product_id' => $item->getProductId(),
@@ -50,10 +51,10 @@ class OrderSerializer
                 'quantity_refunded' => $item->getQtyRefunded(),
                 'quantity_shipped' => $item->getQtyShipped(),
                 'name' => $item->getName(),
-                'title' => $item->getProduct()->getName(),
+                'title' => empty($product) ? $item->getName() : $product->getName(),
                 'price' => (float)$item->getPrice(),
-                'url' => $item->getProduct()->getProductUrl(),
-                'images' => $this->remarketyHelper->getMediaGalleryImages($item->getProduct())
+                'url' => empty($product) ? null : $product->getProductUrl(),
+                'images' => empty($product) ? [] : $this->remarketyHelper->getMediaGalleryImages($product)
             ];
 
             $line_items[] = $itemArr;
