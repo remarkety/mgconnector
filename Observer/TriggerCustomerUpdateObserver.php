@@ -3,18 +3,7 @@
 namespace Remarkety\Mgconnector\Observer;
 
 use Magento\Framework\Event\ObserverInterface;
-use Magento\Customer\Model\Address;
 use Magento\Customer\Model\CustomerFactory;
-use \Magento\Framework\Registry;
-use \Magento\Newsletter\Model\Subscriber;
-use \Magento\Customer\Model\Group;
-use Remarkety\Mgconnector\Helper\ConfigHelper;
-use \Remarkety\Mgconnector\Model\Queue;
-use \Magento\Store\Model\Store;
-use \Magento\Framework\App\Config\ScopeConfigInterface;
-use Remarkety\Mgconnector\Serializer\AddressSerializer;
-use Remarkety\Mgconnector\Serializer\CustomerSerializer;
-use Remarkety\Mgconnector\Serializer\OrderSerializer;
 
 
 class TriggerCustomerUpdateObserver extends EventMethods implements ObserverInterface
@@ -40,6 +29,7 @@ class TriggerCustomerUpdateObserver extends EventMethods implements ObserverInte
              */
             $customer = $backendModel->getDataModel();
             $customerOld = $this->customerRepository->getById($customer->getId());
+            $this->_coreRegistry->register('remarkety_customer_id', $customer->getId(), true);
 
             if($this->_coreRegistry->registry('remarkety_customer_save_observer_executed_'.$customer->getId()) || !$customer->getId()) {
                 return $this;

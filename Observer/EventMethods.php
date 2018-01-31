@@ -9,7 +9,6 @@ use \Magento\Newsletter\Model\Subscriber;
 use \Magento\Customer\Model\Group;
 use Magento\Store\Model\StoreManager;
 use Remarkety\Mgconnector\Helper\ConfigHelper;
-use \Remarkety\Mgconnector\Model\Queue;
 use \Magento\Store\Model\Store;
 use \Magento\Framework\UrlInterface;
 use \Magento\Framework\App\Config\ScopeConfigInterface;
@@ -283,7 +282,7 @@ class EventMethods {
     }
 
 
-    protected function _prepareCustomerSubscribtionUpdateData(Subscriber $subscriber, $clientIp = null)
+    protected function _prepareCustomerSubscribtionUpdateData(Subscriber $subscriber, $clientIp = null, $customerId = null)
     {
         $arr = array(
             'email' => $subscriber->getSubscriberEmail(),
@@ -293,6 +292,10 @@ class EventMethods {
 
         if(!empty($clientIp)){
             $arr['client_ip'] = $clientIp;
+        }
+
+        if(!empty($customerId)){
+            $arr['customerId'] = $customerId;
         }
 
         return $arr;

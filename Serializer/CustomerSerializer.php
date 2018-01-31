@@ -9,6 +9,7 @@
 namespace Remarkety\Mgconnector\Serializer;
 
 
+use Magento\Framework\App\RequestInterface;
 use Magento\Newsletter\Model\Subscriber;
 use Magento\Customer\Api\GroupRepositoryInterface as CustomerGroupRepository;
 
@@ -18,18 +19,26 @@ class CustomerSerializer
     private $subscriber;
     private $addressSerializer;
     private $customerGroupRepository;
+    private $request;
     public function __construct(
         Subscriber $subscriber,
         AddressSerializer $addressSerializer,
-        CustomerGroupRepository $customerGroupRepository
+        CustomerGroupRepository $customerGroupRepository,
+        RequestInterface $request
     )
     {
         $this->subscriber = $subscriber;
         $this->addressSerializer = $addressSerializer;
         $this->customerGroupRepository = $customerGroupRepository;
+        $this->request = $request;
     }
     public function serialize(\Magento\Customer\Api\Data\CustomerInterface $customer){
-        $checkSubscriber = $this->subscriber->loadByEmail($customer->getEmail());
+        if ($this->request->getParam('is_subscribed', false)) {
+            $subscribed = true;
+        } else {
+            $checkSubscriber = $this->subscriber->loadByEmail($customer->getEmail());
+            $subscribed = $checkSubscriber->isSubscribed();
+        }
 
         $created_at = new \DateTime($customer->getCreatedAt());
         $updated_at = new \DateTime($customer->getUpdatedAt());
@@ -56,7 +65,7 @@ class CustomerSerializer
         $customerInfo = [
             'id' => (int)$customer->getId(),
             'email' => $customer->getEmail(),
-            'accepts_marketing' => $checkSubscriber->isSubscribed(),
+            'accepts_marketing' => $subscribed,
             'title' => $customer->getPrefix(),
             'first_name' => $customer->getFirstname(),
             'last_name' => $customer->getLastname(),

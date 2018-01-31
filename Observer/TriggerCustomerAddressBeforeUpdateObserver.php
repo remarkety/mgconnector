@@ -3,20 +3,7 @@
 namespace Remarkety\Mgconnector\Observer;
 
 use Magento\Framework\Event\ObserverInterface;
-use Magento\Customer\Model\Address;
 use Magento\Customer\Model\CustomerFactory;
-use \Magento\Framework\ObjectManager\ObjectManager;
-use \Magento\Framework\Registry;
-use Remarkety\Mgconnector\Helper\ConfigHelper;
-use Remarkety\Mgconnector\Observer\EventMethods;
-use \Magento\Newsletter\Model\Subscriber;
-use \Magento\Customer\Model\Group;
-use \Remarkety\Mgconnector\Model\Queue;
-use \Magento\Store\Model\Store;
-use \Magento\Framework\App\Config\ScopeConfigInterface;
-use Remarkety\Mgconnector\Serializer\AddressSerializer;
-use Remarkety\Mgconnector\Serializer\CustomerSerializer;
-use Remarkety\Mgconnector\Serializer\OrderSerializer;
 
 
 class TriggerCustomerAddressBeforeUpdateObserver extends EventMethods implements ObserverInterface

@@ -82,6 +82,8 @@ class TriggerSubscribeUpdateObserver extends EventMethods implements ObserverInt
             if($subscriber->getId()) {
                 if ($this->_coreRegistry->registry('remarkety_subscriber_deleted_' . $subscriber->getSubscriberEmail()))
                     return $this;
+                if ($this->_coreRegistry->registry('remarkety_subscriber_updated_' . $subscriber->getSubscriberEmail()))
+                    return $this;
 
                 $status = $subscriber->getStatus();
                 $eventType = 'newsletter/subscribed';
@@ -98,7 +100,12 @@ class TriggerSubscribeUpdateObserver extends EventMethods implements ObserverInt
                         return $this;
                 }
 
-                $this->makeRequest($eventType, $this->_prepareCustomerSubscribtionUpdateData($subscriber, $this->remoteAddress->getRemoteAddress()), $subscriber->getStoreId());
+                $customerId = $this->session->getCustomerId();
+                if(empty($customerId)){
+                    $customerId = $this->_coreRegistry->registry('remarkety_customer_id');
+                }
+                $data = $this->_prepareCustomerSubscribtionUpdateData($subscriber, $this->remoteAddress->getRemoteAddress(), $customerId);
+                $this->makeRequest($eventType, $data, $subscriber->getStoreId());
 
                 if($this->_store->getId() != 0){
                     $email = $subscriber->getSubscriberEmail();
@@ -113,6 +120,7 @@ class TriggerSubscribeUpdateObserver extends EventMethods implements ObserverInt
                         }
                     }
                 }
+                $this->_coreRegistry->register('remarkety_subscriber_updated_' . $subscriber->getSubscriberEmail(), 1, true);
             }
         } catch (\Exception $ex){
             $this->logError($ex);
