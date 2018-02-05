@@ -69,6 +69,10 @@ class EventMethods {
      */
     protected $logger;
 
+    private $_countEvents = 0;
+
+    private $_forceAsyncWebhooks = false;
+
     public function __construct(
         LoggerInterface $logger,
         Registry $coreRegistry,
@@ -115,6 +119,7 @@ class EventMethods {
         } else {
             $this->_intervals = explode(',', $intervals);
         }
+        $this->_forceAsyncWebhooks = $configHelper->forceAsyncWebhooks();
     }
 
     protected function isWebhooksEnabled($store){
@@ -203,6 +208,14 @@ class EventMethods {
             }
             $client = new \Zend_Http_Client($url, $this->_getRequestConfig($eventType));
             $payload = array_merge($payload, $this->_getPayloadBase($eventType));
+
+            if(empty($queueId) && ($this->_forceAsyncWebhooks || $this->_countEvents >= 3)){
+                //batch update, push to queue
+                $this->_queueRequest($eventType, $payload, 0, null, $storeId);
+                return true;
+            }
+            $this->_countEvents++;
+
             $json = json_encode($payload);
 
             $response = $client
@@ -233,9 +246,13 @@ class EventMethods {
     {
 
         $queueModel = null;
-        if(!empty($this->_intervals[$attempt-1])) {
+        if($attempt == 0 || !empty($this->_intervals[$attempt-1])) {
             $now = time();
-            $nextAttempt = $now + (int)$this->_intervals[$attempt-1] * 60;
+            if($attempt == 0){
+                $nextAttempt = $now;
+            } else {
+                $nextAttempt = $now + (int)$this->_intervals[$attempt-1] * 60;
+            }
             if($queueId) {
                 $queueModel = $this->_remarketyQueueRepo->getById($queueId);
                 $queueModel->setAttempts($attempt);
@@ -282,7 +299,7 @@ class EventMethods {
     }
 
 
-    protected function _prepareCustomerSubscribtionUpdateData(Subscriber $subscriber, $clientIp = null, $customerId = null)
+    protected function _prepareCustomerSubscribtionUpdateData(Subscriber $subscriber, $clientIp = null)
     {
         $arr = array(
             'email' => $subscriber->getSubscriberEmail(),
@@ -294,6 +311,7 @@ class EventMethods {
             $arr['client_ip'] = $clientIp;
         }
 
+        $customerId = $subscriber->getCustomerId();
         if(!empty($customerId)){
             $arr['customerId'] = $customerId;
         }
