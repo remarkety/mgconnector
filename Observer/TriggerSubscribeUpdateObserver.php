@@ -76,6 +76,10 @@ class TriggerSubscribeUpdateObserver extends EventMethods implements ObserverInt
              */
             $subscriber = $observer->getEvent()->getSubscriber();
 
+            if(!$subscriber->isStatusChanged()) {
+                return $this;
+            }
+
             if(!$this->_coreRegistry->registry('subscriber_object_data_observer'))
                 $this->_coreRegistry->register('subscriber_object_data_observer', 1);
 
@@ -100,11 +104,7 @@ class TriggerSubscribeUpdateObserver extends EventMethods implements ObserverInt
                         return $this;
                 }
 
-                $customerId = $this->session->getCustomerId();
-                if(empty($customerId)){
-                    $customerId = $this->_coreRegistry->registry('remarkety_customer_id');
-                }
-                $data = $this->_prepareCustomerSubscribtionUpdateData($subscriber, $this->remoteAddress->getRemoteAddress(), $customerId);
+                $data = $this->_prepareCustomerSubscribtionUpdateData($subscriber, $this->remoteAddress->getRemoteAddress());
                 $this->makeRequest($eventType, $data, $subscriber->getStoreId());
 
                 if($this->_store->getId() != 0){
