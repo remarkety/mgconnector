@@ -18,8 +18,9 @@ interface DataInterface
      * @param string|null $created_at_min
      * @param string|null $created_at_max
      * @param int|null $product_id
+     * @param bool $enabled_only
      * @return \Remarkety\Mgconnector\Api\Data\ProductCollectionInterface
-*/
+     */
     public function getProducts(
         $mage_store_id,
         $updated_at_min = null,
@@ -29,7 +30,8 @@ interface DataInterface
         $since_id = null,
         $created_at_min = null,
         $created_at_max = null,
-        $product_id = null
+        $product_id = null,
+        $enabled_only = false
     );
     /**
      * Get All customers from catalog

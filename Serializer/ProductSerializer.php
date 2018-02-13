@@ -16,6 +16,7 @@ use Magento\Catalog\Model\Product\Visibility;
 use Magento\Catalog\Model\ProductRepository;
 use Magento\CatalogInventory\Api\StockRegistryInterface;
 use Magento\ConfigurableProduct\Model\Product\Type\Configurable;
+use Magento\Store\Model\StoreManagerInterface;
 use Remarkety\Mgconnector\Helper\Data;
 
 class ProductSerializer
@@ -26,13 +27,15 @@ class ProductSerializer
     protected $dataHelper;
     protected $urlModel;
     protected $stockRegistry;
+    protected $storeManager;
     public function __construct(
         \Magento\Catalog\Model\CategoryFactory $categoryFactory,
         \Magento\ConfigurableProduct\Model\ResourceModel\Product\Type\Configurable $catalogProductTypeConfigurable,
         ProductRepository $productRepository,
         Data $dataHelper,
         Url $urlModel,
-        StockRegistryInterface $stockRegistry
+        StockRegistryInterface $stockRegistry,
+        StoreManagerInterface $storeManager
     )
     {
         $this->categoryFactory = $categoryFactory;
@@ -41,10 +44,11 @@ class ProductSerializer
         $this->dataHelper = $dataHelper;
         $this->urlModel = $urlModel;
         $this->stockRegistry = $stockRegistry;
+        $this->storeManager = $storeManager;
     }
 
-    public function loadProduct($product_id){
-        return $this->productRepository->getById($product_id);
+    public function loadProduct($product_id, $store_id = null){
+        return $this->productRepository->getById($product_id, false, $store_id);
     }
 
     public function serialize(ProductInterface $product, $storeId){
@@ -53,9 +57,17 @@ class ProductSerializer
         if($product->getTypeId() == 'simple'){
             $parent_id = $this->dataHelper->getParentId($product->getId());
             if(!empty($parent_id)) {
-                $parentProduct = $this->loadProduct($parent_id);
+                $parentProduct = $this->loadProduct($parent_id, $storeId);
             }
         }
+
+        $store = $this->storeManager->getStore($storeId);
+        $product->setStoreId($storeId);
+        $product->setWebsiteId($store->getWebsiteId());
+        $product->setCustomerGroupId(0);
+
+        //makes sure the final price is re-calculated based on the current store
+        $product->setFinalPrice(null);
 
         $created_at = new \DateTime($product->getCreatedAt());
         $updated_at = new \DateTime($product->getUpdatedAt());
@@ -74,11 +86,11 @@ class ProductSerializer
             $stock = $this->stockRegistry->getStockItem($product->getId());
             $variants[] = [
                 'inventory_quantity' => $stock->getQty(),
-                'price' => (float)$product->getPrice()
+                'price' => (float)$product->getPrice(),
+                'salePrice' => (float)$product->getFinalPrice()
             ];
 
         } else {
-            $product->setStoreId($storeId);
             $categoryIds = $product->getCategoryIds();
             $url = $product->getProductUrl(false);
             $images = $this->dataHelper->getMediaGalleryImages($product);
@@ -89,7 +101,11 @@ class ProductSerializer
                 if(isset($childrenIdsGroups[0])) {
                     $childrenIds = $childrenIdsGroups[0];
                     foreach ($childrenIds as $childId) {
-                        $childProd = $this->loadProduct($childId);
+                        $childProd = $this->loadProduct($childId, $storeId);
+                        $childProd->setStoreId($storeId);
+                        $childProd->setWebsiteId($store->getWebsiteId());
+                        $childProd->setCustomerGroupId(0);
+
                         $stock = $this->stockRegistry->getStockItem($childId);
 
                         $created_at_child = new \DateTime($childProd->getCreatedAt());
@@ -102,7 +118,8 @@ class ProductSerializer
                             'created_at' => $created_at_child->format(\DateTime::ATOM),
                             'updated_at' => $updated_at_child->format(\DateTime::ATOM),
                             'inventory_quantity' => $stock->getQty(),
-                            'price' => (float)$childProd->getPrice()
+                            'price' => (float)$childProd->getPrice(),
+                            'salePrice' => (float)$childProd->getFinalPrice()
                         ];
                     }
                 }
@@ -110,7 +127,8 @@ class ProductSerializer
                 $stock = $this->stockRegistry->getStockItem($product->getId());
                 $variants[] = [
                     'inventory_quantity' => $stock->getQty(),
-                    'price' => (float)$product->getPrice()
+                    'price' => (float)$product->getPrice(),
+                    'salePrice' => (float)$product->getFinalPrice()
                 ];
             }
 
@@ -126,6 +144,24 @@ class ProductSerializer
 
         $options = [];
 
+        $vendor = null;
+        $manufacturer = null;
+
+        $vendorAttr = $product->getResource()->getAttribute('vendor');
+        if(!$vendorAttr){
+            $vendorAttr = $product->getResource()->getAttribute('brand');
+        }
+        $manufacturerAttr = $product->getResource()->getAttribute('manufacturer');
+        if($manufacturerAttr){
+            if(!empty($product->getData($manufacturerAttr->getAttributeCode()))){
+                $manufacturer = $manufacturerAttr->getFrontend()->getValue($product);
+            }
+        }
+        if($vendorAttr){
+            if(!empty($product->getData($vendorAttr->getAttributeCode()))){
+                $vendor = $vendorAttr->getFrontend()->getValue($product);
+            }
+        }
         $data = [
             'id' => $product->getId(),
             'sku' => $product->getSku(),
@@ -136,9 +172,12 @@ class ProductSerializer
             'images' => $images,
             'enabled' => $enabled,
             'price' => (float)$product->getPrice(),
+            'salePrice' => (float)$product->getFinalPrice(),
             'url' => $url,
             'variants' => $variants,
-            'options' => $options
+            'options' => $options,
+            'vendor' => $vendor,
+            'manufacturer' => $manufacturer
         ];
         if(!empty($parent_id)){
             $data['parent_id'] = $parent_id;

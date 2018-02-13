@@ -43,16 +43,24 @@ class OrderSerializer
         $line_items = [];
         foreach($items as $item){
             $product = $item->getProduct();
+            $lineTax = (float)$item->getTaxAmount();
+            $lineQty = (float)$item->getQtyOrdered();
+            if($lineQty > 0 && $lineTax > 0){
+                $itemTax = $lineTax / $lineQty;
+            } else {
+                $itemTax = 0;
+            }
             $itemArr = [
                 //'product_parent_id' => $rmCore->getProductParentId($item->getProduct()),
                 'product_id' => $item->getProductId(),
                 'sku' => $item->getSku(),
-                'quantity' => (float)$item->getQtyOrdered(),
+                'quantity' => $lineQty,
                 'quantity_refunded' => $item->getQtyRefunded(),
                 'quantity_shipped' => $item->getQtyShipped(),
                 'name' => $item->getName(),
                 'title' => empty($product) ? $item->getName() : $product->getName(),
                 'price' => (float)$item->getPrice(),
+                'tax_amount' => $itemTax,
                 'url' => empty($product) ? null : $product->getProductUrl(),
                 'images' => empty($product) ? [] : $this->remarketyHelper->getMediaGalleryImages($product)
             ];

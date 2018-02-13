@@ -75,7 +75,8 @@ class Data implements DataInterface
             ],
             "created_at" => 'created_at',
             "id" => 'entity_id',
-            'price' => 'price',
+            "price" => "price",
+            "sale_price_with_tax" => "sale_price_with_tax",
             "image" => [
                 "id",
                 "product_id",
@@ -113,6 +114,7 @@ class Data implements DataInterface
                 "image",
                 "inventory_quantity",
                 "price",
+                "sale_price_with_tax",
                 "product_id",
                 "sku",
                 "taxable",
@@ -367,7 +369,8 @@ class Data implements DataInterface
      * @param string|null $created_at_min
      * @param string|null $created_at_max
      * @param int|null $product_id
-     * @return array $collection
+     * @param bool $enabled_only
+     * @return DataObject $collection
      */
     public function getProducts(
         $mage_store_id,
@@ -378,9 +381,11 @@ class Data implements DataInterface
         $since_id = null,
         $created_at_min = null,
         $created_at_max = null,
-        $product_id = null
+        $product_id = null,
+        $enabled_only = false
     )
     {
+        $this->_storeManagerInterface->setCurrentStore($mage_store_id);
 
         $pageNumber = null;
         $pageSize = null;
@@ -416,6 +421,11 @@ class Data implements DataInterface
             $collection->addAttributeToFilter('entity_id', $product_id);
         }
 
+        if($enabled_only){
+            $collection->addAttributeToFilter('status', Status::STATUS_ENABLED);
+            $collection->addAttributeToFilter('visibility', ['neq' => Visibility::VISIBILITY_NOT_VISIBLE]);
+        }
+
         if ($limit != null) {
             $pageNumber = 1;        // Note that page numbers begin at 1
             $pageSize = $limit;
@@ -429,6 +439,12 @@ class Data implements DataInterface
 
         if (!is_null($pageSize)) $collection->setPage($pageNumber, $pageSize);
 
+
+        $vendorAttr = $collection->getResource()->getAttribute('vendor');
+        if(!$vendorAttr){
+            $vendorAttr = $collection->getResource()->getAttribute('brand');
+        }
+        $manufacturerAttr = $collection->getResource()->getAttribute('manufacturer');
 
         $map = $this->response_mask;
         $productsArray = [];
@@ -465,6 +481,7 @@ class Data implements DataInterface
 
             $prod['body_html'] = $row->getDescription();
             $prod['id'] = $row->getId();
+            $prod['sale_price_with_tax'] = $row->getFinalPrice();
 
             $parent_id = $this->dataHelper->getParentId($row->getId());
             if ($row->getTypeId() == 'simple' && $parent_id) {
@@ -499,7 +516,8 @@ class Data implements DataInterface
                             'created_at' => $created_at_child->format(\DateTime::ATOM),
                             'updated_at' => $updated_at_child->format(\DateTime::ATOM),
                             'inventory_quantity' => $stock->getQty(),
-                            'price' => (float)$childProd->getPrice()
+                            'price' => (float)$childProd->getPrice(),
+                            'sale_price_with_tax' => (float)$childProd->getFinalPrice()
                         ];
                     }
                 }
@@ -507,10 +525,27 @@ class Data implements DataInterface
                 $stock = $this->stockRegistry->getStockItem($row->getId());
                 $variants[] = [
                     'inventory_quantity' => $stock->getQty(),
-                    'price' => (float)$row->getPrice()
+                    'price' => (float)$row->getPrice(),
+                    'sale_price_with_tax' => (float)$row->getFinalPrice()
                 ];
             }
             $prod['variants'] = $variants;
+            if($vendorAttr){
+                if(!empty($row->getData($vendorAttr->getAttributeCode()))){
+                    $vendor = $vendorAttr->getFrontend()->getValue($row);
+                    $prod['vendor'] = $vendor;
+                } else {
+                    $prod['vendor'] = null;
+                }
+            }
+            if($manufacturerAttr){
+                if(!empty($row->getData($manufacturerAttr->getAttributeCode()))){
+                    $manufacturer = $manufacturerAttr->getFrontend()->getValue($row);
+                    $prod['manufacturer'] = $manufacturer;
+                } else {
+                    $prod['manufacturer'] = null;
+                }
+            }
 
             $productsArray[] = $prod;
         }
@@ -1206,7 +1241,7 @@ class Data implements DataInterface
      */
     public function getVersion()
     {
-        return '2.2.13';
+        return '2.2.14';
     }
 
     /**
