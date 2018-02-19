@@ -35,7 +35,21 @@ class OrderSerializer
     }
 
     public function serialize(\Magento\Sales\Model\Order $order){
-        $status = $this->statusCollection->getItemByColumnValue('status', $order->getStatus());
+        //find order status
+        $statusVal = $order->getStatus();
+        $status = [
+            'code' => 'unknown',
+            'name' => 'unknown'
+        ];
+        if(!empty($statusVal)){
+            $statusObj = $this->statusCollection->getItemByColumnValue('status', $statusVal);
+            if(!empty($statusObj)){
+                $status = [
+                    'code' => $statusObj->getStatus(),
+                    'name' => $statusObj->getLabel()
+                ];
+            }
+        }
         /**
          * @var $items \Magento\Sales\Model\Order\Item[]
          */
@@ -71,23 +85,22 @@ class OrderSerializer
         $created_at = new \DateTime($order->getCreatedAt());
         $updated_at = new \DateTime($order->getUpdatedAt());
 
-        $customerId = $order->getCustomerId();
         if(!$order->getCustomerIsGuest()){
             $customer = $this->customerRepository->getById($order->getCustomerId());
             $customerInfo = $this->customerSerializer->serialize($customer);
         } else {
             $checkSubscriber = $this->subscriber->loadByEmail($order->getCustomerEmail());
-
+            $billingAddress = $order->getBillingAddress();
             $customerInfo = [
                 'accepts_marketing' => $checkSubscriber->isSubscribed(),
                 'email' => $order->getCustomerEmail(),
-                'title' => $order->getBillingAddress()->getPrefix(),
-                'first_name' => $order->getBillingAddress()->getFirstname(),
-                'last_name' => $order->getBillingAddress()->getLastname(),
+                'title' => empty($billingAddress) ? null : $billingAddress->getPrefix(),
+                'first_name' => empty($billingAddress) ? null : $billingAddress->getFirstname(),
+                'last_name' => empty($billingAddress) ? null : $billingAddress->getLastname(),
                 'created_at' => $created_at->format(\DateTime::ATOM ),
                 'updated_at' => $created_at->format(\DateTime::ATOM ),
                 'guest' => true,
-                'default_address' => $this->addressSerializer->serialize($order->getBillingAddress())
+                'default_address' => empty($billingAddress) ? null : $this->addressSerializer->serialize($billingAddress)
             ];
         }
 
@@ -109,9 +122,14 @@ class OrderSerializer
             }
         }
 
+        $paymentMethodTitle = null;
         $payment = $order->getPayment();
-        $method = $payment->getMethodInstance();
-        $paymentMethodTitle = $method->getTitle();
+        if(!empty($payment)){
+            $method = $payment->getMethodInstance();
+            if(!empty($method)){
+                $paymentMethodTitle = $method->getTitle();
+            }
+        }
 
         $discount_codes = [];
         $coupon = $order->getCouponCode();
@@ -132,10 +150,7 @@ class OrderSerializer
             'discount_codes' => $discount_codes,
             'payment_method' => $paymentMethodTitle,
             'note' => $order->getCustomerNote(),
-            'status' => [
-                'code' => $status->getStatus(),
-                'name' => $status->getLabel()
-            ],
+            'status' => $status,
             'subtotal_price' => (float)$order->getSubtotal(),
             'total_discounts' => (float)$order->getDiscountAmount(),
             'total_price' => (float)$order->getGrandTotal(),

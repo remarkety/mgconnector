@@ -25,7 +25,14 @@ class AddressSerializer
      * @return array
      */
     public function serialize($address){
-        $country = $this->_countryFactory->create()->loadByCode($address->getCountryId());
+        $countryCode = $address->getCountryId();
+        $countryName = null;
+        if(!empty($countryCode)){
+            $country = $this->_countryFactory->create()->loadByCode($countryCode);
+            if(!empty($country)){
+                $countryName = $country->getName();
+            }
+        }
         $region = null;
         $regionStr = null;
         if($address instanceof \Magento\Sales\Model\Order\Address){
@@ -45,8 +52,8 @@ class AddressSerializer
             'last_name' => $address->getLastname(),
             'city' => $address->getCity(),
             'street' => implode(PHP_EOL, $address->getStreet()),
-            'country_code' => $address->getCountryId(),
-            'country' => $country->getName(),
+            'country_code' => $countryCode,
+            'country' => $countryName,
             'zip' => $address->getPostcode(),
             'phone' => $address->getTelephone(),
             'region' => $regionStr

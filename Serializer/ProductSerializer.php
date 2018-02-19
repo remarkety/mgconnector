@@ -54,6 +54,7 @@ class ProductSerializer
     public function serialize(ProductInterface $product, $storeId){
 
         $parent_id = null;
+        $parentProduct = null;
         if($product->getTypeId() == 'simple'){
             $parent_id = $this->dataHelper->getParentId($product->getId());
             if(!empty($parent_id)) {
@@ -183,30 +184,6 @@ class ProductSerializer
             $data['parent_id'] = $parent_id;
         }
         return $data;
-
-        /**
-         * $data = array(
-        'id' => $product->getId(),
-        'sku' => $product->getSku(),
-        'title' => $rmCore->getProductName($product, $storeId),
-        'body_html' => '',
-        'categories' => $categories,
-        'created_at' => $product->getCreatedAt(),
-        'updated_at' => $product->getUpdatedAt(),
-        'images' => $this->getProductImages($product),
-        'enabled' => $enabled,
-        'price' => $price,
-        'special_price' => $special_price,
-        'url' => $url,
-        'parent_id' => $rmCore->getProductParentId($product),
-        'variants' => array(
-        array(
-        'inventory_quantity' => $stocklevel,
-        'price' => $price
-        )
-        )
-        );
-         */
     }
 
     public function getParentId($id)
