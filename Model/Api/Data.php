@@ -455,7 +455,7 @@ class Data implements DataInterface
             $mappedArray = $row->getData();
             if ($row->getCategoryIds()) {
                 foreach ($row->getCategoryIds() AS $category_id) {
-                    $prod['categories'][] = $this->dataHelper->getCategory($category_id);
+                    $prod['categories'][] = $this->dataHelper->getCategory($category_id, $mage_store_id);
                 }
             }
 
@@ -1236,7 +1236,7 @@ class Data implements DataInterface
      */
     public function getVersion()
     {
-        return '2.2.17';
+        return '2.2.18';
     }
 
     /**

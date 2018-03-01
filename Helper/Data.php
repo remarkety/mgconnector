@@ -144,9 +144,10 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
 
     /**
      * @param $category_id
+     * @param null $storeId
      * @return array|bool
      */
-    public function getCategory($category_id)
+    public function getCategory($category_id, $storeId = null)
     {
         if (!isset($this->categoryMapCache[$category_id])) {
             $fullPath = $this->configHelper->useCategoriesFullPath();
@@ -158,9 +159,13 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
                 $name = $category->getName();
             } else {
                 $parents = $category->getParentCategories();
-                if(count($parents) > 0) {
+                if(count($parents) > 1) {
+                    $rootCategoryId = $this->storeManager->getStore($storeId)->getRootCategoryId();
                     $nameParts = [];
                     foreach ($parents as $parentCategory) {
+                        if($parentCategory->getId() == $rootCategoryId){
+                            continue;
+                        }
                         $nameParts[] = $parentCategory->getName();
                     }
                     $name = implode(" / ", $nameParts);

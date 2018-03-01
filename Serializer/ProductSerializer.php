@@ -138,7 +138,7 @@ class ProductSerializer
         $categories = [];
         if(!empty($categoryIds)){
             foreach($categoryIds as $categoryId){
-                $categories[] = $this->dataHelper->getCategory($categoryId);
+                $categories[] = $this->dataHelper->getCategory($categoryId, $storeId);
             }
         }
 
