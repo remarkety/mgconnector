@@ -14,6 +14,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
     protected $_catalogProductTypeConfigurable;
     private $categoryMapCache = [];
     protected $categoryFactory;
+    protected $configHelper;
     public function __construct(\Magento\Framework\App\Helper\Context $context,
                                 \Magento\Framework\Module\ModuleResource $moduleResource,
                                 \Magento\Integration\Model\Integration $integration,
@@ -22,7 +23,8 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
                                 \Magento\Store\Model\StoreManagerInterface $storeManager,
                                 \Magento\Catalog\Model\Product\Gallery\GalleryManagement $galleryManagement,
                                 \Magento\ConfigurableProduct\Model\ResourceModel\Product\Type\Configurable $catalogProductTypeConfigurable,
-                                \Magento\Catalog\Model\CategoryFactory $categoryFactory
+                                \Magento\Catalog\Model\CategoryFactory $categoryFactory,
+                                ConfigHelper $configHelper
     ){
         $this->integration = $integration;
         $this->moduleResource = $moduleResource;
@@ -32,6 +34,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         $this->galleryManagement = $galleryManagement;
         $this->_catalogProductTypeConfigurable = $catalogProductTypeConfigurable;
         $this->categoryFactory = $categoryFactory;
+        $this->configHelper = $configHelper;
         parent::__construct($context);
     }
 
@@ -139,11 +142,33 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         }
     }
 
+    /**
+     * @param $category_id
+     * @return array|bool
+     */
     public function getCategory($category_id)
     {
         if (!isset($this->categoryMapCache[$category_id])) {
+            $fullPath = $this->configHelper->useCategoriesFullPath();
+            /**
+             * @var Category $category
+             */
             $category = $this->categoryFactory->create()->load($category_id);
-            $this->categoryMapCache[$category_id] = $category->getName();
+            if(!$fullPath){
+                $name = $category->getName();
+            } else {
+                $parents = $category->getParentCategories();
+                if(count($parents) > 0) {
+                    $nameParts = [];
+                    foreach ($parents as $parentCategory) {
+                        $nameParts[] = $parentCategory->getName();
+                    }
+                    $name = implode(" / ", $nameParts);
+                } else {
+                    $name = $category->getName();
+                }
+            }
+            $this->categoryMapCache[$category_id] = $name;
         }
         if (!isset($this->categoryMapCache[$category_id])) return false;
 

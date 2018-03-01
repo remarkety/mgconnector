@@ -11,19 +11,22 @@ namespace Remarkety\Mgconnector\Controller\Adminhtml\Install;
 
 use \Magento\Backend\App\Action\Context;
 use \Magento\Framework\View\Result\PageFactory;
+use Remarkety\Mgconnector\Helper\ConfigHelper;
 use \Remarkety\Mgconnector\Model\Install as InstallModel;
 
 class Reinstall extends \Magento\Backend\App\Action
 {
     protected $resultPageFactory;
     protected $installModel;
+    private $configHelper;
 
     public function __construct(Context $context,
                                 PageFactory $resultPageFactory,
                                 InstallModel $installModel,
                                 \Magento\Config\Model\ResourceModel\Config $resourceConfig,
                                 \Magento\Store\Model\StoreManager $storeManager,
-                                \Magento\Customer\Model\Session $customerSession
+                                \Magento\Customer\Model\Session $customerSession,
+                                ConfigHelper $configHelper
     ){
         parent::__construct($context);
         $this->installModel = $installModel;
@@ -32,7 +35,7 @@ class Reinstall extends \Magento\Backend\App\Action
         $this->config = $resourceConfig;
         $this->storeManager = $storeManager;
         $this->session = $customerSession;
-
+        $this->configHelper = $configHelper;
 
 
     }
@@ -46,6 +49,7 @@ class Reinstall extends \Magento\Backend\App\Action
             ->deleteConfig('remarkety/mgconnector/intervals', 'default',0)
             ->deleteConfig('remarkety/mgconnector/last_response_status', 'default',0)
             ->deleteConfig('remarkety/mgconnector/last_response_message', 'default',0);
+        $this->configHelper->setCategoriesFullPath($this->configHelper->useCategoriesFullPath());
 
         foreach ($this->storeManager->getWebsites() as $_website) {
             foreach ($_website->getGroups() as $_group) {

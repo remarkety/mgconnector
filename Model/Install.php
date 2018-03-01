@@ -11,6 +11,7 @@ use \Magento\Integration\Model\Integration;
 use \Magento\Authorization\Model\Role;
 use \Magento\Authorization\Model\Rules;
 use \Magento\Store\Model\Store;
+use Remarkety\Mgconnector\Helper\ConfigHelper;
 use \Remarkety\Mgconnector\Model\Request as MgconnectorRequest;
 use \Remarkety\Mgconnector\Model\Webtracking;
 use \Magento\Framework\UrlInterface;
@@ -348,7 +349,16 @@ class Install extends \Magento\Framework\Model\AbstractModel
         if(!empty($response['storePublicId'])){
             $this->_webtracking->setRemarketyPublicId($storeId, $response['storePublicId']);
         }
-
+        //check if we should use full categories path
+        $use_full_cat_path = $this->scopeConfigInterface->getValue(ConfigHelper::USE_CATEGORIES_FULL_PATH);
+        if(is_null($use_full_cat_path)){
+            $this->_resourceConfig->saveConfig(
+                ConfigHelper::USE_CATEGORIES_FULL_PATH,
+                1,
+                ScopeConfigInterface::SCOPE_TYPE_DEFAULT,
+                0
+            );
+        }
         $this->_cache->cleanType('config');
         return $this;
     }

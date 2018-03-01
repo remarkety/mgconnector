@@ -1,8 +1,10 @@
 <?php
 namespace Remarkety\Mgconnector\Model\Api;
 
+use Magento\Catalog\Model\Category;
 use Magento\Framework\App\Cache\TypeListInterface;
 use Magento\Framework\DataObject;
+use Magento\Quote\Model\Quote\Item;
 use Remarkety\Mgconnector\Api\Data\QueueInterface;
 use Remarkety\Mgconnector\Api\DataInterface;
 use \Magento\Catalog\Model\ProductFactory;
@@ -453,7 +455,7 @@ class Data implements DataInterface
             $mappedArray = $row->getData();
             if ($row->getCategoryIds()) {
                 foreach ($row->getCategoryIds() AS $category_id) {
-                    $prod['categories'][] = $this->getCategory($category_id);
+                    $prod['categories'][] = $this->dataHelper->getCategory($category_id);
                 }
             }
 
@@ -556,17 +558,6 @@ class Data implements DataInterface
 
     private function loadProduct($product_id){
         return $this->productRepository->getById($product_id);
-    }
-
-    public function getCategory($category_id)
-    {
-        if (!isset($this->categoryMapCache[$category_id])) {
-            $category = $this->categoryFactory->create()->load($category_id);
-            $this->categoryMapCache[$category_id] = $category->getName();
-        }
-        if (!isset($this->categoryMapCache[$category_id])) return false;
-
-        return ['code' => $category_id, 'name' => $this->categoryMapCache[$category_id]];
     }
 
     /**
@@ -1024,7 +1015,7 @@ class Data implements DataInterface
 
             $itemArray = [];
             foreach ($itemsCollection as $item) {
-                if (($item->getData('parent_item_id') || $item->getData('parent_item_id') == null) && $item->getData('product_type') == 'simple') {
+                if ($item->getProductType() == 'simple') {
                     $itemsData = $item->getData();
                     $itemData = [];
                     foreach ($map['carts']['line_items'] as $element => $value) {
@@ -1033,6 +1024,10 @@ class Data implements DataInterface
                                 $itemData[$element] = $itemsData[$value];
                             }
                         }
+                    }
+                    $parentItem = $item->getParentItem();
+                    if($parentItem && $parentItem->getProductType() == Configurable::TYPE_CODE){
+                        $itemData['price'] = $parentItem->getPrice();
                     }
                     $itemArray[] = $itemData;
                 }
@@ -1241,7 +1236,7 @@ class Data implements DataInterface
      */
     public function getVersion()
     {
-        return '2.2.16';
+        return '2.2.17';
     }
 
     /**

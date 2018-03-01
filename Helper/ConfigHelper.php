@@ -19,11 +19,13 @@ class ConfigHelper
     const WEBHOOKS_ENABLED = 'remarkety/mgconnector/webhooks';
     const PRODUCT_WEBHOOKS_DISABLED = 'remarkety/mgconnector/product_webhooks_disable';
     const FORCE_ASYNC_WEBHOOKS = 'remarkety/mgconnector/forceasyncwebhooks';
+    const USE_CATEGORIES_FULL_PATH = 'remarkety/mgconnector/categories_full_path';
 
     protected $_activeStore;
     protected $_scopeConfig;
     protected $configResource;
     protected $cacheTypeList;
+    private $_useCategoriesFullPath = null;
 
     public function __construct(
         ScopeConfigInterface $scopeConfig,
@@ -81,6 +83,24 @@ class ConfigHelper
         $this->configResource->saveConfig(
             self::WEBHOOKS_ENABLED,
             $enabled ? 1 : 0,
+            ScopeConfigInterface::SCOPE_TYPE_DEFAULT,
+            0
+        );
+        $this->cacheTypeList->cleanType('config');
+    }
+
+    public function useCategoriesFullPath(){
+        if(is_null($this->_useCategoriesFullPath)) {
+            $fullPath = $this->_scopeConfig->getValue(self::USE_CATEGORIES_FULL_PATH);
+            $this->_useCategoriesFullPath = !empty($fullPath);
+        }
+        return $this->_useCategoriesFullPath;
+    }
+
+    public function setCategoriesFullPath($value = true){
+        $this->configResource->saveConfig(
+            self::USE_CATEGORIES_FULL_PATH,
+            $value ? 1 : 0,
             ScopeConfigInterface::SCOPE_TYPE_DEFAULT,
             0
         );
