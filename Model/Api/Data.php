@@ -5,6 +5,7 @@ use Magento\Catalog\Model\Category;
 use Magento\Framework\App\Cache\TypeListInterface;
 use Magento\Framework\DataObject;
 use Magento\Quote\Model\Quote\Item;
+use Magento\Sales\Model\Order;
 use Remarkety\Mgconnector\Api\Data\QueueInterface;
 use Remarkety\Mgconnector\Api\DataInterface;
 use \Magento\Catalog\Model\ProductFactory;
@@ -189,20 +190,11 @@ class Data implements DataInterface
             "fulfillment_status",
             "id" => 'entity_id',
             "line_items" => [
-                "product_id" => 'product_id',
-                "quantity" => 'qty_ordered',
-                "sku" => 'sku',
-                "name" => 'name',
-                "title",
-                "variant_title",
-                "vendor",
-                "price" => 'price',
-                "taxable",
-                "tax_lines" => [
-                    "title",
-                    "price",
-                    "rate"
-                ]
+                "product_id" => "product_id",
+                "quantity" => "qty_ordered",
+                "sku" => "sku",
+                "name" => "name",
+                "price" => "price"
             ],
             "note" => 'customer_note',
             "shipping_lines" => [
@@ -220,13 +212,12 @@ class Data implements DataInterface
                 "price",
                 "rate"
             ],
-            "taxes_included" => 'base_tax_amount',
+            "total_tax" => "tax_amount",
             "test",
             "total_discounts" => 'base_discount_amount',
             "total_line_items_price",
             "total_price" => 'grand_total',
             "total_shipping" => 'shipping_amount',
-            "total_tax",
             "total_weight" => 'weight',
             "updated_at" => 'updated_at'
         ],
@@ -254,16 +245,9 @@ class Data implements DataInterface
                 "quantity" => 'qty',
                 "sku" => 'sku',
                 "name" => 'name',
-                "title",
                 "variant_title",
-                "vendor",
                 "price" => 'price',
-                "taxable",
-                "tax_lines" => [
-                    "title",
-                    "price",
-                    "rate"
-                ]
+                "tax_amount" => "tax_amount"
             ],
             "note" => 'customer_note',
             "shipping_address" => [
@@ -758,6 +742,9 @@ class Data implements DataInterface
         $pageNumber = null;
         $pageSize = null;
 
+        /**
+         * @var Order[] $orders
+         */
         $orders = $this->_salesOrderResourceCollectionFactory->create();
 
         $orders->addFieldToFilter('main_table.store_id', array('eq' => $mage_store_id));
@@ -807,8 +794,6 @@ class Data implements DataInterface
         $map = $this->response_mask;
         $ordersArray = [];
         foreach ($orders as $order) {
-            $items = $order->getAllItems();
-
             $ord = [];
             $orderDetails = $order->getData();
             foreach ($map['orders'] as $element => $value) {
@@ -847,6 +832,10 @@ class Data implements DataInterface
                 $ord['customer']['default_address']['phone'] = $billingAddressData->getTelephone();
             }
             $ord['line_items'] = [];
+            /**
+             * @var Order\Item[] $items
+             */
+            $items = $order->getAllVisibleItems();
             foreach($items as $item){
                 $newItem = [];
                 $itemElement = $item->getData();
@@ -857,6 +846,13 @@ class Data implements DataInterface
                         }
                     }
                 }
+                $totalTaxAmount = (float)$item->getTaxAmount();
+                $qty = (int)$item->getQtyOrdered();
+                if($totalTaxAmount > 0 && $qty > 0){
+                    $newItem['tax_amount'] = ($totalTaxAmount / $qty);
+                }
+                $newItem['line_total_incl_tax'] = $item->getRowTotalInclTax();
+                $newItem['line_total_tax'] = $item->getTaxAmount();
                 $ord['line_items'][] = $newItem;
             }
             $ord['status']= $this->getStoreOrderStatusesByCode($orderDetails['status']);
@@ -940,6 +936,9 @@ class Data implements DataInterface
         $pageNumber = null;
         $pageSize = null;
 
+        /**
+         * @var Quote[] $quotes
+         */
         $quotes = $this->quoteFactory->create()->getCollection();
         $quotes->addFieldToFilter('is_active' , 1);
 
@@ -1009,11 +1008,13 @@ class Data implements DataInterface
                     }
                 }
             }
+            $quoteArray['total_shipping'] = (float)$defaultShipping['shipping_amount'];
             $itemsCollection = $quote->getItemsCollection();
             $customer = $this->mapCustomer($quote->getCustomerId());
             $quoteArray['customer'] = $customer;
 
             $itemArray = [];
+            $cartTotalTax = 0;
             foreach ($itemsCollection as $item) {
                 if ($item->getProductType() == 'simple') {
                     $itemsData = $item->getData();
@@ -1025,13 +1026,29 @@ class Data implements DataInterface
                             }
                         }
                     }
+
                     $parentItem = $item->getParentItem();
                     if($parentItem && $parentItem->getProductType() == Configurable::TYPE_CODE){
                         $itemData['price'] = $parentItem->getPrice();
+                        $qty = (float)$parentItem->getQty();
+                        $totalTax = (float)$parentItem['tax_amount'];
+                    } else {
+                        $qty = (float)$item->getQty();
+                        $totalTax = (float)$itemData['tax_amount'];
                     }
+                    $cartTotalTax += $totalTax;
+                    $itemData['quantity'] = $qty;
+
+                    if(!empty($totalTax) && $qty > 0){
+                        $taxAmount = $totalTax / $qty;
+                    } else {
+                        $taxAmount = 0;
+                    }
+                    $itemData['tax_amount'] = $taxAmount;
                     $itemArray[] = $itemData;
                 }
             }
+            $quoteArray['total_tax'] = $cartTotalTax;
             $quoteArray['line_items'] = $itemArray;
             $quoteCartArray[] = $quoteArray;
         }
@@ -1236,7 +1253,7 @@ class Data implements DataInterface
      */
     public function getVersion()
     {
-        return '2.2.18';
+        return '2.2.19';
     }
 
     /**
