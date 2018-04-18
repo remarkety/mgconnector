@@ -185,7 +185,7 @@ class Data implements DataInterface
                 "title",
                 "verified_email"
             ],
-            "discount_codes" => 'coupon_code',
+            "coupon_code" => 'coupon_code',
             "email" => 'customer_email',
             "fulfillment_status",
             "id" => 'entity_id',
@@ -213,8 +213,7 @@ class Data implements DataInterface
                 "rate"
             ],
             "total_tax" => "tax_amount",
-            "test",
-            "total_discounts" => 'base_discount_amount',
+            "order_discount" => 'discount_amount',
             "total_line_items_price",
             "total_price" => 'grand_total',
             "total_shipping" => 'shipping_amount',
@@ -222,7 +221,6 @@ class Data implements DataInterface
             "updated_at" => 'updated_at'
         ],
         "carts" => [
-
             "abandoned_checkout_url",
             "billing_address" => [
                 "country" => 'country_id',
@@ -236,7 +234,7 @@ class Data implements DataInterface
             "cart_token",
             "created_at" => "created_at",
             "currency" => "global_currency_code",
-            "discount_codes" => 'coupon_code',
+            "coupon_code" => "coupon_code",
             "email" => 'customer_email',
             "fulfillment_status",
             "id" => 'entity_id',
@@ -259,10 +257,6 @@ class Data implements DataInterface
             ],
             "shipping_lines" => 'shipping_method',
             "subtotal_price" => 'subtotal',
-            "tax_lines",
-            "taxes_included",
-            "total_discounts",
-            "total_line_items_price",
             "total_price" => 'grand_total',
             "total_shipping",
             "total_tax" => 'tax_amount',
@@ -798,18 +792,7 @@ class Data implements DataInterface
             $orderDetails = $order->getData();
             foreach ($map['orders'] as $element => $value) {
                 if (!is_array($value)) {
-                    if ($value == 'coupon_code') {
-                        if ($orderDetails['coupon_code']) {
-                            $ord['discount_codes'] = [
-                                [
-                                    'code' => $orderDetails['coupon_code'],
-                                    'amount' => isset($orderDetails['discount_amount']) ? $orderDetails['discount_amount'] : 0
-                                ]
-                            ];
-                        } else {
-                            $ord['discount_codes'] = [];
-                        }
-                    } elseif (array_key_exists($value, $orderDetails)) {
+                    if (array_key_exists($value, $orderDetails)) {
                         $ord[$element] = $orderDetails[$value];
                     }
                 }
@@ -941,6 +924,7 @@ class Data implements DataInterface
          */
         $quotes = $this->quoteFactory->create()->getCollection();
         $quotes->addFieldToFilter('is_active' , 1);
+        $quotes->addFieldToFilter('customer_email' , ['neq' => null]);
 
         if ($mage_store_id != null) {
             $quotes->addFieldToFilter('store_id', array('eq' => $mage_store_id));
@@ -990,6 +974,10 @@ class Data implements DataInterface
                     }
                 }
             }
+
+            $subtotal = $quote->getSubtotal();
+            $subtotal_with_discount = $quote->getSubtotalWithDiscount();
+            $quoteArray['order_discount'] = $subtotal-$subtotal_with_discount;
 
             $defaultBilling = $quote->getBillingAddress()->getData();
             $defaultShipping = $quote->getShippingAddress()->getData();
@@ -1253,7 +1241,7 @@ class Data implements DataInterface
      */
     public function getVersion()
     {
-        return '2.2.19';
+        return '2.2.20';
     }
 
     /**
