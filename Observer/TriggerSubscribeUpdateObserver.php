@@ -71,6 +71,7 @@ class TriggerSubscribeUpdateObserver extends EventMethods implements ObserverInt
      */
     public function execute(\Magento\Framework\Event\Observer $observer){
         try {
+            $this->startTiming(self::class);
             /**
              * @var $subscriber Subscriber
              */
@@ -105,7 +106,7 @@ class TriggerSubscribeUpdateObserver extends EventMethods implements ObserverInt
                 }
 
                 $data = $this->_prepareCustomerSubscribtionUpdateData($subscriber, $this->remoteAddress->getRemoteAddress());
-                $this->makeRequest($eventType, $data, $subscriber->getStoreId());
+                $this->makeRequest($eventType, $data, $subscriber->getStoreId(), 0, null, $this->_forceSyncCustomersWebhooks);
 
                 if($this->_store->getId() != 0){
                     $email = $subscriber->getSubscriberEmail();
@@ -121,6 +122,7 @@ class TriggerSubscribeUpdateObserver extends EventMethods implements ObserverInt
                     }
                 }
                 $this->_coreRegistry->register('remarkety_subscriber_updated_' . $subscriber->getSubscriberEmail(), 1, true);
+                $this->endTiming(self::class);
             }
         } catch (\Exception $ex){
             $this->logError($ex);

@@ -9,6 +9,7 @@ class TriggerSubscribeDeleteObserver extends EventMethods implements ObserverInt
     public function execute(\Magento\Framework\Event\Observer $observer)
     {
         try {
+            $this->startTiming(self::class);
             $subscriber = $observer->getEvent()->getSubscriber();
             $regKey = 'remarkety_subscriber_deleted_' . $subscriber->getEmail();
             if (!$this->_coreRegistry->registry($regKey) && $subscriber->getId()) {
@@ -19,6 +20,7 @@ class TriggerSubscribeDeleteObserver extends EventMethods implements ObserverInt
                 );
                 $this->_coreRegistry->register($regKey, 1, true);
             }
+            $this->endTiming(self::class);
         } catch (\Exception $ex){
             $this->logError($ex);
         }

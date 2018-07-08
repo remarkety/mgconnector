@@ -23,7 +23,7 @@ class TriggerProductUpdated extends EventMethods implements ObserverInterface
     public function execute(Observer $observer)
     {
         try {
-
+            $this->startTiming(self::class);
             if(!$this->shouldSendProductUpdates()){
                 return;
             }
@@ -49,6 +49,7 @@ class TriggerProductUpdated extends EventMethods implements ObserverInterface
                     }
                 }
             }
+            $this->endTiming(self::class);
         } catch (\Exception $ex){
             $this->logError($ex);
         }

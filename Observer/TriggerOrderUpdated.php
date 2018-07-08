@@ -24,6 +24,7 @@ class TriggerOrderUpdated extends EventMethods implements ObserverInterface
     public function execute(\Magento\Framework\Event\Observer $observer)
     {
         try {
+            $this->startTiming(self::class);
             $event = $observer->getEvent();
             /**
              * @var $order Order
@@ -39,6 +40,7 @@ class TriggerOrderUpdated extends EventMethods implements ObserverInterface
                 $data = $this->orderSerializer->serialize($order);
                 $this->makeRequest($eventType, $data, $order->getStore()->getId());
             }
+            $this->endTiming(self::class);
         } catch (\Exception $ex){
             $this->logError($ex);
         }

@@ -23,7 +23,7 @@ class Install extends \Magento\Framework\View\Element\Template
 
     protected function _toHtml()
     {
-        $this->setTemplate('a.phtml');
+        $this->setTemplate('index.phtml');
 
         return parent::_toHtml();
     }

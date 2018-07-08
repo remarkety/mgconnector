@@ -72,7 +72,11 @@ class EventMethods {
     private $_countEvents = 0;
 
     private $_forceAsyncWebhooks = false;
+    protected $_forceSyncCustomersWebhooks = false;
+    private $_enableWebhooksTiming = false;
+    private $_webhooksTimingLogger;
 
+    private $_timings = [];
     public function __construct(
         LoggerInterface $logger,
         Registry $coreRegistry,
@@ -120,6 +124,18 @@ class EventMethods {
             $this->_intervals = explode(',', $intervals);
         }
         $this->_forceAsyncWebhooks = $configHelper->forceAsyncWebhooks();
+        $this->_forceSyncCustomersWebhooks = $configHelper->forceSyncCustomersWebhooks();
+        $this->_enableWebhooksTiming = $configHelper->shouldLogWebhooksTiming();
+
+        try {
+            if($this->_enableWebhooksTiming) {
+                $writer = new \Zend\Log\Writer\Stream(BP . '/var/log/remarkety_webhooks_timing.log');
+                $this->_webhooksTimingLogger = new \Zend\Log\Logger();
+                $this->_webhooksTimingLogger->addWriter($writer);
+            }
+        } catch (\Exception $ex){
+            $this->logError($ex);
+        }
     }
 
     protected function isWebhooksEnabled($store){
@@ -142,7 +158,8 @@ class EventMethods {
             }
             $data = $this->customerSerializer->serialize($customer);
 
-            $this->makeRequest($eventType, $data, $customer->getStoreId());
+            $forceSyncRequest = $isNew && $this->_forceSyncCustomersWebhooks;
+            $this->makeRequest($eventType, $data, $customer->getStoreId(), 0, null, $forceSyncRequest);
         }
         return $this;
     }
@@ -192,9 +209,10 @@ class EventMethods {
         return true;
     }
 
-    public function makeRequest($eventType, $payload, $storeId = null, $attempt = 0, $queueId = null)
+    public function makeRequest($eventType, $payload, $storeId = null, $attempt = 0, $queueId = null, $forceSync = false)
     {
         try {
+            $this->startTiming('makeRequest_'.$eventType);
             if(!$this->shouldSendEvent($eventType, $payload, $storeId)){
                 //safety for not sending the same event on same event
                 $this->logger->debug('Event already sent ' . $eventType);
@@ -209,7 +227,7 @@ class EventMethods {
             $client = new \Zend_Http_Client($url, $this->_getRequestConfig($eventType));
             $payload = array_merge($payload, $this->_getPayloadBase($eventType));
 
-            if(empty($queueId) && ($this->_forceAsyncWebhooks || $this->_countEvents >= 3)){
+            if(empty($queueId) && (($this->_forceAsyncWebhooks && !$forceSync) || $this->_countEvents >= 3)){
                 //batch update, push to queue
                 $this->_queueRequest($eventType, $payload, 0, null, $storeId);
                 return true;
@@ -225,6 +243,7 @@ class EventMethods {
 
             switch ($response->getStatus()) {
                 case '200':
+                    $this->endTiming('makeRequest_'.$eventType);
                     return true;
                 case '400':
                     throw new \Exception('Request has been malformed.');
@@ -238,7 +257,7 @@ class EventMethods {
             $err = $e->getCode() . ' - ' . $e->getMessage();
             $this->_queueRequest($eventType, $payload, $attempt+1, $queueId, $storeId, $err);
         }
-
+        $this->endTiming('makeRequest_'.$eventType);
         return false;
     }
 
@@ -337,5 +356,27 @@ class EventMethods {
             'file' => $exception->getFile(),
             'trace' => $exception->getTraceAsString()
         ]);
+    }
+
+    protected function startTiming($eventName){
+        if(!$this->_enableWebhooksTiming)
+            return;
+        $eventName = trim(strtolower($eventName));
+        $this->_timings[$eventName] = microtime(true);
+    }
+
+    protected function endTiming($eventName)
+    {
+        if(!$this->_enableWebhooksTiming || !$this->_webhooksTimingLogger)
+            return;
+        $eventName = trim(strtolower($eventName));
+        if(!isset($this->_timings[$eventName]))
+            return;
+        $ended = microtime(true);
+        $started = $this->_timings[$eventName];
+        unset($this->_timings[$eventName]);
+        $totalTime = ($ended - $started)*1000;
+
+        $this->_webhooksTimingLogger->info(";" . $eventName . ";" . $totalTime);
     }
 }

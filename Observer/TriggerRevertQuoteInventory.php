@@ -17,7 +17,7 @@ class TriggerRevertQuoteInventory extends EventMethods implements ObserverInterf
     public function execute(\Magento\Framework\Event\Observer $observer)
     {
         try {
-
+            $this->startTiming(self::class);
             if(!$this->shouldSendProductUpdates()){
                 return;
             }
@@ -40,6 +40,7 @@ class TriggerRevertQuoteInventory extends EventMethods implements ObserverInterf
                     }
                 }
             }
+            $this->endTiming(self::class);
         } catch (\Exception $ex){
             $this->logError($ex);
         }

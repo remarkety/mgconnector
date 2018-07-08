@@ -20,6 +20,11 @@ class ConfigHelper
     const PRODUCT_WEBHOOKS_DISABLED = 'remarkety/mgconnector/product_webhooks_disable';
     const FORCE_ASYNC_WEBHOOKS = 'remarkety/mgconnector/forceasyncwebhooks';
     const USE_CATEGORIES_FULL_PATH = 'remarkety/mgconnector/categories_full_path';
+    const ENABLE_WEBHOOKS_TIMER = 'remarkety/mgconnector/enable_webhooks_timer';
+
+    const ASYNC_MODE_OFF = 0;
+    const ASYNC_MODE_ON = 1;
+    const ASYNC_MODE_ON_CUSTOMERS_SYNC = 2;
 
     protected $_activeStore;
     protected $_scopeConfig;
@@ -71,6 +76,22 @@ class ConfigHelper
     public function forceAsyncWebhooks(){
         $async = $this->_scopeConfig->getValue(self::FORCE_ASYNC_WEBHOOKS);
         if(!empty($async)){
+            return true;
+        }
+        return false;
+    }
+
+    public function forceSyncCustomersWebhooks(){
+        $async = $this->_scopeConfig->getValue(self::FORCE_ASYNC_WEBHOOKS);
+        if(!empty($async) && $async == self::ASYNC_MODE_ON_CUSTOMERS_SYNC){
+            return true;
+        }
+        return false;
+    }
+
+    public function shouldLogWebhooksTiming(){
+        $enabled = $this->_scopeConfig->getValue(self::ENABLE_WEBHOOKS_TIMER);
+        if(!empty($enabled)){
             return true;
         }
         return false;

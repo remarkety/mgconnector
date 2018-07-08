@@ -17,6 +17,7 @@ class TriggerCustomerAddressUpdateObserver extends EventMethods implements Obser
     public function execute(\Magento\Framework\Event\Observer $observer)
     {
         try {
+            $this->startTiming(self::class);
             if($this->request->getFullActionName() == "customer_account_loginPost"){
                 return $this;
             }
@@ -43,6 +44,7 @@ class TriggerCustomerAddressUpdateObserver extends EventMethods implements Obser
             }
 
             $this->_customerUpdate($customer);
+            $this->endTiming(self::class);
         } catch (\Exception $ex){
             $this->logError($ex);
         }

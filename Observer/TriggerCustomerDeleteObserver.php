@@ -9,6 +9,7 @@ class TriggerCustomerDeleteObserver extends EventMethods implements ObserverInte
 
     public function execute(\Magento\Framework\Event\Observer $observer){
         try {
+            $this->startTiming(self::class);
             /**
              * @var $customer Customer
              */
@@ -24,7 +25,7 @@ class TriggerCustomerDeleteObserver extends EventMethods implements ObserverInte
                     'email' => $customer->getEmail(),
                 ), $store->getId());
             }
-
+            $this->endTiming(self::class);
         } catch (\Exception $ex){
             $this->logError($ex);
         }

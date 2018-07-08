@@ -17,7 +17,7 @@ class TriggerProductBeforeDelete extends EventMethods implements ObserverInterfa
     public function execute(\Magento\Framework\Event\Observer $observer)
     {
         try {
-
+            $this->startTiming(self::class);
             if(!$this->shouldSendProductUpdates()){
                 return;
             }
@@ -33,6 +33,7 @@ class TriggerProductBeforeDelete extends EventMethods implements ObserverInterfa
                     $this->_coreRegistry->register('product_stores_' . $product->getId(), $storeIds);
                 }
             }
+            $this->endTiming(self::class);
         } catch (\Exception $ex){
             $this->logError($ex);
         }

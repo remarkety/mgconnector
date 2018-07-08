@@ -17,7 +17,7 @@ class TriggerSubtractQuoteInventory extends EventMethods implements ObserverInte
     public function execute(\Magento\Framework\Event\Observer $observer)
     {
         try {
-
+            $this->startTiming(self::class);
             if(!$this->shouldSendProductUpdates()){
                 return;
             }
@@ -40,6 +40,7 @@ class TriggerSubtractQuoteInventory extends EventMethods implements ObserverInte
                     }
                 }
             }
+            $this->endTiming(self::class);
         } catch (\Exception $ex){
             $this->logError($ex);
         }

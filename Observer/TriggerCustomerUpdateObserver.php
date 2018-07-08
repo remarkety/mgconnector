@@ -17,6 +17,7 @@ class TriggerCustomerUpdateObserver extends EventMethods implements ObserverInte
     public function execute(\Magento\Framework\Event\Observer $observer)
     {
         try {
+            $this->startTiming(self::class);
             if($this->request->getFullActionName() == "customer_account_loginPost"){
                 return $this;
             }
@@ -50,6 +51,7 @@ class TriggerCustomerUpdateObserver extends EventMethods implements ObserverInte
             }
 
             $this->_customerUpdate($customer, $isNew);
+            $this->endTiming(self::class);
         } catch (\Exception $ex){
             $this->logError($ex);
         }
