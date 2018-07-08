@@ -164,15 +164,21 @@ class EventMethods {
         return $this;
     }
 
-    protected function _getRequestConfig($eventType)
+    protected function _getRequestConfig($eventType, $async = false)
     {
-        return array(
+        $config = [
             'adapter' => 'Zend_Http_Client_Adapter_Curl',
-            'curloptions' => array(
-                CURLOPT_HEADER => true,
-                CURLOPT_CONNECTTIMEOUT => self::REMARKETY_TIMEOUT
-            ),
-        );
+            'timeout' => self::REMARKETY_TIMEOUT,
+            'request_timeout' => self::REMARKETY_TIMEOUT,
+            'curloptions' => [
+                CURLOPT_HEADER => true
+            ]
+        ];
+        if($async){
+            $config['timeout'] = 10;
+            $config['request_timeout'] = 10;
+        }
+        return $config;
     }
 
     protected function _getHeaders($eventType,$payload, $storeId = null)
@@ -224,7 +230,6 @@ class EventMethods {
                 $remarketyId = $this->configHelper->getRemarketyPublicId($storeId);
                 $url .= '?storeId=' . $remarketyId;
             }
-            $client = new \Zend_Http_Client($url, $this->_getRequestConfig($eventType));
             $payload = array_merge($payload, $this->_getPayloadBase($eventType));
 
             if(empty($queueId) && (($this->_forceAsyncWebhooks && !$forceSync) || $this->_countEvents >= 3)){
@@ -236,6 +241,8 @@ class EventMethods {
 
             $json = json_encode($payload);
 
+            $isAsync = !is_null($queueId);
+            $client = new \Zend_Http_Client($url, $this->_getRequestConfig($eventType, $isAsync));
             $response = $client
                 ->setHeaders($this->_getHeaders($eventType, $payload, $storeId))
                 ->setRawData($json, 'application/json')
