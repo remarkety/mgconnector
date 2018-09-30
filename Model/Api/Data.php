@@ -645,15 +645,26 @@ class Data implements DataInterface
 
     public function getCustomerAddresses($customer_id){
 
-        $customerAddresses = $this->adressFactory->create()->load($customer_id, 'customer_id')->getData();
-        $addressData = [];
-        foreach ($this->response_mask['customers']['default_address'] as $key => $value) {
-            if (!is_array($value)) {
-                if (array_key_exists($value, $customerAddresses)) {
-                    $addressData[$key] = $customerAddresses[$value];
-                }
-            }
+        /**
+         * @var Address $customerAddresses
+         */
+        $customerAddresses = $this->adressFactory->create()->load($customer_id, 'customer_id');
+        $addressData = null;
+        if($customerAddresses){
+            $countryCode = $customerAddresses->getCountryId();
+            $addressData = [
+                'first_name' => $customerAddresses->getFirstname(),
+                'last_name' => $customerAddresses->getLastname(),
+                'city' => $customerAddresses->getCity(),
+                'street' => implode(PHP_EOL, $customerAddresses->getStreet()),
+                'country_code' => $countryCode,
+                'country' => $customerAddresses->getCountry(),
+                'zip' => $customerAddresses->getPostcode(),
+                'phone' => $customerAddresses->getTelephone(),
+                'region' => $customerAddresses->getRegionCode()
+            ];
         }
+
         return $addressData;
     }
 
@@ -1241,7 +1252,7 @@ class Data implements DataInterface
      */
     public function getVersion()
     {
-        return '2.2.22';
+        return '2.2.23';
     }
 
     /**
