@@ -7,8 +7,8 @@ class Queue extends \Magento\Backend\Block\Widget\Grid\Container
     protected function _construct() {
         $this->_controller = 'adminhtml_queue';
         $this->_blockGroup = 'Remarkety_Mgconnector';
-        $this->removeButton('add_button');
         parent::_construct();
+        $this->removeButton('add');
     }
 
     public function getButtonsHtml($region = null)

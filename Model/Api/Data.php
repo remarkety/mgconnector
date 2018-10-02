@@ -1261,7 +1261,7 @@ class Data implements DataInterface
      */
     public function getVersion()
     {
-        return '2.2.24';
+        return '2.2.25';
     }
 
     /**
