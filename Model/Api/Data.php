@@ -2,6 +2,7 @@
 namespace Remarkety\Mgconnector\Model\Api;
 
 use Magento\Catalog\Model\Category;
+use Magento\Customer\Model\Address;
 use Magento\Framework\App\Cache\TypeListInterface;
 use Magento\Framework\DataObject;
 use Magento\Quote\Model\Quote\Item;
@@ -649,6 +650,14 @@ class Data implements DataInterface
          * @var Address $customerAddresses
          */
         $customerAddresses = $this->adressFactory->create()->load($customer_id, 'customer_id');
+        return $this->getAddressData($customerAddresses);
+    }
+
+    /**
+     * @param Order\Address $customerAddresses
+     * @return array|null
+     */
+    protected function getAddressData($customerAddresses){
         $addressData = null;
         if($customerAddresses){
             $countryCode = $customerAddresses->getCountryId();
@@ -812,18 +821,18 @@ class Data implements DataInterface
             if ($order->getCustomerId()) {
                 $ord['customer'] = $this->getCustomerDataById($order->getCustomerId());
             } else {
+                /**
+                 * @var Order\Address $billingAddressData
+                 */
                 $billingAddressData = $this->getGuestBillingAddressData($order->getBillingAddressId());
+                $address = $this->getAddressData($billingAddressData);
 
                 $ord['customer']['email'] = $billingAddressData->getEmail();
                 $ord['customer']['first_name'] = $billingAddressData->getFirstname();
                 $ord['customer']['last_name'] = $billingAddressData->getLastname();
                 $ord['customer']['title'] = $billingAddressData->getPrefix();
 
-                $ord['customer']['default_address']['country'] = $billingAddressData->getCountryId();
-                $ord['customer']['default_address']['country_code'] = $billingAddressData->getCountryId();
-                $ord['customer']['default_address']['province_code'] = $billingAddressData->getRegionId();
-                $ord['customer']['default_address']['zip'] = $billingAddressData->getPostcode();
-                $ord['customer']['default_address']['phone'] = $billingAddressData->getTelephone();
+                $ord['customer']['default_address'] = $address;
             }
             $ord['line_items'] = [];
             /**
@@ -1252,7 +1261,7 @@ class Data implements DataInterface
      */
     public function getVersion()
     {
-        return '2.2.23';
+        return '2.2.24';
     }
 
     /**
