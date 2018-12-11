@@ -34,6 +34,7 @@ use Remarkety\Mgconnector\Helper\Data as DataHelper;
 use Magento\ConfigurableProduct\Model\Product\Type\Configurable;
 use Magento\Catalog\Model\ProductRepository;
 use Magento\CatalogInventory\Api\StockRegistryInterface;
+use Remarkety\Mgconnector\Helper\Recovery;
 
 class Data implements DataInterface
 {
@@ -69,6 +70,7 @@ class Data implements DataInterface
     protected $dataHelper;
     protected $productRepository;
     protected $stockRegistry;
+    protected $recoveryHelper;
 
     protected $response_mask = [
         'products' => [
@@ -299,7 +301,8 @@ class Data implements DataInterface
                                 EventMethods $eventMethods,
                                 DataHelper $dataHelper,
                                 ProductRepository $productRepository,
-                                StockRegistryInterface $stockRegistry
+                                StockRegistryInterface $stockRegistry,
+                                Recovery $recoveryHelper
     )
     {
         $this->dataHelper = $dataHelper;
@@ -336,6 +339,7 @@ class Data implements DataInterface
         $this->couponFactory = $couponFactory;
         $this->stockRegistry = $stockRegistry;
         $this->productRepository = $productRepository;
+        $this->recoveryHelper = $recoveryHelper;
     }
 
     /**
@@ -1058,6 +1062,7 @@ class Data implements DataInterface
             }
             $quoteArray['total_tax'] = $cartTotalTax;
             $quoteArray['line_items'] = $itemArray;
+            $quoteArray['abandoned_checkout_url'] = $this->recoveryHelper->getCartRecoveryURL($quoteData['entity_id'], $mage_store_id);
             $quoteCartArray[] = $quoteArray;
         }
         $object = new DataObject();
@@ -1261,7 +1266,7 @@ class Data implements DataInterface
      */
     public function getVersion()
     {
-        return '2.2.25';
+        return '2.2.26';
     }
 
     /**
