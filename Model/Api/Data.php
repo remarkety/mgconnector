@@ -35,6 +35,7 @@ use Magento\ConfigurableProduct\Model\Product\Type\Configurable;
 use Magento\Catalog\Model\ProductRepository;
 use Magento\CatalogInventory\Api\StockRegistryInterface;
 use Remarkety\Mgconnector\Helper\Recovery;
+use Remarkety\Mgconnector\Serializer\AddressSerializer;
 
 class Data implements DataInterface
 {
@@ -71,6 +72,7 @@ class Data implements DataInterface
     protected $productRepository;
     protected $stockRegistry;
     protected $recoveryHelper;
+    protected $addressSerializer;
 
     protected $response_mask = [
         'products' => [
@@ -302,7 +304,8 @@ class Data implements DataInterface
                                 DataHelper $dataHelper,
                                 ProductRepository $productRepository,
                                 StockRegistryInterface $stockRegistry,
-                                Recovery $recoveryHelper
+                                Recovery $recoveryHelper,
+                                AddressSerializer $addressSerializer
     )
     {
         $this->dataHelper = $dataHelper;
@@ -340,6 +343,7 @@ class Data implements DataInterface
         $this->stockRegistry = $stockRegistry;
         $this->productRepository = $productRepository;
         $this->recoveryHelper = $recoveryHelper;
+        $this->addressSerializer = $addressSerializer;
     }
 
     /**
@@ -628,7 +632,7 @@ class Data implements DataInterface
                     }
                 }
             }
-            $customers['default_address'] = $this->getCustomerAddresses($customer->getId());
+            $customers['default_address'] = $this->getCustomerAddresses($customer);
             $group = $this->customerGroupFactory->load($customer->getGroupId());
             $customers['groups'] = array();
             $customers['groups'][] = [
@@ -648,13 +652,29 @@ class Data implements DataInterface
     }
 
 
-    public function getCustomerAddresses($customer_id){
+    public function getCustomerAddresses($customer){
 
-        /**
-         * @var Address $customerAddresses
-         */
-        $customerAddresses = $this->adressFactory->create()->load($customer_id, 'customer_id');
-        return $this->getAddressData($customerAddresses);
+        $addresses = $customer->getAddresses();
+        $address = null;
+        if(!empty($addresses)){
+            $billingAddressId = $customer->getDefaultBilling();
+            $shippingAddressId = $customer->getDefaultShipping();
+            if($shippingAddressId) {
+                if (array_key_exists($shippingAddressId, $addresses)) {
+                    $address = $addresses[$shippingAddressId];
+                }
+            }
+            if(empty($address) && $billingAddressId) {
+                if (array_key_exists($billingAddressId, $addresses)) {
+                    $address = $addresses[$billingAddressId];
+                }
+            }
+            if(empty($address)){
+                $address = array_pop($addresses);
+            }
+        }
+
+        return $address ? $this->addressSerializer->serialize($address) : null;
     }
 
     /**
@@ -709,7 +729,7 @@ class Data implements DataInterface
                 }
             }
         }
-        $customers['default_address'] = $this->getCustomerAddresses($customer_id);
+        $customers['default_address'] = $this->getCustomerAddresses($customerData);
         return $customers;
     }
 
@@ -1266,7 +1286,7 @@ class Data implements DataInterface
      */
     public function getVersion()
     {
-        return '2.2.26';
+        return '2.2.27';
     }
 
     /**
