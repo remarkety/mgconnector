@@ -71,7 +71,7 @@ class EventMethods {
 
     private $_countEvents = 0;
 
-    private $_forceAsyncWebhooks = false;
+    private $_forceSyncWebhooks = false;
     protected $_forceSyncCustomersWebhooks = false;
     private $_enableWebhooksTiming = false;
     private $_webhooksTimingLogger;
@@ -123,7 +123,7 @@ class EventMethods {
         } else {
             $this->_intervals = explode(',', $intervals);
         }
-        $this->_forceAsyncWebhooks = $configHelper->forceAsyncWebhooks();
+        $this->_forceSyncWebhooks = $configHelper->forceSyncWebhooks();
         $this->_forceSyncCustomersWebhooks = $configHelper->forceSyncCustomersWebhooks();
         $this->_enableWebhooksTiming = $configHelper->shouldLogWebhooksTiming();
 
@@ -232,7 +232,8 @@ class EventMethods {
             }
             $payload = array_merge($payload, $this->_getPayloadBase($eventType));
 
-            if(empty($queueId) && (($this->_forceAsyncWebhooks && !$forceSync) || $this->_countEvents >= 3)){
+            $sync = $forceSync || ($this->_forceSyncWebhooks && $this->_countEvents < 3);
+            if(empty($queueId) && !$sync){
                 //batch update, push to queue
                 $this->_queueRequest($eventType, $payload, 0, null, $storeId);
                 return true;

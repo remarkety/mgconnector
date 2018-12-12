@@ -30,18 +30,15 @@ class TriggerCustomerAddressUpdateObserver extends EventMethods implements Obser
             $this->customerRegistry->remove($customerId);
             $customer = $this->customerRepository->getById($customerId);
 
-            if($this->_coreRegistry->registry('remarkety_customer_save_observer_executed_'.$customer->getId())) {
+            if($this->_coreRegistry->registry('remarkety_customer_address_updated_'.$customer->getId())) {
                 return $this;
             }
-            $this->_coreRegistry->register('remarkety_customer_save_observer_executed_'.$customer->getId(),true);
 
-            $isDefaultBilling = false;
-            if($customer && $customer->getDefaultBilling() == $address->getId()){
-                $isDefaultBilling = true;
-            }
-            if (!$isDefaultBilling || !$customer->getId()) {
+            $isDefaultAddress = $address->getIsDefaultShipping() || $address->getIsDefaultBilling();
+            if (!$isDefaultAddress || !$customer->getId()) {
                 return $this;
             }
+            $this->_coreRegistry->register('remarkety_customer_address_updated_'.$customer->getId(),true);
 
             $this->_customerUpdate($customer);
             $this->endTiming(self::class);
