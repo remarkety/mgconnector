@@ -5,6 +5,7 @@ namespace Remarkety\Mgconnector\Serializer;
 use Magento\Customer\Model\ResourceModel\CustomerRepository;
 use Magento\Newsletter\Model\Subscriber;
 use Magento\Sales\Model\Order\Shipment;
+use Magento\ConfigurableProduct\Model\Product\Type\Configurable;
 
 class OrderSerializer
 {
@@ -53,12 +54,29 @@ class OrderSerializer
         /**
          * @var $items \Magento\Sales\Model\Order\Item[]
          */
-        $items = $order->getAllVisibleItems();
+        $items = $order->getAllItems();
         $line_items = [];
         foreach($items as $item){
+            if ($item->getProductType() === Configurable::TYPE_CODE) {
+                continue;
+            }
+
+            $parentItem = $item->getParentItem();
+            if($parentItem && $parentItem->getProductType() == Configurable::TYPE_CODE){
+                $price = (float)$parentItem->getPrice();
+                $lineQty = (float)$parentItem->getQtyOrdered();
+                $lineTax = (float)$parentItem->getTaxAmount();
+                $quantity_refunded = $parentItem->getQtyRefunded();
+                $quantity_shipped = $parentItem->getQtyShipped();
+            } else {
+                $price = (float)$item->getPrice();
+                $lineQty = (float)$item->getQtyOrdered();
+                $lineTax = (float)$item->getTaxAmount();
+                $quantity_refunded = $item->getQtyRefunded();
+                $quantity_shipped = $item->getQtyShipped();
+            }
+
             $product = $item->getProduct();
-            $lineTax = (float)$item->getTaxAmount();
-            $lineQty = (float)$item->getQtyOrdered();
             if($lineQty > 0 && $lineTax > 0){
                 $itemTax = $lineTax / $lineQty;
             } else {
@@ -69,11 +87,11 @@ class OrderSerializer
                 'product_id' => $item->getProductId(),
                 'sku' => $item->getSku(),
                 'quantity' => $lineQty,
-                'quantity_refunded' => $item->getQtyRefunded(),
-                'quantity_shipped' => $item->getQtyShipped(),
+                'quantity_refunded' => $quantity_refunded,
+                'quantity_shipped' => $quantity_shipped,
                 'name' => $item->getName(),
                 'title' => empty($product) ? $item->getName() : $product->getName(),
-                'price' => (float)$item->getPrice(),
+                'price' => $price,
                 'tax_amount' => $itemTax,
                 'url' => empty($product) ? null : $product->getProductUrl(),
                 'images' => empty($product) ? [] : $this->remarketyHelper->getMediaGalleryImages($product)
@@ -151,6 +169,7 @@ class OrderSerializer
             'payment_method' => $paymentMethodTitle,
             'note' => $order->getCustomerNote(),
             'status' => $status,
+            'state' => $order->getState(),
             'subtotal_price' => (float)$order->getSubtotal(),
             'total_discounts' => (float)$order->getDiscountAmount(),
             'total_price' => (float)$order->getGrandTotal(),

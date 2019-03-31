@@ -862,8 +862,11 @@ class Data implements DataInterface
             /**
              * @var Order\Item[] $items
              */
-            $items = $order->getAllVisibleItems();
+            $items = $order->getAllItems();
             foreach($items as $item){
+                if ($item->getProductType() === Configurable::TYPE_CODE) {
+                    continue;
+                }
                 $newItem = [];
                 $itemElement = $item->getData();
                 foreach ($map['orders']['line_items'] as $element => $value) {
@@ -873,16 +876,31 @@ class Data implements DataInterface
                         }
                     }
                 }
-                $totalTaxAmount = (float)$item->getTaxAmount();
-                $qty = (int)$item->getQtyOrdered();
-                if($totalTaxAmount > 0 && $qty > 0){
-                    $newItem['tax_amount'] = ($totalTaxAmount / $qty);
+
+                $parentItem = $item->getParentItem();
+                if($parentItem && $parentItem->getProductType() == Configurable::TYPE_CODE){
+                    $price = (float)$parentItem->getPrice();
+                    $qty = (float)$parentItem->getQtyOrdered();
+                    $totalTax = (float)$parentItem->getTaxAmount();
+                    $total_with_tax = (float)$parentItem->getRowTotalInclTax();
+                } else {
+                    $price = (float)$item->getPrice();
+                    $qty = (float)$item->getQtyOrdered();
+                    $totalTax = (float)$item->getTaxAmount();
+                    $total_with_tax = (float)$item->getRowTotalInclTax();
                 }
-                $newItem['line_total_incl_tax'] = $item->getRowTotalInclTax();
-                $newItem['line_total_tax'] = $item->getTaxAmount();
+
+                $newItem['price'] = $price;
+                $newItem['quantity'] = $qty;
+                if($totalTax > 0 && $qty > 0){
+                    $newItem['tax_amount'] = ($totalTax / $qty);
+                }
+                $newItem['line_total_incl_tax'] = $total_with_tax;
+                $newItem['line_total_tax'] = $totalTax;
                 $ord['line_items'][] = $newItem;
             }
             $ord['status']= $this->getStoreOrderStatusesByCode($orderDetails['status']);
+            $ord['state']= $order->getState();
             $ordersArray[]= $ord;
         }
 
@@ -1048,37 +1066,38 @@ class Data implements DataInterface
             $itemArray = [];
             $cartTotalTax = 0;
             foreach ($itemsCollection as $item) {
-                if ($item->getProductType() == 'simple') {
-                    $itemsData = $item->getData();
-                    $itemData = [];
-                    foreach ($map['carts']['line_items'] as $element => $value) {
-                        if (!is_array($value)) {
-                            if (array_key_exists($value, $itemsData)) {
-                                $itemData[$element] = $itemsData[$value];
-                            }
+                if ($item->getProductType() === Configurable::TYPE_CODE) {
+                    continue;
+                }
+                $itemsData = $item->getData();
+                $itemData = [];
+                foreach ($map['carts']['line_items'] as $element => $value) {
+                    if (!is_array($value)) {
+                        if (array_key_exists($value, $itemsData)) {
+                            $itemData[$element] = $itemsData[$value];
                         }
                     }
-
-                    $parentItem = $item->getParentItem();
-                    if($parentItem && $parentItem->getProductType() == Configurable::TYPE_CODE){
-                        $itemData['price'] = $parentItem->getPrice();
-                        $qty = (float)$parentItem->getQty();
-                        $totalTax = (float)$parentItem['tax_amount'];
-                    } else {
-                        $qty = (float)$item->getQty();
-                        $totalTax = (float)$itemData['tax_amount'];
-                    }
-                    $cartTotalTax += $totalTax;
-                    $itemData['quantity'] = $qty;
-
-                    if(!empty($totalTax) && $qty > 0){
-                        $taxAmount = $totalTax / $qty;
-                    } else {
-                        $taxAmount = 0;
-                    }
-                    $itemData['tax_amount'] = $taxAmount;
-                    $itemArray[] = $itemData;
                 }
+
+                $parentItem = $item->getParentItem();
+                if($parentItem && $parentItem->getProductType() == Configurable::TYPE_CODE){
+                    $itemData['price'] = $parentItem->getPrice();
+                    $qty = (float)$parentItem->getQty();
+                    $totalTax = (float)$parentItem['tax_amount'];
+                } else {
+                    $qty = (float)$item->getQty();
+                    $totalTax = (float)$itemData['tax_amount'];
+                }
+                $cartTotalTax += $totalTax;
+                $itemData['quantity'] = $qty;
+
+                if(!empty($totalTax) && $qty > 0){
+                    $taxAmount = $totalTax / $qty;
+                } else {
+                    $taxAmount = 0;
+                }
+                $itemData['tax_amount'] = $taxAmount;
+                $itemArray[] = $itemData;
             }
             $quoteArray['total_tax'] = $cartTotalTax;
             $quoteArray['line_items'] = $itemArray;
@@ -1286,7 +1305,7 @@ class Data implements DataInterface
      */
     public function getVersion()
     {
-        return '2.2.28';
+        return '2.2.29';
     }
 
     /**
