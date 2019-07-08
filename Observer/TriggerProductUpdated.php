@@ -34,18 +34,23 @@ class TriggerProductUpdated extends EventMethods implements ObserverInterface
              */
             $product = $event->getDataByKey('product');
             $eventType = self::EVENT_PRODUCTS_UPDATED;
-            if($product->isObjectNew()){
-                $eventType = self::EVENT_PRODUCTS_CREATED;
-            }
-            if(!empty($product)) {
-                $storeIds = $product->getStoreIds();
-                if (!empty($storeIds)) {
-                    foreach ($storeIds as $storeId) {
-                        if ($this->isWebhooksEnabled($storeId)) {
-                            $data = $this->productSerializer->serialize($product, $storeId);
 
-                            $this->makeRequest($eventType, $data, $storeId);
-                        }
+            if(!empty($product)) {
+                if ($product->isObjectNew()) {
+                    $eventType = self::EVENT_PRODUCTS_CREATED;
+                }
+                //for multistore id
+                if (empty($product->getStoreId())) {
+                    $storeIds = $product->getStoreIds();
+                } else {
+                    $storeIds = [$product->getStoreId()];
+                }
+
+                foreach ($storeIds as $storeId) {
+                    if ($this->isWebhooksEnabled($storeId)) {
+                        $data = $this->productSerializer->serialize($product, $storeId);
+
+                        $this->makeRequest($eventType, $data, $storeId);
                     }
                 }
             }
