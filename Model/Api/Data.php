@@ -36,9 +36,13 @@ use Magento\Catalog\Model\ProductRepository;
 use Magento\CatalogInventory\Api\StockRegistryInterface;
 use Remarkety\Mgconnector\Helper\Recovery;
 use Remarkety\Mgconnector\Serializer\AddressSerializer;
+use Remarkety\Mgconnector\Serializer\CheckSubscriberTrait;
 
 class Data implements DataInterface
 {
+
+    use CheckSubscriberTrait;
+
     private $_productCache = [];
     protected $eventMethods;
     protected $queueRepo;
@@ -73,6 +77,10 @@ class Data implements DataInterface
     protected $stockRegistry;
     protected $recoveryHelper;
     protected $addressSerializer;
+    /**
+     * @var \Magento\Newsletter\Model\Subscriber
+     */
+    protected $subscriber;
 
     protected $response_mask = [
         'products' => [
@@ -546,7 +554,6 @@ class Data implements DataInterface
     private function loadProduct($product_id){
         return $this->productRepository->getById($product_id);
     }
-
     /**
      * Get All products from catalog
      *
@@ -613,7 +620,6 @@ class Data implements DataInterface
             $customers = [];
             $mappedCustomer = $customer->getData();
 
-            $newsletter = $this->subscriber->load($customer->getId(), 'customer_id');
             foreach ($map['customers'] as $element => $value) {
                 $mappedCustomer['id'] = $customer->getId();
 
@@ -639,11 +645,8 @@ class Data implements DataInterface
                 'id' => $group->getId(),
                 'name' => $group->getCustomerGroupCode(),
             ];
-            if ($newsletter->isSubscribed()) {
-                $customers['accepts_marketing'] = 'true';
-            } else {
-                $customers['accepts_marketing'] = 'false';
-            }
+
+            $customers['accepts_marketing'] = $this->checkSubscriber($customer->getEmail(), $customer->getId());
             $customerArray[] = $customers;
         }
         $object = new DataObject();
@@ -729,6 +732,7 @@ class Data implements DataInterface
                 }
             }
         }
+        $customers['accepts_marketing'] = $this->checkSubscriber($customerData->getEmail(), $customer_id);
         $customers['default_address'] = $this->getCustomerAddresses($customerData);
         return $customers;
     }
@@ -852,6 +856,8 @@ class Data implements DataInterface
                 $address = $this->getAddressData($billingAddressData);
 
                 $ord['customer']['email'] = $billingAddressData->getEmail();
+                $ord['customer']['accepts_marketing'] = $this->checkSubscriber($billingAddressData->getEmail(), null);
+                $ord['customer']['guest'] = true;
                 $ord['customer']['first_name'] = $billingAddressData->getFirstname();
                 $ord['customer']['last_name'] = $billingAddressData->getLastname();
                 $ord['customer']['title'] = $billingAddressData->getPrefix();
@@ -1305,7 +1311,7 @@ class Data implements DataInterface
      */
     public function getVersion()
     {
-        return '2.2.30';
+        return '2.2.40';
     }
 
     /**

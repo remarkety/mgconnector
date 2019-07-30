@@ -10,6 +10,8 @@ use Magento\ConfigurableProduct\Model\Product\Type\Configurable;
 class OrderSerializer
 {
 
+    use CheckSubscriberTrait;
+
     private $customerRepository;
     private $statusCollection;
     private $remarketyHelper;
@@ -107,10 +109,9 @@ class OrderSerializer
             $customer = $this->customerRepository->getById($order->getCustomerId());
             $customerInfo = $this->customerSerializer->serialize($customer);
         } else {
-            $checkSubscriber = $this->subscriber->loadByEmail($order->getCustomerEmail());
             $billingAddress = $order->getBillingAddress();
             $customerInfo = [
-                'accepts_marketing' => $checkSubscriber->isSubscribed(),
+                'accepts_marketing' => $this->checkSubscriber($order->getCustomerEmail(), null),
                 'email' => $order->getCustomerEmail(),
                 'title' => empty($billingAddress) ? null : $billingAddress->getPrefix(),
                 'first_name' => empty($billingAddress) ? null : $billingAddress->getFirstname(),

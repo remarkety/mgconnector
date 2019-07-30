@@ -15,6 +15,7 @@ use Magento\Customer\Api\GroupRepositoryInterface as CustomerGroupRepository;
 
 class CustomerSerializer
 {
+    use CheckSubscriberTrait;
 
     private $subscriber;
     private $addressSerializer;
@@ -35,14 +36,13 @@ class CustomerSerializer
         $this->request = $request;
         $this->logger = $logger;
     }
+
     public function serialize(\Magento\Customer\Api\Data\CustomerInterface $customer){
         if ($this->request->getParam('is_subscribed', false)) {
             $subscribed = true;
         } else {
-            $checkSubscriber = $this->subscriber->loadByEmail($customer->getEmail());
-            $subscribed = $checkSubscriber->isSubscribed();
+            $subscribed = $this->checkSubscriber($customer->getEmail(), $customer->getId());
         }
-
         $created_at = new \DateTime($customer->getCreatedAt());
         $updated_at = new \DateTime($customer->getUpdatedAt());
 
