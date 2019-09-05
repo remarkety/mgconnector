@@ -25,6 +25,9 @@ class AddressSerializer
      * @return array
      */
     public function serialize($address){
+        if(is_null($address)){
+            return null;
+        }
         $countryCode = $address->getCountryId();
         $countryName = null;
         if(!empty($countryCode)){
