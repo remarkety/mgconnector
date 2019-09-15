@@ -22,6 +22,7 @@ class ConfigHelper
     const FORCE_ASYNC_WEBHOOKS = 'remarkety/mgconnector/forceasyncwebhooks';
     const USE_CATEGORIES_FULL_PATH = 'remarkety/mgconnector/categories_full_path';
     const ENABLE_WEBHOOKS_TIMER = 'remarkety/mgconnector/enable_webhooks_timer';
+    const POS_ATTRIBUTE_CODE = 'remarkety/mgconnector/pos_attribute_code';
 
     const ASYNC_MODE_OFF = 0;
     const ASYNC_MODE_ON = 1;
@@ -64,6 +65,27 @@ class ConfigHelper
             return true;
         }
         return false;
+    }
+
+    public function getPOSAttributeCode(){
+        $pos_attribute_code = $this->_scopeConfig->getValue(self::POS_ATTRIBUTE_CODE);
+        if(empty($pos_attribute_code)){
+            return null;
+        }
+        return $pos_attribute_code;
+    }
+
+    /**
+     * @param string $code
+     */
+    public function setPOSAttributeCode($code){
+        $this->configResource->saveConfig(
+            self::POS_ATTRIBUTE_CODE,
+            $code,
+            ScopeConfigInterface::SCOPE_TYPE_DEFAULT,
+            0
+        );
+        $this->cacheTypeList->cleanType('config');
     }
 
     public function shouldSendProductUpdates(){

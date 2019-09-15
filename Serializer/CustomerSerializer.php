@@ -9,9 +9,12 @@
 namespace Remarkety\Mgconnector\Serializer;
 
 
+use Magento\Customer\Model\Data\Customer;
 use Magento\Framework\App\RequestInterface;
 use Magento\Newsletter\Model\Subscriber;
 use Magento\Customer\Api\GroupRepositoryInterface as CustomerGroupRepository;
+use Remarkety\Mgconnector\Helper\ConfigHelper;
+use Remarkety\Mgconnector\Helper\Data;
 
 class CustomerSerializer
 {
@@ -22,12 +25,15 @@ class CustomerSerializer
     private $customerGroupRepository;
     private $request;
     private $logger;
+    private $configHelper;
+    private $pos_id_attribute_code;
     public function __construct(
         Subscriber $subscriber,
         AddressSerializer $addressSerializer,
         CustomerGroupRepository $customerGroupRepository,
         RequestInterface $request,
-        \Psr\Log\LoggerInterface $logger = null
+        \Psr\Log\LoggerInterface $logger = null,
+        ConfigHelper $configHelper
     )
     {
         $this->subscriber = $subscriber;
@@ -35,9 +41,11 @@ class CustomerSerializer
         $this->customerGroupRepository = $customerGroupRepository;
         $this->request = $request;
         $this->logger = $logger;
+        $this->configHelper = $configHelper;
+        $this->pos_id_attribute_code = $configHelper->getPOSAttributeCode();
     }
 
-    public function serialize(\Magento\Customer\Api\Data\CustomerInterface $customer){
+    public function serialize(Customer $customer){
         if ($this->request->getParam('is_subscribed', false)) {
             $subscribed = true;
         } else {
@@ -74,6 +82,9 @@ class CustomerSerializer
         if(!empty($addresses)){
             $address = array_pop($addresses);
         }
+
+        $pos_id = $this->getPosId($customer);
+
         $customerInfo = [
             'id' => (int)$customer->getId(),
             'email' => $customer->getEmail(),
@@ -87,7 +98,8 @@ class CustomerSerializer
             'default_address' => empty($address) ? null : $this->addressSerializer->serialize($address),
             'groups' => $groups,
             'gender' => $gender,
-            'birthdate' => $customer->getDob()
+            'birthdate' => $customer->getDob(),
+            'pos_id' => $pos_id
         ];
 
         return $customerInfo;
@@ -100,5 +112,22 @@ class CustomerSerializer
             'file' => $exception->getFile(),
             'trace' => $exception->getTraceAsString()
         ]);
+    }
+
+    protected function getPosId(Customer $customer){
+        $pos_id = null;
+        if(!empty($this->pos_id_attribute_code)){
+            $attr = $customer->getCustomAttribute($this->pos_id_attribute_code);
+            if($attr){
+                $attr_val = $attr->getValue();
+                $pos_id = !empty($attr_val) ? $attr_val : null;
+            } else {
+                $pos_get_method = "get" . Data::toCamelCase($this->pos_id_attribute_code, true);
+                if(method_exists($customer, $pos_get_method)){
+                    $pos_id = $customer->$pos_get_method();
+                }
+            }
+        }
+        return $pos_id;
     }
 }

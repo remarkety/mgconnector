@@ -19,6 +19,7 @@ use \Magento\Sales\Model\OrderFactory;
 use \Magento\Quote\Model\QuoteFactory;
 use \Magento\Sales\Model\Order\StatusFactory;
 use \Magento\Framework\App\Config\ScopeConfigInterface;
+use Remarkety\Mgconnector\Helper\ConfigHelper;
 use Remarkety\Mgconnector\Model\Api\Data\StoreSettingsContact;
 use Magento\SalesRule\Model\RuleFactory;
 use Magento\SalesRule\Model\CouponFactory;
@@ -278,6 +279,8 @@ class Data implements DataInterface
         ]
     ];
 
+    private $configHelper;
+    private $pos_id_attribute_code;
     public function __construct(ProductFactory $productFactory,
                                 \Remarkety\Mgconnector\Api\Data\ProductCollectionInterfaceFactory $searchResultFactory,
                                 \Remarkety\Mgconnector\Api\Data\CustomerCollectionInterfaceFactory $customerResultFactory,
@@ -313,7 +316,8 @@ class Data implements DataInterface
                                 ProductRepository $productRepository,
                                 StockRegistryInterface $stockRegistry,
                                 Recovery $recoveryHelper,
-                                AddressSerializer $addressSerializer
+                                AddressSerializer $addressSerializer,
+                                ConfigHelper $configHelper
     )
     {
         $this->dataHelper = $dataHelper;
@@ -352,6 +356,8 @@ class Data implements DataInterface
         $this->productRepository = $productRepository;
         $this->recoveryHelper = $recoveryHelper;
         $this->addressSerializer = $addressSerializer;
+        $this->configHelper = $configHelper;
+        $this->pos_id_attribute_code = $this->configHelper->getPOSAttributeCode();
     }
 
     /**
@@ -612,10 +618,19 @@ class Data implements DataInterface
         if (!is_null($pageSize)) {
             $customerData->setPage($pageNumber, $pageSize);
         }
+        $pos_id_attribute_code = $this->configHelper->getPOSAttributeCode();
+
+        if(!empty($pos_id_attribute_code)){
+            //make sure we get the POS id attribute
+            $customerData->addAttributeToSelect([$pos_id_attribute_code]);
+        }
 
         $customerArray = [];
         $map = $this->response_mask;
 
+        /**
+         * @var \Magento\Customer\Model\Customer\Interceptor[] $customerData
+         */
         foreach ($customerData AS $customer) {
             $customers = [];
             $mappedCustomer = $customer->getData();
@@ -646,6 +661,12 @@ class Data implements DataInterface
                 'name' => $group->getCustomerGroupCode(),
             ];
 
+            $pos_id = null;
+            if(!empty($pos_id_attribute_code)){
+                if(isset($mappedCustomer[$pos_id_attribute_code]))
+                    $pos_id = $mappedCustomer[$pos_id_attribute_code];
+            }
+            $customers['pos_id'] = $pos_id;
             $customers['accepts_marketing'] = $this->checkSubscriber($customer->getEmail(), $customer->getId());
             $customerArray[] = $customers;
         }
@@ -732,6 +753,12 @@ class Data implements DataInterface
                 }
             }
         }
+        $pos_id = null;
+        if(!empty($this->pos_id_attribute_code)){
+            if(isset($mappedCustomer[$this->pos_id_attribute_code]))
+                $pos_id = $mappedCustomer[$this->pos_id_attribute_code];
+        }
+        $customers['pos_id'] = $pos_id;
         $customers['accepts_marketing'] = $this->checkSubscriber($customerData->getEmail(), $customer_id);
         $customers['default_address'] = $this->getCustomerAddresses($customerData);
         return $customers;
@@ -1066,8 +1093,12 @@ class Data implements DataInterface
             }
             $quoteArray['total_shipping'] = (float)$defaultShipping['shipping_amount'];
             $itemsCollection = $quote->getItemsCollection();
-            $customer = $this->mapCustomer($quote->getCustomerId());
-            $quoteArray['customer'] = $customer;
+            if($quote->getCustomerId()) {
+                $customer = $this->mapCustomer($quote->getCustomerId());
+                $quoteArray['customer'] = $customer;
+            } else {
+                $quoteArray['customer'] = null;
+            }
 
             $itemArray = [];
             $cartTotalTax = 0;
@@ -1311,7 +1342,7 @@ class Data implements DataInterface
      */
     public function getVersion()
     {
-        return '2.2.40';
+        return '2.2.50';
     }
 
     /**

@@ -1,0 +1,42 @@
+<form class="form" action="" method="post">
+
+    <div class="page-main-actions">
+        <div class="page-actions" data-ui-id="page-actions-toolbar-content-header">
+            <div class="page-actions-inner" data-title="bnaya2 test">
+                <div class="page-actions-buttons">
+                    <button id="save" title="Save Settings" type="submit"
+                            class="action- scalable save primary ui-button ui-widget ui-state-default ui-corner-all ui-button-text-only"
+                            data-form-role="save" data-ui-id="save-button" role="button" aria-disabled="false"><span
+                                class="ui-button-text">
+                        Save Settings
+                        </span></button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <fieldset class="admin__fieldset">
+        <div class="admin__field">
+            <label for="pos_id" class="admin__field-label">
+                <span><?php echo __('Customer POS ID Attribute') ?></span>
+            </label>
+
+            <div class="admin__field-control _with-tooltip">
+                <select id="pos_id" name="pos_id" class="admin__control-select">
+                    <option value="">- Do not sync POS ID -</option>
+                    <?php foreach($this->getPosIdOptions() as $code => $name): ?>
+                        <option
+                                value="<?php echo $code; ?>"
+                            <?php if($code == $this->getCurrentPOSCode()){ echo 'selected="selected"'; } ?>
+                        ><?php echo $name; ?></option>
+                    <?php endforeach; ?>
+                </select>
+                <div class="admin__field-tooltip">
+                    <span class="admin__field-tooltip-action action-help"></span>
+                    <div class="admin__field-tooltip-content">If you are syncing POS transactions to Remarkety from another source, mapping the POS ID from Magento will help us merge the data between the data sources.</div>
+                </div>
+            </div>
+        </div>
+    </fieldset>
+
+    <input name="form_key" type="hidden" value="<?php echo $this->getFormKey() ?>" />
+</form>

@@ -189,4 +189,19 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         }
         return false;
     }
+
+    /**
+     * @param $string
+     * @param bool $capitalizeFirstCharacter
+     * @return string
+     */
+    public static function toCamelCase($string, $capitalizeFirstCharacter = false){
+        if(strlen($string) == 0)
+            return "";
+        $str = str_replace(' ', '', ucwords(str_replace('_', ' ', $string)));
+        if (!$capitalizeFirstCharacter) {
+            $str[0] = strtolower($str[0]);
+        }
+        return $str;
+    }
 }
