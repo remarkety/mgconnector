@@ -2,7 +2,6 @@
 namespace Remarkety\Mgconnector\Controller\Adminhtml\Settings;
 
 use Magento\Framework\Controller\Result\Redirect;
-use Magento\Framework\Controller\ResultFactory;
 use Magento\Framework\Controller\ResultInterface;
 use Magento\Framework\Message\ManagerInterface;
 use Magento\Framework\View\Result\Page;
@@ -17,30 +16,24 @@ class Index extends \Magento\Backend\App\Action
     protected $resultPageFactory;
 
     protected $configHelper;
-    protected $messageManager;
     protected $resultRedirect;
 
     /**
      * Constructor
      *
      * @param \Magento\Backend\App\Action\Context $context
-     * @param PageFactory $resultPageFactory
-     * @param ManagerInterface $messageManager
-     * @param ConfigHelper $configHelper
-     * @param ResultFactory $result
+     * @param PageFactory                         $resultPageFactory
+     * @param ConfigHelper                        $configHelper
      */
     public function __construct(
         \Magento\Backend\App\Action\Context $context,
         PageFactory $resultPageFactory,
-        ManagerInterface $messageManager,
-        ConfigHelper $configHelper,
-        ResultFactory $result
+        ConfigHelper $configHelper
     ) {
         parent::__construct($context);
-        $this->resultPageFactory = $resultPageFactory;
         $this->configHelper = $configHelper;
-        $this->messageManager = $messageManager;
-        $this->resultRedirect = $result;
+        $this->resultPageFactory = $resultPageFactory;
+        $this->resultRedirect = $this->resultFactory;
     }
 
     /**
