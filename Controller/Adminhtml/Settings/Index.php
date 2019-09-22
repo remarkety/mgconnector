@@ -8,6 +8,7 @@ use Magento\Framework\View\Result\Page;
 use Magento\Framework\View\Result\PageFactory;
 use Remarkety\Mgconnector\Helper\ConfigHelper;
 
+
 class Index extends \Magento\Backend\App\Action
 {
     /**
@@ -33,7 +34,7 @@ class Index extends \Magento\Backend\App\Action
         parent::__construct($context);
         $this->configHelper = $configHelper;
         $this->resultPageFactory = $resultPageFactory;
-        $this->resultRedirect = $this->resultFactory;
+        $this->resultRedirect = $context->getResultRedirectFactory();
     }
 
     /**
@@ -59,7 +60,7 @@ class Index extends \Magento\Backend\App\Action
         /**
          * @var Redirect $resultRedirect
          */
-        $resultRedirect = $this->resultRedirect->create(ResultFactory::TYPE_REDIRECT);
+        $resultRedirect = $this->resultRedirect->create();
         $url = $this->_url->getUrl('mgconnector/settings/index');
         $resultRedirect->setUrl($url);
 
