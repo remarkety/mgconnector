@@ -1,0 +1,16 @@
+<?php
+/* @var $block Remarkety\Mgconnector\Block\Frontend\Tracking\Category */
+?>
+<?php if ($block->isEventCategoryViewActivated()): ?>
+    <script>
+        var _rmData = _rmData || [];
+        _rmData.push([
+            'track',
+            'categoryView',
+            {
+                category_id: <?php echo json_encode($this->getCategoryId()); ?>,
+                category_name: <?php echo json_encode($this->getCategoryName()); ?>
+            }
+        ]);
+    </script>
+<?php endif; ?>

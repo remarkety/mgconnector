@@ -22,6 +22,10 @@ class ConfigHelper
     const FORCE_ASYNC_WEBHOOKS = 'remarkety/mgconnector/forceasyncwebhooks';
     const USE_CATEGORIES_FULL_PATH = 'remarkety/mgconnector/categories_full_path';
     const ENABLE_WEBHOOKS_TIMER = 'remarkety/mgconnector/enable_webhooks_timer';
+    const POS_ATTRIBUTE_CODE = 'remarkety/mgconnector/pos_attribute_code';
+    const EVENT_CART_VIEW_ENABLED = 'remarkety/mgconnector/event_cart_view_enabled';
+    const EVENT_SEARCH_VIEW_ENABLED = 'remarkety/mgconnector/event_search_view_enabled';
+    const EVENT_CATEGORY_VIEW_ENABLED = 'remarkety/mgconnector/event_category_view_enabled';
 
     const ASYNC_MODE_OFF = 0;
     const ASYNC_MODE_ON = 1;
@@ -64,6 +68,84 @@ class ConfigHelper
             return true;
         }
         return false;
+    }
+
+    public function getPOSAttributeCode(){
+        $pos_attribute_code = $this->_scopeConfig->getValue(self::POS_ATTRIBUTE_CODE);
+        if(empty($pos_attribute_code)){
+            return null;
+        }
+        return $pos_attribute_code;
+    }
+
+    public function isEventCartViewEnabled() {
+        $cart_view_code = $this->_scopeConfig->getValue(self::EVENT_CART_VIEW_ENABLED);
+        return $cart_view_code == 1;
+    }
+
+    public function isEventSearchViewEnabled() {
+        $search_view_code = $this->_scopeConfig->getValue(self::EVENT_SEARCH_VIEW_ENABLED);
+        return $search_view_code == 1;
+    }
+
+    public function isEventCategoryViewEnabled() {
+        $category_view_code = $this->_scopeConfig->getValue(self::EVENT_CATEGORY_VIEW_ENABLED);
+        return $category_view_code == 1;
+    }
+
+    /**
+     * @param string $code
+     */
+    public function setPOSAttributeCode($code){
+        $this->configResource->saveConfig(
+            self::POS_ATTRIBUTE_CODE,
+            $code,
+            ScopeConfigInterface::SCOPE_TYPE_DEFAULT,
+            0
+        );
+        $this->cacheTypeList->cleanType('config');
+    }
+
+    public function setEventSearchViewEnabled($status){
+        $current_status = $this->isEventSearchViewEnabled();
+        $this->configResource->saveConfig(
+            self::EVENT_SEARCH_VIEW_ENABLED,
+            $status ? 1 : 0,
+            ScopeConfigInterface::SCOPE_TYPE_DEFAULT,
+            0
+        );
+        if($current_status != $status){
+            $this->cacheTypeList->cleanType('config');
+            $this->cacheTypeList->cleanType('full_page');
+        }
+    }
+
+    public function setEventCartViewEnabled($status){
+        $current_status = $this->isEventCartViewEnabled();
+        $this->configResource->saveConfig(
+            self::EVENT_CART_VIEW_ENABLED,
+            $status ? 1 : 0,
+            ScopeConfigInterface::SCOPE_TYPE_DEFAULT,
+            0
+        );
+        if($current_status != $status){
+            $this->cacheTypeList->cleanType('config');
+            $this->cacheTypeList->cleanType('full_page');
+        }
+    }
+
+    public function setEventCategoryViewEnabled($status){
+        $current_status = $this->isEventCategoryViewEnabled();
+        $this->configResource->saveConfig(
+            self::EVENT_CATEGORY_VIEW_ENABLED,
+            $status ? 1 : 0,
+            ScopeConfigInterface::SCOPE_TYPE_DEFAULT,
+            0
+        );
+        if($current_status != $status){
+            $this->cacheTypeList->cleanType('config');
+            $this->cacheTypeList->cleanType('full_page');
+        }
     }
 
     public function shouldSendProductUpdates(){

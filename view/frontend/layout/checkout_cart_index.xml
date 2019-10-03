@@ -1,0 +1,8 @@
+<page xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="../../../../../../../lib/internal/Magento/Framework/View/Layout/etc/page_configuration.xsd">
+    <body>
+        <referenceContainer name="before.body.end">
+            <block class="Remarkety\Mgconnector\Block\Frontend\Tracking\Quote" name="remarkety.tracking.quote" template="quote.phtml">
+            </block>
+        </referenceContainer>
+    </body>
+</page>

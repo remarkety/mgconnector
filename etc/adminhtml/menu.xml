@@ -2,7 +2,8 @@
 <config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Backend:etc/menu.xsd">
     <menu>
         <add id="Remarkety_Mgconnector::mgconnector_content" title="Remarkety" module="Remarkety_Mgconnector" sortOrder="50" resource="Remarkety_Mgconnector::mgconnector_content" />
-        <add id="Remarkety_Mgconnector::installation" title="Remarkety Installation" module="Remarkety_Mgconnector" sortOrder="60" parent="Remarkety_Mgconnector::mgconnector_content" action="mgconnector/install/complete" resource="Remarkety_Mgconnector::installation"/>
-        <add id="Remarkety_Mgconnector::queue" title="Remarkety Queue" module="Remarkety_Mgconnector" sortOrder="70" parent="Remarkety_Mgconnector::mgconnector_content" action="mgconnector/queue/queue" resource="Remarkety_Mgconnector::queue"/>
+        <add id="Remarkety_Mgconnector::installation" title="Installation" module="Remarkety_Mgconnector" sortOrder="60" parent="Remarkety_Mgconnector::mgconnector_content" action="mgconnector/install/complete" resource="Remarkety_Mgconnector::installation"/>
+        <add id="Remarkety_Mgconnector::queue" title="Webhooks Queue" module="Remarkety_Mgconnector" sortOrder="70" parent="Remarkety_Mgconnector::mgconnector_content" action="mgconnector/queue/queue" resource="Remarkety_Mgconnector::queue"/>
+        <add id="Remarkety_Mgconnector::settings" title="Settings" module="Remarkety_Mgconnector" sortOrder="70" parent="Remarkety_Mgconnector::mgconnector_content" action="mgconnector/settings/index" resource="Remarkety_Mgconnector::settings"/>
     </menu>
 </config>
