@@ -14,6 +14,10 @@ class Form extends \Magento\Framework\View\Element\Template {
     private $configHelper;
 
     private $current_pos_id;
+    private $event_cart_view;
+    private $event_search_view;
+    private $event_category_view;
+
     public function __construct(
         Template\Context $context,
         array $data,
@@ -27,6 +31,9 @@ class Form extends \Magento\Framework\View\Element\Template {
         $this->attributesCollection = $attributesCollection;
         $this->configHelper = $configHelper;
         $this->current_pos_id = $configHelper->getPOSAttributeCode();
+        $this->event_cart_view = $configHelper->isEventCartViewEnabled();
+        $this->event_search_view = $configHelper->isEventSearchViewEnabled();
+        $this->event_category_view = $configHelper->isEventCategoryViewEnabled();
     }
 
     public function getFormKey()
@@ -48,5 +55,38 @@ class Form extends \Magento\Framework\View\Element\Template {
 
     public function getCurrentPOSCode(){
         return $this->current_pos_id;
+    }
+
+    public function getEnabledDisabledOptions() {
+        $attribute_data = [];
+
+        $attribute_data[0] = 'Disable';
+        $attribute_data[1] = 'Enable';
+
+        return $attribute_data;
+    }
+
+    /**
+     * @return int|mixed
+     */
+    public function getEventCartView()
+    {
+        return $this->event_cart_view;
+    }
+
+    /**
+     * @return int|mixed
+     */
+    public function getEventSearchView()
+    {
+        return $this->event_search_view;
+    }
+
+    /**
+     * @return int|mixed
+     */
+    public function getEventCategoryView()
+    {
+        return $this->event_category_view;
     }
 }

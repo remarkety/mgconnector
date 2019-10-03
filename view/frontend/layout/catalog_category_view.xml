@@ -1,0 +1,11 @@
+<page xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="../../../../../../../lib/internal/Magento/Framework/View/Layout/etc/page_configuration.xsd">
+    <body>
+        <referenceContainer name="before.body.end">
+            <block
+                    class="Remarkety\Mgconnector\Block\Frontend\Tracking\Category"
+                    name="remarkety.tracking.category"
+                    template="category.phtml">
+            </block>
+        </referenceContainer>
+    </body>
+</page>

@@ -8,7 +8,6 @@ use Magento\Framework\View\Result\Page;
 use Magento\Framework\View\Result\PageFactory;
 use Remarkety\Mgconnector\Helper\ConfigHelper;
 
-
 class Index extends \Magento\Backend\App\Action
 {
     /**
@@ -70,6 +69,19 @@ class Index extends \Magento\Backend\App\Action
         if(isset($data['pos_id'])){
             $this->configHelper->setPOSAttributeCode($data['pos_id']);
         }
+
+        if(isset($data['category_view'])) {
+            $this->configHelper->setEventCategoryViewEnabled($data['category_view'] == 1);
+        }
+
+        if(isset($data['search_view'])) {
+            $this->configHelper->setEventSearchViewEnabled($data['search_view'] == 1);
+        }
+
+        if(isset($data['cart_updated'])) {
+            $this->configHelper->setEventCartViewEnabled($data['cart_updated'] == 1);
+        }
+
         return true;
     }
 }

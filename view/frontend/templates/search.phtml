@@ -1,0 +1,12 @@
+<?php
+/* @var $block Remarkety\Mgconnector\Block\Frontend\Tracking\Product */
+?>
+<?php if ($block->isEventSearchViewActivated()): ?>
+<script>
+    var _rmData = _rmData || [];
+    _rmData.push(['track', 'siteSearch', {
+        search_keyword: <?php echo json_encode($block->getQueryTerm()); ?>,
+        products: <?php echo json_encode($block->getResultProducts()); ?>
+    }]);
+</script>
+<?php endif; ?>
