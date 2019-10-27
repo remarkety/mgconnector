@@ -6,6 +6,7 @@ use Magento\Customer\Model\ResourceModel\CustomerRepository;
 use Magento\Newsletter\Model\Subscriber;
 use Magento\Sales\Model\Order\Shipment;
 use Magento\ConfigurableProduct\Model\Product\Type\Configurable;
+use Remarkety\Mgconnector\Helper\DataOverride;
 
 class OrderSerializer
 {
@@ -19,6 +20,7 @@ class OrderSerializer
     private $addressSerializer;
     private $customerSerializer;
     private $subscriber;
+    private $dataOverride;
 
     public function __construct(
         CustomerRepository $customerRepository,
@@ -26,7 +28,8 @@ class OrderSerializer
         \Remarkety\Mgconnector\Helper\Data $remarketyHelper,
         AddressSerializer $addressSerializer,
         CustomerSerializer $customerSerializer,
-        Subscriber $subscriber
+        Subscriber $subscriber,
+        DataOverride $dataOverride
     )
     {
         $this->customerRepository = $customerRepository;
@@ -35,6 +38,7 @@ class OrderSerializer
         $this->addressSerializer = $addressSerializer;
         $this->customerSerializer = $customerSerializer;
         $this->subscriber = $subscriber;
+        $this->dataOverride = $dataOverride;
     }
 
     public function serialize(\Magento\Sales\Model\Order $order){
@@ -182,6 +186,6 @@ class OrderSerializer
             'shipping_lines' => $shipping_lines,
             'line_items' => $line_items
         ];
-        return $data;
+        return $this->dataOverride->order($order, $data);
     }
 }

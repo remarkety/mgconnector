@@ -18,6 +18,7 @@ use Magento\CatalogInventory\Api\StockRegistryInterface;
 use Magento\ConfigurableProduct\Model\Product\Type\Configurable;
 use Magento\Store\Model\StoreManagerInterface;
 use Remarkety\Mgconnector\Helper\Data;
+use Remarkety\Mgconnector\Helper\DataOverride;
 
 class ProductSerializer
 {
@@ -28,6 +29,8 @@ class ProductSerializer
     protected $urlModel;
     protected $stockRegistry;
     protected $storeManager;
+    private $dataOverride;
+
     public function __construct(
         \Magento\Catalog\Model\CategoryFactory $categoryFactory,
         \Magento\ConfigurableProduct\Model\ResourceModel\Product\Type\Configurable $catalogProductTypeConfigurable,
@@ -35,7 +38,8 @@ class ProductSerializer
         Data $dataHelper,
         Url $urlModel,
         StockRegistryInterface $stockRegistry,
-        StoreManagerInterface $storeManager
+        StoreManagerInterface $storeManager,
+        DataOverride $dataOverride
     )
     {
         $this->categoryFactory = $categoryFactory;
@@ -45,6 +49,7 @@ class ProductSerializer
         $this->urlModel = $urlModel;
         $this->stockRegistry = $stockRegistry;
         $this->storeManager = $storeManager;
+        $this->dataOverride = $dataOverride;
     }
 
     public function loadProduct($product_id, $store_id = null){
@@ -183,7 +188,7 @@ class ProductSerializer
         if(!empty($parent_id)){
             $data['parent_id'] = $parent_id;
         }
-        return $data;
+        return $this->dataOverride->product($product, $data);
     }
 
     public function getParentId($id)
