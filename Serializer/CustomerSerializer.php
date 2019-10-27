@@ -15,6 +15,7 @@ use Magento\Newsletter\Model\Subscriber;
 use Magento\Customer\Api\GroupRepositoryInterface as CustomerGroupRepository;
 use Remarkety\Mgconnector\Helper\ConfigHelper;
 use Remarkety\Mgconnector\Helper\Data;
+use Remarkety\Mgconnector\Helper\DataOverride;
 
 class CustomerSerializer
 {
@@ -27,13 +28,15 @@ class CustomerSerializer
     private $logger;
     private $configHelper;
     private $pos_id_attribute_code;
+    private $dataOverride;
     public function __construct(
         Subscriber $subscriber,
         AddressSerializer $addressSerializer,
         CustomerGroupRepository $customerGroupRepository,
         RequestInterface $request,
         \Psr\Log\LoggerInterface $logger = null,
-        ConfigHelper $configHelper
+        ConfigHelper $configHelper,
+        DataOverride $dataOverride
     )
     {
         $this->subscriber = $subscriber;
@@ -43,6 +46,7 @@ class CustomerSerializer
         $this->logger = $logger;
         $this->configHelper = $configHelper;
         $this->pos_id_attribute_code = $configHelper->getPOSAttributeCode();
+        $this->dataOverride = $dataOverride;
     }
 
     public function serialize(Customer $customer){
@@ -102,7 +106,7 @@ class CustomerSerializer
             'pos_id' => $pos_id
         ];
 
-        return $customerInfo;
+        return $this->dataOverride->customer($customer, $customerInfo);
     }
 
     protected function logError(\Exception $exception){

@@ -12,6 +12,7 @@ use \Magento\Framework\Registry;
 use \Magento\Newsletter\Model\Subscriber;
 use \Magento\Customer\Model\Group;
 use Magento\Quote\Api\CartRepositoryInterface;
+use Remarkety\Mgconnector\Helper\DataOverride;
 use Remarkety\Mgconnector\Model\QueueRepository;
 use Remarkety\Mgconnector\Helper\ConfigHelper;
 use \Magento\Store\Model\Store;
@@ -31,7 +32,7 @@ class TriggerSubscribeUpdateObserver extends EventMethods implements ObserverInt
     protected $cartRepository;
     protected $session;
     protected $remoteAddress;
-
+    private $dataOverride;
     public function __construct(
         LoggerInterface $logger,
         Session $customerSession,
@@ -54,7 +55,8 @@ class TriggerSubscribeUpdateObserver extends EventMethods implements ObserverInt
         \Remarkety\Mgconnector\Model\QueueFactory $queueFactory,
         CustomerRegistry $customerRegistry,
         RemoteAddress $remoteAddress,
-        StoreManager $storeManager
+        StoreManager $storeManager,
+        DataOverride $dataOverride
     ){
         parent::__construct($logger, $registry, $subscriber, $customerGroupModel, $remarketyQueueRepo, $queueFactory, $store, $scopeConfig, $orderSerializer, $customerSerializer, $addressSerializer, $configHelper, $productSerializer, $request, $customerRepository, $customerRegistry, $storeManager);
         $this->session = $customerSession;
@@ -62,6 +64,7 @@ class TriggerSubscribeUpdateObserver extends EventMethods implements ObserverInt
         $this->_store = $sManager->getStore();
         $this->cartRepository = $cartRepository;
         $this->remoteAddress = $remoteAddress;
+        $this->dataOverride = $dataOverride;
     }
     /**
      * Apply catalog price rules to product in admin
@@ -106,6 +109,7 @@ class TriggerSubscribeUpdateObserver extends EventMethods implements ObserverInt
                 }
 
                 $data = $this->_prepareCustomerSubscribtionUpdateData($subscriber, $this->remoteAddress->getRemoteAddress());
+                $data = $this->dataOverride->newsletter($data);
                 $this->makeRequest($eventType, $data, $subscriber->getStoreId(), 0, null, $this->_forceSyncCustomersWebhooks);
 
                 if($this->_store->getId() != 0){

@@ -20,6 +20,7 @@ use \Magento\Quote\Model\QuoteFactory;
 use \Magento\Sales\Model\Order\StatusFactory;
 use \Magento\Framework\App\Config\ScopeConfigInterface;
 use Remarkety\Mgconnector\Helper\ConfigHelper;
+use Remarkety\Mgconnector\Helper\DataOverride;
 use Remarkety\Mgconnector\Model\Api\Data\StoreSettingsContact;
 use Magento\SalesRule\Model\RuleFactory;
 use Magento\SalesRule\Model\CouponFactory;
@@ -280,6 +281,8 @@ class Data implements DataInterface
     ];
 
     private $configHelper;
+    private $dataOverride;
+
     private $pos_id_attribute_code;
     public function __construct(ProductFactory $productFactory,
                                 \Remarkety\Mgconnector\Api\Data\ProductCollectionInterfaceFactory $searchResultFactory,
@@ -317,7 +320,8 @@ class Data implements DataInterface
                                 StockRegistryInterface $stockRegistry,
                                 Recovery $recoveryHelper,
                                 AddressSerializer $addressSerializer,
-                                ConfigHelper $configHelper
+                                ConfigHelper $configHelper,
+                                DataOverride $dataOverride
     )
     {
         $this->dataHelper = $dataHelper;
@@ -357,6 +361,7 @@ class Data implements DataInterface
         $this->recoveryHelper = $recoveryHelper;
         $this->addressSerializer = $addressSerializer;
         $this->configHelper = $configHelper;
+        $this->dataOverride = $dataOverride;
         $this->pos_id_attribute_code = $this->configHelper->getPOSAttributeCode();
     }
 
@@ -550,7 +555,7 @@ class Data implements DataInterface
                 }
             }
 
-            $productsArray[] = $prod;
+            $productsArray[] = $this->dataOverride->product($prod, $row);
         }
         $object = new DataObject();
         $object->setProducts($productsArray);
@@ -668,7 +673,7 @@ class Data implements DataInterface
             }
             $customers['pos_id'] = $pos_id;
             $customers['accepts_marketing'] = $this->checkSubscriber($customer->getEmail(), $customer->getId());
-            $customerArray[] = $customers;
+            $customerArray[] = $this->dataOverride->customer($customer, $customers);
         }
         $object = new DataObject();
         $object->setCustomers($customerArray);
@@ -761,7 +766,7 @@ class Data implements DataInterface
         $customers['pos_id'] = $pos_id;
         $customers['accepts_marketing'] = $this->checkSubscriber($customerData->getEmail(), $customer_id);
         $customers['default_address'] = $this->getCustomerAddresses($customerData);
-        return $customers;
+        return $this->dataOverride->customer($customerData, $customers);
     }
 
     public function getCustomerDataById($id = false)
@@ -934,7 +939,7 @@ class Data implements DataInterface
             }
             $ord['status']= $this->getStoreOrderStatusesByCode($orderDetails['status']);
             $ord['state']= $order->getState();
-            $ordersArray[]= $ord;
+            $ordersArray[]= $this->dataOverride->order($order, $ord);
         }
 
         $object = new DataObject();
@@ -1139,7 +1144,7 @@ class Data implements DataInterface
             $quoteArray['total_tax'] = $cartTotalTax;
             $quoteArray['line_items'] = $itemArray;
             $quoteArray['abandoned_checkout_url'] = $this->recoveryHelper->getCartRecoveryURL($quoteData['entity_id'], $mage_store_id);
-            $quoteCartArray[] = $quoteArray;
+            $quoteCartArray[] = $this->dataOverride->cart($quote, $quoteArray);
         }
         $object = new DataObject();
         $object->setCarts($quoteCartArray);
@@ -1342,7 +1347,7 @@ class Data implements DataInterface
      */
     public function getVersion()
     {
-        return '2.3.0';
+        return '2.3.1';
     }
 
     /**

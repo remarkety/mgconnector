@@ -2,10 +2,52 @@
 
 namespace Remarkety\Mgconnector\Observer;
 
+use Magento\Customer\Model\CustomerRegistry;
+use Magento\Customer\Model\Group;
+use Magento\Customer\Model\ResourceModel\CustomerRepository;
+use Magento\Framework\App\Config\ScopeConfigInterface;
+use Magento\Framework\App\Request\Http;
 use Magento\Framework\Event\ObserverInterface;
+use Magento\Framework\Registry;
+use Magento\Newsletter\Model\Subscriber;
+use Magento\Store\Model\Store;
+use Magento\Store\Model\StoreManager;
+use Psr\Log\LoggerInterface;
+use Remarkety\Mgconnector\Helper\ConfigHelper;
+use Remarkety\Mgconnector\Helper\DataOverride;
+use Remarkety\Mgconnector\Model\QueueRepository;
+use Remarkety\Mgconnector\Serializer\AddressSerializer;
+use Remarkety\Mgconnector\Serializer\CustomerSerializer;
+use Remarkety\Mgconnector\Serializer\OrderSerializer;
+use Remarkety\Mgconnector\Serializer\ProductSerializer;
 
 class TriggerSubscribeDeleteObserver extends EventMethods implements ObserverInterface
 {
+    private $dataOverride;
+    public function __construct(
+        LoggerInterface $logger,
+        Registry $coreRegistry,
+        Subscriber $subscriber,
+        Group $customerGroupModel,
+        QueueRepository $remarketyQueueRepo,
+        \Remarkety\Mgconnector\Model\QueueFactory $queueFactory,
+        Store $store,
+        ScopeConfigInterface $scopeConfig,
+        OrderSerializer $orderSerializer,
+        CustomerSerializer $customerSerializer,
+        AddressSerializer $addressSerializer,
+        ConfigHelper $configHelper,
+        ProductSerializer $productSerializer,
+        Http $request,
+        CustomerRepository $customerRepository,
+        CustomerRegistry $customerRegistry,
+        StoreManager $storeManager,
+        DataOverride $dataOverride
+    ){
+        parent::__construct($logger, $coreRegistry, $subscriber, $customerGroupModel, $remarketyQueueRepo, $queueFactory, $store, $scopeConfig, $orderSerializer, $customerSerializer, $addressSerializer, $configHelper, $productSerializer, $request, $customerRepository, $customerRegistry, $storeManager);
+        $this->dataOverride = $dataOverride;
+    }
+
     public function execute(\Magento\Framework\Event\Observer $observer)
     {
         try {
@@ -13,9 +55,11 @@ class TriggerSubscribeDeleteObserver extends EventMethods implements ObserverInt
             $subscriber = $observer->getEvent()->getSubscriber();
             $regKey = 'remarkety_subscriber_deleted_' . $subscriber->getEmail();
             if (!$this->_coreRegistry->registry($regKey) && $subscriber->getId()) {
+                $data = $this->_prepareCustomerSubscribtionDeleteData($subscriber);
+                $data = $this->dataOverride->newsletter($data);
                 $this->makeRequest(
                     'newsletter/unsubscribed',
-                    $this->_prepareCustomerSubscribtionDeleteData($subscriber),
+                    $data,
                     $subscriber->getStoreId()
                 );
                 $this->_coreRegistry->register($regKey, 1, true);
