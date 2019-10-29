@@ -555,7 +555,7 @@ class Data implements DataInterface
                 }
             }
 
-            $productsArray[] = $this->dataOverride->product($prod, $row);
+            $productsArray[] = $this->dataOverride->product($row, $prod);
         }
         $object = new DataObject();
         $object->setProducts($productsArray);
@@ -1347,7 +1347,7 @@ class Data implements DataInterface
      */
     public function getVersion()
     {
-        return '2.3.1';
+        return '2.3.2';
     }
 
     /**
