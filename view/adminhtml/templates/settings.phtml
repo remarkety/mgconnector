@@ -37,7 +37,30 @@
                 </div>
             </div>
         </div>
+
+        <div class="admin__field">
+            <label for="with_fpt" class="admin__field-label">
+                <span><?php echo __('Enabled Fixed Product Tax (FPT)') ?></span>
+            </label>
+
+            <div class="admin__field-control _with-tooltip">
+                <select id="with_fpt" name="with_fpt" class="admin__control-select">
+                    <?php foreach($this->getEnabledDisabledOptions() as $code => $name): ?>
+                        <option
+                                value="<?php echo $code; ?>"
+                            <?php if($code && $this->getFptEnabled()){ echo 'selected="selected"'; } ?>
+                        ><?php echo $name; ?></option>
+                    <?php endforeach; ?>
+                </select>
+                <div class="admin__field-tooltip">
+                    <span class="admin__field-tooltip-action action-help"></span>
+                    <div class="admin__field-tooltip-content">Enable this setting if your store uses Fixed Product Tax (FPT)</div>
+                </div>
+            </div>
+        </div>
     </fieldset>
+
+
     <fieldset class="admin__fieldset">
         <legend class="admin__legend">Website tracking events</legend>
         <div class="admin__field">

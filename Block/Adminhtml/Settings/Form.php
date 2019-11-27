@@ -14,6 +14,7 @@ class Form extends \Magento\Framework\View\Element\Template {
     private $configHelper;
 
     private $current_pos_id;
+    private $is_fpt_enabled;
     private $event_cart_view;
     private $event_search_view;
     private $event_category_view;
@@ -34,6 +35,7 @@ class Form extends \Magento\Framework\View\Element\Template {
         $this->event_cart_view = $configHelper->isEventCartViewEnabled();
         $this->event_search_view = $configHelper->isEventSearchViewEnabled();
         $this->event_category_view = $configHelper->isEventCategoryViewEnabled();
+        $this->is_fpt_enabled = $configHelper->getWithFixedProductTax();
     }
 
     public function getFormKey()
@@ -88,5 +90,9 @@ class Form extends \Magento\Framework\View\Element\Template {
     public function getEventCategoryView()
     {
         return $this->event_category_view;
+    }
+
+    public function getFptEnabled() {
+        return $this->is_fpt_enabled;
     }
 }

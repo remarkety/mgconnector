@@ -489,7 +489,7 @@ class Data implements DataInterface
 
             $prod['body_html'] = $row->getDescription();
             $prod['id'] = $row->getId();
-            $prod['sale_price_with_tax'] = $row->getFinalPrice();
+            $prod['sale_price_with_tax'] = $this->getFinalPrice($row);
 
             $parent_id = $this->dataHelper->getParentId($row->getId());
             if ($row->getTypeId() == 'simple' && $parent_id) {
@@ -525,7 +525,7 @@ class Data implements DataInterface
                             'updated_at' => $updated_at_child->format(\DateTime::ATOM),
                             'inventory_quantity' => $stock->getQty(),
                             'price' => (float)$childProd->getPrice(),
-                            'sale_price_with_tax' => (float)$childProd->getFinalPrice()
+                            'sale_price_with_tax' => $this->getFinalPrice($childProd)
                         ];
                     }
                 }
@@ -534,7 +534,7 @@ class Data implements DataInterface
                 $variants[] = [
                     'inventory_quantity' => $stock->getQty(),
                     'price' => (float)$row->getPrice(),
-                    'sale_price_with_tax' => (float)$row->getFinalPrice()
+                    'sale_price_with_tax' => $this->getFinalPrice($row)
                 ];
             }
             $prod['variants'] = $variants;
@@ -1347,7 +1347,7 @@ class Data implements DataInterface
      */
     public function getVersion()
     {
-        return '2.3.2';
+        return '2.3.4';
     }
 
     /**
@@ -1493,5 +1493,15 @@ class Data implements DataInterface
             ]
         ];
         return $ret;
+    }
+
+    private function getFinalPrice($row) {
+        $price = $row->getFinalPrice();
+        $price_info = 0;
+        if ($this->configHelper->getWithFixedProductTax()) {
+            $price_info = $row->getPriceInfo()->getPrice('final_price')->getAmount()->getTotalAdjustmentAmount();
+        }
+
+        return (float)$price + (float)$price_info;
     }
 }

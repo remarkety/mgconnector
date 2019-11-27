@@ -17,6 +17,7 @@ use Magento\Catalog\Model\ProductRepository;
 use Magento\CatalogInventory\Api\StockRegistryInterface;
 use Magento\ConfigurableProduct\Model\Product\Type\Configurable;
 use Magento\Store\Model\StoreManagerInterface;
+use Remarkety\Mgconnector\Helper\ConfigHelper;
 use Remarkety\Mgconnector\Helper\Data;
 use Remarkety\Mgconnector\Helper\DataOverride;
 
@@ -30,6 +31,7 @@ class ProductSerializer
     protected $stockRegistry;
     protected $storeManager;
     private $dataOverride;
+    protected $configHelper;
 
     public function __construct(
         \Magento\Catalog\Model\CategoryFactory $categoryFactory,
@@ -39,7 +41,8 @@ class ProductSerializer
         Url $urlModel,
         StockRegistryInterface $stockRegistry,
         StoreManagerInterface $storeManager,
-        DataOverride $dataOverride
+        DataOverride $dataOverride,
+        ConfigHelper $configHelper
     )
     {
         $this->categoryFactory = $categoryFactory;
@@ -50,6 +53,7 @@ class ProductSerializer
         $this->stockRegistry = $stockRegistry;
         $this->storeManager = $storeManager;
         $this->dataOverride = $dataOverride;
+        $this->configHelper = $configHelper;
     }
 
     public function loadProduct($product_id, $store_id = null){
@@ -93,7 +97,7 @@ class ProductSerializer
             $variants[] = [
                 'inventory_quantity' => $stock->getQty(),
                 'price' => (float)$product->getPrice(),
-                'salePrice' => (float)$product->getFinalPrice()
+                'salePrice' => $this->getFinalPrice($product)
             ];
 
         } else {
@@ -125,7 +129,7 @@ class ProductSerializer
                             'updated_at' => $updated_at_child->format(\DateTime::ATOM),
                             'inventory_quantity' => $stock->getQty(),
                             'price' => (float)$childProd->getPrice(),
-                            'salePrice' => (float)$childProd->getFinalPrice()
+                            'salePrice' => $this->getFinalPrice($childProd)
                         ];
                     }
                 }
@@ -134,7 +138,7 @@ class ProductSerializer
                 $variants[] = [
                     'inventory_quantity' => $stock->getQty(),
                     'price' => (float)$product->getPrice(),
-                    'salePrice' => (float)$product->getFinalPrice()
+                    'salePrice' => $this->getFinalPrice($product)
                 ];
             }
 
@@ -178,7 +182,7 @@ class ProductSerializer
             'images' => $images,
             'enabled' => $enabled,
             'price' => (float)$product->getPrice(),
-            'salePrice' => (float)$product->getFinalPrice(),
+            'salePrice' => $this->getFinalPrice($product),
             'url' => $url,
             'variants' => $variants,
             'options' => $options,
@@ -199,5 +203,15 @@ class ProductSerializer
             return $id;
         }
         return false;
+    }
+
+    private function getFinalPrice($row) {
+        $price = $row->getFinalPrice();
+        $price_info = 0;
+        if ($this->configHelper->getWithFixedProductTax()) {
+            $price_info = $row->getPriceInfo()->getPrice('final_price')->getAmount()->getTotalAdjustmentAmount();
+        }
+
+        return (float)$price + (float)$price_info;
     }
 }

@@ -82,6 +82,10 @@ class Index extends \Magento\Backend\App\Action
             $this->configHelper->setEventCartViewEnabled($data['cart_updated'] == 1);
         }
 
+        if(isset($data['with_fpt'])) {
+            $this->configHelper->setWithFixedProductTax($data['with_fpt'] == 1);
+        }
+
         return true;
     }
 }

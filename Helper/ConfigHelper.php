@@ -23,6 +23,7 @@ class ConfigHelper
     const USE_CATEGORIES_FULL_PATH = 'remarkety/mgconnector/categories_full_path';
     const ENABLE_WEBHOOKS_TIMER = 'remarkety/mgconnector/enable_webhooks_timer';
     const POS_ATTRIBUTE_CODE = 'remarkety/mgconnector/pos_attribute_code';
+    const WITH_FIXED_PRODUCT_TAX = 'remarkety/mgconnector/with_fpt';
     const EVENT_CART_VIEW_ENABLED = 'remarkety/mgconnector/event_cart_view_enabled';
     const EVENT_SEARCH_VIEW_ENABLED = 'remarkety/mgconnector/event_search_view_enabled';
     const EVENT_CATEGORY_VIEW_ENABLED = 'remarkety/mgconnector/event_category_view_enabled';
@@ -78,6 +79,16 @@ class ConfigHelper
         return $pos_attribute_code;
     }
 
+    public function getWithFixedProductTax() {
+        $status = $this->_scopeConfig->getValue(self::WITH_FIXED_PRODUCT_TAX);
+        if(empty($status)){
+
+            return false;
+        }
+
+        return $status;
+    }
+
     public function isEventCartViewEnabled() {
         $cart_view_code = $this->_scopeConfig->getValue(self::EVENT_CART_VIEW_ENABLED);
         return $cart_view_code == 1;
@@ -104,6 +115,20 @@ class ConfigHelper
             0
         );
         $this->cacheTypeList->cleanType('config');
+    }
+
+    public function setWithFixedProductTax($status) {
+        $current_status = $this->isEventSearchViewEnabled();
+        $this->configResource->saveConfig(
+            self::WITH_FIXED_PRODUCT_TAX,
+            $status ? 1 : 0,
+            ScopeConfigInterface::SCOPE_TYPE_DEFAULT,
+            0
+        );
+        if($current_status != $status){
+            $this->cacheTypeList->cleanType('config');
+            $this->cacheTypeList->cleanType('full_page');
+        }
     }
 
     public function setEventSearchViewEnabled($status){

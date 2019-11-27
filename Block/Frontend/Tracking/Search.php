@@ -54,20 +54,14 @@ class Search extends Result
             if ($size > 0) {
                 $size--;
 
-                if($entity->getTypeId() == Configurable::TYPE_CODE){
-                    $full_price = $entity->getMinimalPrice();
-                    $price = $entity->getMinimalPrice();
-                } else {
-                    $full_price = $entity->getFinalPrice();
-                    $price = $entity->getPrice();
-                }
+                list($sale_price, $full_price) = $this->getFinalPrice($entity);
 
                 $data[] = [
                     'product_id' => $entity->getId(),
                     'title'      => $entity->getName(),
                     'image'      => $this->getMediaPath($entity) . $entity->getThumbnail(),
                     'full_price' => floatval($full_price),
-                    'price'      => floatval($price),
+                    'price'      => floatval($sale_price),
                     'url'        => $entity->getProductUrl()
                 ];
             } else {
@@ -91,5 +85,37 @@ class Search extends Result
         }
 
         return $this->media_path;
+    }
+
+    /**
+     * Get final price
+     *
+     * @param $row
+     *
+     * @return array
+     */
+    private function getFinalPrice($row) {
+        if (Configurable::TYPE_CODE == $row->getTypeId() || 'bundle' == $row->getTypeId()) {
+            $sale_price = $row->getMinimalPrice();
+            $price = $row->getMinimalPrice();
+        } else {
+            $sale_price = $row->getFinalPrice();
+            $price = $row->getPrice();
+        }
+
+        $price_info = $row->getPriceInfo()->getPrice('final_price')->getAmount();
+        $special_addition = 0;
+
+        if ((float)$price_info->getBaseAmount() < (float)$sale_price) {
+            $sale_price = $price_info->getBaseAmount();
+        }
+
+        if ($this->config_helper->getWithFixedProductTax()) {
+            $special_addition = $row->getPriceInfo()->getPrice('final_price')->getAmount()->getTotalAdjustmentAmount();
+        }
+
+        $sale_price = (float)$sale_price + (float)$special_addition;
+
+        return [$sale_price, $price];
     }
 }
