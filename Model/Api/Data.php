@@ -1096,7 +1096,7 @@ class Data implements DataInterface
                     }
                 }
             }
-            $quoteArray['total_shipping'] = (float)$defaultShipping['shipping_amount'];
+            $quoteArray['total_shipping'] = empty($defaultShipping['shipping_amount']) ? 0 : (float)$defaultShipping['shipping_amount'];
             $itemsCollection = $quote->getItemsCollection();
             if($quote->getCustomerId()) {
                 $customer = $this->mapCustomer($quote->getCustomerId());
@@ -1125,10 +1125,10 @@ class Data implements DataInterface
                 if($parentItem && $parentItem->getProductType() == Configurable::TYPE_CODE){
                     $itemData['price'] = $parentItem->getPrice();
                     $qty = (float)$parentItem->getQty();
-                    $totalTax = (float)$parentItem['tax_amount'];
+                    $totalTax = empty($parentItem['tax_amount']) ? 0 : (float)$parentItem['tax_amount'];
                 } else {
                     $qty = (float)$item->getQty();
-                    $totalTax = (float)$itemData['tax_amount'];
+                    $totalTax = empty($itemData['tax_amount']) ? 0 : (float)$itemData['tax_amount'];
                 }
                 $cartTotalTax += $totalTax;
                 $itemData['quantity'] = $qty;
@@ -1347,7 +1347,7 @@ class Data implements DataInterface
      */
     public function getVersion()
     {
-        return '2.3.4';
+        return '2.3.5';
     }
 
     /**
