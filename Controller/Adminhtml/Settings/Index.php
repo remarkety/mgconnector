@@ -86,6 +86,10 @@ class Index extends \Magento\Backend\App\Action
             $this->configHelper->setWithFixedProductTax($data['with_fpt'] == 1);
         }
 
+        if(isset($data['aw_rewards_integrate'])) {
+            $this->configHelper->setAheadworksRewardPointsEnabled($data['aw_rewards_integrate'] == 1);
+        }
+
         return true;
     }
 }

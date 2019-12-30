@@ -21,6 +21,7 @@ use \Magento\Sales\Model\Order\StatusFactory;
 use \Magento\Framework\App\Config\ScopeConfigInterface;
 use Remarkety\Mgconnector\Helper\ConfigHelper;
 use Remarkety\Mgconnector\Helper\DataOverride;
+use Remarkety\Mgconnector\Helper\RewardPointsFactory;
 use Remarkety\Mgconnector\Model\Api\Data\StoreSettingsContact;
 use Magento\SalesRule\Model\RuleFactory;
 use Magento\SalesRule\Model\CouponFactory;
@@ -284,6 +285,12 @@ class Data implements DataInterface
     private $dataOverride;
 
     private $pos_id_attribute_code;
+
+    /**
+     * @var CustomerRewardPointsManagementInterface
+     */
+    private $customerRewardPointsService;
+
     public function __construct(ProductFactory $productFactory,
                                 \Remarkety\Mgconnector\Api\Data\ProductCollectionInterfaceFactory $searchResultFactory,
                                 \Remarkety\Mgconnector\Api\Data\CustomerCollectionInterfaceFactory $customerResultFactory,
@@ -321,7 +328,8 @@ class Data implements DataInterface
                                 Recovery $recoveryHelper,
                                 AddressSerializer $addressSerializer,
                                 ConfigHelper $configHelper,
-                                DataOverride $dataOverride
+                                DataOverride $dataOverride,
+                                RewardPointsFactory $rewardPointsFactory
     )
     {
         $this->dataHelper = $dataHelper;
@@ -363,6 +371,7 @@ class Data implements DataInterface
         $this->configHelper = $configHelper;
         $this->dataOverride = $dataOverride;
         $this->pos_id_attribute_code = $this->configHelper->getPOSAttributeCode();
+        $this->customerRewardPointsService = $rewardPointsFactory->create();
     }
 
     /**
@@ -633,6 +642,12 @@ class Data implements DataInterface
         $customerArray = [];
         $map = $this->response_mask;
 
+        $aw_rewards_integrate = false;
+        if($this->customerRewardPointsService){
+            if($this->configHelper->isAheadworksRewardPointsEnabled()){
+                $aw_rewards_integrate = true;
+            }
+        }
         /**
          * @var \Magento\Customer\Model\Customer\Interceptor[] $customerData
          */
@@ -673,6 +688,9 @@ class Data implements DataInterface
             }
             $customers['pos_id'] = $pos_id;
             $customers['accepts_marketing'] = $this->checkSubscriber($customer->getEmail(), $customer->getId());
+            if($aw_rewards_integrate){
+                $customers['rewards_points'] = $this->customerRewardPointsService->getCustomerRewardPointsBalance($customer->getId());
+            }
             $customerArray[] = $this->dataOverride->customer($customer, $customers);
         }
         $object = new DataObject();
@@ -1347,7 +1365,7 @@ class Data implements DataInterface
      */
     public function getVersion()
     {
-        return '2.3.5';
+        return '2.3.6';
     }
 
     /**

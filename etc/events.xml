@@ -3,6 +3,9 @@
     <event name="customer_save_after">
         <observer name="remarkety_customer_save_after_observer" instance="Remarkety\Mgconnector\Observer\TriggerCustomerUpdateObserver"/>
     </event>
+    <event name="aheadworks_rewardpoints_api_data_transactioninterface_save_after">
+        <observer name="remarkety_aheadworks_rewardpoints_save_after" instance="Remarkety\Mgconnector\Observer\TriggerAWRewardsPointsObserver"/>
+    </event>
     <event name="customer_address_save_commit_after">
         <observer name="remarkety_customer_address_save_after_observer" instance="Remarkety\Mgconnector\Observer\TriggerCustomerAddressUpdateObserver"/>
     </event>

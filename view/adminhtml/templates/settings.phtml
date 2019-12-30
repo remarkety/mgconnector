@@ -58,6 +58,24 @@
                 </div>
             </div>
         </div>
+        <?php if($this->isIsAwPointsPluginExists()): ?>
+            <div class="admin__field">
+                <label for="aw_rewards_integrate" class="admin__field-label">
+                    <span><?php echo __('Enabled integration with Aheadworks Reward Points') ?></span>
+                </label>
+
+                <div class="admin__field-control _with-tooltip">
+                    <select id="aw_rewards_integrate" name="aw_rewards_integrate" class="admin__control-select">
+                        <?php foreach($this->getEnabledDisabledOptions() as $code => $name): ?>
+                            <option
+                                    value="<?php echo $code; ?>"
+                                <?php if($code && $this->isAWRewradPointsEnabled()){ echo 'selected="selected"'; } ?>
+                            ><?php echo $name; ?></option>
+                        <?php endforeach; ?>
+                    </select>
+                </div>
+            </div>
+        <?php endif; ?>
     </fieldset>
 
 

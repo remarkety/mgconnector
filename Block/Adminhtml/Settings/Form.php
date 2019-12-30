@@ -2,19 +2,19 @@
 namespace Remarkety\Mgconnector\Block\Adminhtml\Settings;
 
 use Magento\Framework\View\Element\Template;
-use Magento\Store\Model\StoreManager;
-use Magento\Framework\View\Element\Template\Context;
 use Remarkety\Mgconnector\Helper\ConfigHelper;
-use \Remarkety\Mgconnector\Model\Webtracking;
-use Magento\Customer\Model\Session;
+use Remarkety\Mgconnector\Helper\RewardPointsFactory;
 
-class Form extends \Magento\Framework\View\Element\Template {
+class Form extends Template
+{
     private $formKey;
     private $attributesCollection;
     private $configHelper;
 
     private $current_pos_id;
     private $is_fpt_enabled;
+    private $is_aw_points_enabled;
+    private $is_aw_points_plugin_exists = false;
     private $event_cart_view;
     private $event_search_view;
     private $event_category_view;
@@ -24,7 +24,8 @@ class Form extends \Magento\Framework\View\Element\Template {
         array $data,
         \Magento\Framework\Data\Form\FormKey $formKey,
         \Magento\Customer\Model\ResourceModel\Attribute\Collection $attributesCollection,
-        ConfigHelper $configHelper
+        ConfigHelper $configHelper,
+        RewardPointsFactory $rewardPointsFactory
     )
     {
         parent::__construct($context, $data);
@@ -36,6 +37,11 @@ class Form extends \Magento\Framework\View\Element\Template {
         $this->event_search_view = $configHelper->isEventSearchViewEnabled();
         $this->event_category_view = $configHelper->isEventCategoryViewEnabled();
         $this->is_fpt_enabled = $configHelper->getWithFixedProductTax();
+        $this->is_aw_points_enabled = $configHelper->isAheadworksRewardPointsEnabled();
+        $aw_service = $rewardPointsFactory->create();
+        if($aw_service){
+            $this->is_aw_points_plugin_exists = true;
+        }
     }
 
     public function getFormKey()
@@ -94,5 +100,17 @@ class Form extends \Magento\Framework\View\Element\Template {
 
     public function getFptEnabled() {
         return $this->is_fpt_enabled;
+    }
+
+    public function isAWRewradPointsEnabled() {
+        return $this->is_aw_points_enabled;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isIsAwPointsPluginExists()
+    {
+        return $this->is_aw_points_plugin_exists;
     }
 }

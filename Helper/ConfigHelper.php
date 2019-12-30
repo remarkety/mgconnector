@@ -27,6 +27,7 @@ class ConfigHelper
     const EVENT_CART_VIEW_ENABLED = 'remarkety/mgconnector/event_cart_view_enabled';
     const EVENT_SEARCH_VIEW_ENABLED = 'remarkety/mgconnector/event_search_view_enabled';
     const EVENT_CATEGORY_VIEW_ENABLED = 'remarkety/mgconnector/event_category_view_enabled';
+    const ENABLE_AHEADWORKS_REWARD_POINTS = 'remarkety/mgconnector/aheadworks_reward_points';
 
     const ASYNC_MODE_OFF = 0;
     const ASYNC_MODE_ON = 1;
@@ -61,6 +62,24 @@ class ConfigHelper
         $store_id = is_numeric($store) ? $store : $store->getId();
         $id = $this->_scopeConfig->getValue(self::RM_STORE_ID, ScopeInterface::SCOPE_STORES, $store_id);
         return (empty($id) || is_null($id)) ? false : $id;
+    }
+
+    public function isAheadworksRewardPointsEnabled(){
+        $enabled = $this->_scopeConfig->getValue(self::ENABLE_AHEADWORKS_REWARD_POINTS);
+        if(is_null($enabled) || $enabled == 1){
+            return true;
+        }
+        return false;
+    }
+
+    public function setAheadworksRewardPointsEnabled($enabled){
+        $this->configResource->saveConfig(
+            self::ENABLE_AHEADWORKS_REWARD_POINTS,
+            $enabled ? 1 : 0,
+            ScopeConfigInterface::SCOPE_TYPE_DEFAULT,
+            0
+        );
+        $this->cacheTypeList->cleanType('config');
     }
 
     public function isWebhooksGloballyEnabled(){
