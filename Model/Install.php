@@ -142,6 +142,8 @@ class Install extends \Magento\Framework\Model\AbstractModel
         $this->_data['terms'] = array_key_exists('terms', $key) ? ($key['terms']== '1' ? 'true' : 'false') : null;
         $this->_data['store_id'] = array_key_exists('store_id', $key) ? $key['store_id'] : null;
         $this->_data['key'] = array_key_exists('key', $key) ? $key['key'] : null;
+        $this->_data['http_user'] = array_key_exists('http_user', $key) ? $key['http_user'] : null;
+        $this->_data['http_password'] = array_key_exists('http_password', $key) ? $key['http_password'] : null;
 
         return $this;
     }
@@ -229,6 +231,8 @@ class Install extends \Magento\Framework\Model\AbstractModel
                 'firstName' => $this->_data['first_name'],
                 'lastName' => $this->_data['last_name'],
                 'phone' => $this->_data['phone'],
+                'httpUser' => $this->_data['http_user'],
+                'httpPassword' => $this->_data['http_password'],
                 'storeFrontUrl' => $store->getBaseUrl(UrlInterface::URL_TYPE_LINK),
                 'viewName' => $store->getName()
             ));
@@ -260,6 +264,8 @@ class Install extends \Magento\Framework\Model\AbstractModel
                     'view_id' => $_storeId,
                 )),
                 'isNewUser' => false,
+                'httpUser' => $this->_data['http_user'],
+                'httpPassword' => $this->_data['http_password'],
                 'storeFrontUrl' => $store->getBaseUrl(UrlInterface::URL_TYPE_LINK),
                 'viewName' => $store->getName()
             ));

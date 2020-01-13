@@ -105,6 +105,26 @@ class Form extends Generic
             'values' => $this->_store->getStoreValuesForForm(false, false),
         ));
 
+        $fieldset->addField('http_note', 'note', [
+            'label' => false,
+            'after_element_html' => 'If your website is password-protected, please enter the credentials here:',
+            'name' => 'http_note',
+        ]);
+
+        $fieldset->addField('http_user', 'text', array(
+            'label' =>__('Website Basic Auth Username:'),
+            'name' => 'data[http_user]',
+            'required' => false,
+            'class' => 'admin__control-text'
+        ));
+
+        $fieldset->addField('http_password', 'password', array(
+            'label' =>__('Website Basic Auth Username:'),
+            'name' => 'data[http_password]',
+            'required' => false,
+            'class' => 'admin__control-text'
+        ));
+
         $fieldset->addField('terms', 'checkbox', array(
             'label' => false,
             'name' => 'data[terms]',
