@@ -10,24 +10,29 @@ namespace Remarkety\Mgconnector\Helper;
 
 use \Magento\Framework\App\Config\ScopeConfigInterface;
 use Magento\Framework\App\Helper\Context;
+use Magento\Quote\Model\QuoteFactory;
 
 class Recovery extends \Magento\Framework\App\Helper\AbstractHelper
 {
     protected $scopeConfig;
     protected $storeManager;
+    protected $quoteFactory;
 
     /**
      * Recovery constructor.
      *
-     * @param Context                                    $context
+     * @param Context $context
      * @param \Magento\Store\Model\StoreManagerInterface $storeManager
+     * @param QuoteFactory $quoteFactory
      */
     public function __construct(
         Context $context,
-        \Magento\Store\Model\StoreManagerInterface $storeManager
+        \Magento\Store\Model\StoreManagerInterface $storeManager,
+        QuoteFactory $quoteFactory
     )
     {
         $this->storeManager = $storeManager;
+        $this->quoteFactory = $quoteFactory;
         parent::__construct($context);
     }
 
@@ -67,24 +72,20 @@ class Recovery extends \Magento\Framework\App\Helper\AbstractHelper
     }
 
     /**
-     * Restore quote 
+     * Restore quote
      * remove customer and all shipping and payment data
-     * 
-     * @param $quote
+     *
+     * @param $old_quote
+     * @return int
      */
-    public function quoteRestore($quote) {
-        $quote
-            ->setCustomerId(null)
-            ->setCustomerEmail(null)
-            ->setCustomerFirstname(null)
-            ->setCustomerLastname(null)
-            ->setCustomerMiddlename(null)
-            ->setCustomerIsGuest(true);
-
-        $quote->removeAllAddresses();
-        $quote->removePayment();
-
+    public function quoteRestore($old_quote) {
+        $quote = $this->quoteFactory->create();
+        $quote->merge($old_quote);
+        $quote->setItemsCount($old_quote->getItemsCount());
+        $quote->setItemsQty($old_quote->getItemsQty());
+        $quote->setStoreId($old_quote->getStoreId());
         $quote->save();
+        return $quote->getId();
     }
 
     /**
