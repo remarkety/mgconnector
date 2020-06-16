@@ -292,44 +292,44 @@ class Data implements DataInterface
     private $customerRewardPointsService;
 
     public function __construct(ProductFactory $productFactory,
-                                \Remarkety\Mgconnector\Api\Data\ProductCollectionInterfaceFactory $searchResultFactory,
-                                \Remarkety\Mgconnector\Api\Data\CustomerCollectionInterfaceFactory $customerResultFactory,
-                                \Magento\Catalog\Model\ResourceModel\Product\CollectionFactory $collectionFactory,
-                                \Magento\Catalog\Model\Product $productModelCollection,
-                                CustomerFactory $customerFactory,
-                                OrderFactory $salesOrderCollectionFactory,
-                                QuoteFactory $quoteFactory,
-                                StatusFactory $statusFactory,
-                                ScopeConfigInterface $scopeConfig,
-                                \Magento\Catalog\Model\CategoryFactory $categoryFactory,
-                                \Magento\Framework\ObjectManagerInterface $interface,
-                                \Magento\Catalog\Model\Product\ImageFactory $imageFactory,
-                                \Magento\Catalog\Model\Product\Gallery\GalleryManagement $entryFactory,
-                                AddressFactory $addressFactory,
-                                AddressDataFactory $addressDataFactory,
-                                \Magento\Customer\Model\Group $customerGroupModel,
-                                Customer $customer,
-                                \Magento\Newsletter\Model\Subscriber $subscriber,
-                                \Magento\Sales\Model\Order\Address $salesOrderAddress,
-                                \Magento\Store\Model\StoreManagerInterface $storeManager,
-                                \Magento\ConfigurableProduct\Model\ResourceModel\Product\Type\Configurable $catalogProductTypeConfigurable,
-                                CustomerCollectionFactory $customerCollectionFactory,
-                                \Magento\Sales\Model\ResourceModel\Order\CollectionFactory $salesOrderResourceCollectionFactory,
-                                RuleFactory $ruleFactory,
-                                CouponFactory $couponFactory,
-                                Config $resourceConfig,
-                                TypeListInterface $cacheTypeList,
-                                Collection $queueCollection,
-                                QueueRepository $queueRepository,
-                                EventMethods $eventMethods,
-                                DataHelper $dataHelper,
-                                ProductRepository $productRepository,
-                                StockRegistryInterface $stockRegistry,
-                                Recovery $recoveryHelper,
-                                AddressSerializer $addressSerializer,
-                                ConfigHelper $configHelper,
-                                DataOverride $dataOverride,
-                                RewardPointsFactory $rewardPointsFactory
+        \Remarkety\Mgconnector\Api\Data\ProductCollectionInterfaceFactory $searchResultFactory,
+        \Remarkety\Mgconnector\Api\Data\CustomerCollectionInterfaceFactory $customerResultFactory,
+        \Magento\Catalog\Model\ResourceModel\Product\CollectionFactory $collectionFactory,
+        \Magento\Catalog\Model\Product $productModelCollection,
+        CustomerFactory $customerFactory,
+        OrderFactory $salesOrderCollectionFactory,
+        QuoteFactory $quoteFactory,
+        StatusFactory $statusFactory,
+        ScopeConfigInterface $scopeConfig,
+        \Magento\Catalog\Model\CategoryFactory $categoryFactory,
+        \Magento\Framework\ObjectManagerInterface $interface,
+        \Magento\Catalog\Model\Product\ImageFactory $imageFactory,
+        \Magento\Catalog\Model\Product\Gallery\GalleryManagement $entryFactory,
+        AddressFactory $addressFactory,
+        AddressDataFactory $addressDataFactory,
+        \Magento\Customer\Model\Group $customerGroupModel,
+        Customer $customer,
+        \Magento\Newsletter\Model\Subscriber $subscriber,
+        \Magento\Sales\Model\Order\Address $salesOrderAddress,
+        \Magento\Store\Model\StoreManagerInterface $storeManager,
+        \Magento\ConfigurableProduct\Model\ResourceModel\Product\Type\Configurable $catalogProductTypeConfigurable,
+        CustomerCollectionFactory $customerCollectionFactory,
+        \Magento\Sales\Model\ResourceModel\Order\CollectionFactory $salesOrderResourceCollectionFactory,
+        RuleFactory $ruleFactory,
+        CouponFactory $couponFactory,
+        Config $resourceConfig,
+        TypeListInterface $cacheTypeList,
+        Collection $queueCollection,
+        QueueRepository $queueRepository,
+        EventMethods $eventMethods,
+        DataHelper $dataHelper,
+        ProductRepository $productRepository,
+        StockRegistryInterface $stockRegistry,
+        Recovery $recoveryHelper,
+        AddressSerializer $addressSerializer,
+        ConfigHelper $configHelper,
+        DataOverride $dataOverride,
+        RewardPointsFactory $rewardPointsFactory
     )
     {
         $this->dataHelper = $dataHelper;
@@ -415,11 +415,11 @@ class Data implements DataInterface
         }
 
         if ($updated_at_min != null) {
-            $collection->addAttributeToFilter('updated_at', ['gt' => $updated_at_min]);
+            $collection->addAttributeToFilter('updated_at', ['gt' => $this->convertTime($updated_at_min)]);
         }
 
         if ($updated_at_max != null) {
-            $collection->addAttributeToFilter('updated_at', ['lt' => $updated_at_max]);
+            $collection->addAttributeToFilter('updated_at', ['lt' => $this->convertTime($updated_at_max)]);
         }
 
         if ($since_id != null) {
@@ -427,11 +427,11 @@ class Data implements DataInterface
         }
 
         if ($created_at_min != null) {
-            $collection->addAttributeToFilter('created_at', ['gt' => $created_at_min]);
+            $collection->addAttributeToFilter('created_at', ['gt' => $this->convertTime($created_at_min)]);
         }
 
         if ($created_at_max != null) {
-            $collection->addAttributeToFilter('created_at', ['lt' => $created_at_max]);
+            $collection->addAttributeToFilter('created_at', ['lt' => $this->convertTime($created_at_max)]);
         }
 
         if ($product_id != null) {
@@ -607,11 +607,11 @@ class Data implements DataInterface
         }
         $customerData->addFieldToFilter('store_id', ['eq' => $mage_store_id]); //$mage_store_id));
         if ($updated_at_min != null) {
-            $customerData->addAttributeToFilter('updated_at', ['gt' => $updated_at_min]);
+            $customerData->addAttributeToFilter('updated_at', ['gt' => $this->convertTime($updated_at_min)]);
         }
 
         if ($updated_at_max != null) {
-            $customerData->addAttributeToFilter('updated_at', ['lt' => $updated_at_max]);
+            $customerData->addAttributeToFilter('updated_at', ['lt' => $this->convertTime($updated_at_max)]);
         }
 
         if ($since_id != null) {
@@ -841,23 +841,28 @@ class Data implements DataInterface
 
         $orders->addFieldToFilter('main_table.store_id', array('eq' => $mage_store_id));
         if ($updated_at_min != null) {
-            $orders->addAttributeToFilter('main_table.updated_at', array('gt' => $updated_at_min));
+            $timestamp = strtotime($updated_at_min);
+            $orders->addAttributeToFilter('main_table.updated_at', ['gt' => $this->convertTime($updated_at_min)]);
         }
 
         if ($updated_at_max != null) {
-            $orders->addAttributeToFilter('main_table.updated_at', array('lt' => $updated_at_max));
+            $timestamp = strtotime($updated_at_max);
+            $orders->addAttributeToFilter('main_table.updated_at', ['lt' => $this->convertTime($updated_at_max)]);
         }
 
         if ($since_id != null) {
-            $orders->addAttributeToFilter('main_table.entity_id', array('gt' => $since_id));
+            $timestamp = strtotime($since_id);
+            $orders->addAttributeToFilter('main_table.entity_id', ['gt' => $since_id]);
         }
 
         if ($created_at_min != null) {
-            $orders->addAttributeToFilter('main_table.created_at', array('gt' => $created_at_min));
+            $timestamp = strtotime($created_at_min);
+            $orders->addAttributeToFilter('main_table.created_at', ['gt' => $this->convertTime($created_at_min)]);
         }
 
         if ($created_at_max != null) {
-            $orders->addAttributeToFilter('main_table.created_at', array('lt' => $created_at_max));
+            $timestamp = strtotime($created_at_max);
+            $orders->addAttributeToFilter('main_table.created_at', ['lt' => $this->convertTime($created_at_max)]);
         }
 
         if ($order_status != null) {
@@ -1045,19 +1050,19 @@ class Data implements DataInterface
         $quotes->addFieldToFilter('customer_email' , ['neq' => null]);
 
         if ($mage_store_id != null) {
-            $quotes->addFieldToFilter('store_id', array('eq' => $mage_store_id));
+            $quotes->addFieldToFilter('store_id', ['eq' => $mage_store_id]);
         }
 
         if ($updated_at_min != null) {
-            $quotes->addFieldToFilter('main_table.updated_at', array('gt' => $updated_at_min));
+            $quotes->addFieldToFilter('main_table.updated_at', ['gt' => $this->convertTime($updated_at_min)]);
         }
 
         if ($updated_at_max != null) {
-            $quotes->addFieldToFilter('main_table.updated_at', array('lt' => $updated_at_max));
+            $quotes->addFieldToFilter('main_table.updated_at', ['lt' => $this->convertTime($updated_at_max)]);
         }
 
         if ($since_id != null) {
-            $quotes->addFieldToFilter('main_table.entity_id', array('gt' => $since_id));
+            $quotes->addFieldToFilter('main_table.entity_id', ['gt' => $since_id]);
         }
 
         if ($limit != null) {
@@ -1289,7 +1294,7 @@ class Data implements DataInterface
                     ->setType(Coupon::COUPON_TYPE_SPECIFIC_AUTOGENERATED);
 
                 if ($expiration != null) {
-                    $coupon->setExpirationDate($expiration);
+                    $coupon->setExpirationDate($this->convertTime($expiration));
                 } else {
                     $coupon->setExpirationDate($rule->getToDate());
                 }
@@ -1521,5 +1526,11 @@ class Data implements DataInterface
         }
 
         return (float)$price + (float)$price_info;
+    }
+
+    private function convertTime($string) {
+        $timestamp = strtotime($string);
+
+        return date('Y-m-d h:i:s', $timestamp);
     }
 }
