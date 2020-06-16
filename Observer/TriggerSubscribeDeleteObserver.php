@@ -55,6 +55,10 @@ class TriggerSubscribeDeleteObserver extends EventMethods implements ObserverInt
             $subscriber = $observer->getEvent()->getSubscriber();
             $regKey = 'remarkety_subscriber_deleted_' . $subscriber->getEmail();
             if (!$this->_coreRegistry->registry($regKey) && $subscriber->getId()) {
+                if(!$this->isWebhooksEnabledSpecificStore($subscriber->getStoreId())){
+                    return $this;
+                }
+
                 $data = $this->_prepareCustomerSubscribtionDeleteData($subscriber);
                 $data = $this->dataOverride->newsletter($data);
                 $this->makeRequest(

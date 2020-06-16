@@ -88,6 +88,11 @@ class TriggerSubscribeUpdateObserver extends EventMethods implements ObserverInt
                 $this->_coreRegistry->register('subscriber_object_data_observer', 1);
 
             if($subscriber->getId()) {
+
+                if(!$this->isWebhooksEnabledSpecificStore($subscriber->getStoreId())){
+                    return $this;
+                }
+
                 if ($this->_coreRegistry->registry('remarkety_subscriber_deleted_' . $subscriber->getSubscriberEmail()))
                     return $this;
                 if ($this->_coreRegistry->registry('remarkety_subscriber_updated_' . $subscriber->getSubscriberEmail()))
