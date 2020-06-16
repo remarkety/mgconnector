@@ -37,8 +37,8 @@ class Recovery extends \Magento\Framework\App\Helper\AbstractHelper
     }
 
     /**
-     * Get magento config array 
-     * 
+     * Get magento config array
+     *
      * @param $config_path
      *
      * @return mixed
@@ -53,7 +53,7 @@ class Recovery extends \Magento\Framework\App\Helper\AbstractHelper
 
     /**
      * Create url to recovery cart
-     * 
+     *
      * @param      $cartId
      * @param null $storeId
      *
@@ -84,6 +84,7 @@ class Recovery extends \Magento\Framework\App\Helper\AbstractHelper
         $quote->setItemsCount($old_quote->getItemsCount());
         $quote->setItemsQty($old_quote->getItemsQty());
         $quote->setStoreId($old_quote->getStoreId());
+        $quote->collectTotals();
         $quote->save();
         return $quote->getId();
     }
@@ -128,7 +129,7 @@ class Recovery extends \Magento\Framework\App\Helper\AbstractHelper
 
     /**
      * Get remarkety api key from config
-     * 
+     *
      * @return mixed
      */
     private function getApiKey() {
