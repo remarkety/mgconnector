@@ -142,6 +142,10 @@ class EventMethods {
         if(!$this->configHelper->isWebhooksGloballyEnabled()){
             return false;
         }
+        return $this->isWebhooksEnabledSpecificStore($store);
+    }
+
+    protected function isWebhooksEnabledSpecificStore($store){
         return !empty($this->configHelper->getRemarketyPublicId($store));
     }
 
@@ -228,6 +232,9 @@ class EventMethods {
             $url = self::REMARKETY_EVENTS_ENDPOINT;
             if(!empty($storeId)){
                 $remarketyId = $this->configHelper->getRemarketyPublicId($storeId);
+                if(empty($remarketyId)){
+                    return false;
+                }
                 $url .= '?storeId=' . $remarketyId;
             }
             $payload = array_merge($payload, $this->_getPayloadBase($eventType));
