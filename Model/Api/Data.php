@@ -845,27 +845,22 @@ class Data implements DataInterface
 
         $orders->addFieldToFilter('main_table.store_id', array('eq' => $mage_store_id));
         if ($updated_at_min != null) {
-            $timestamp = strtotime($updated_at_min);
             $orders->addAttributeToFilter('main_table.updated_at', ['gt' => $this->convertTime($updated_at_min)]);
         }
 
         if ($updated_at_max != null) {
-            $timestamp = strtotime($updated_at_max);
             $orders->addAttributeToFilter('main_table.updated_at', ['lt' => $this->convertTime($updated_at_max)]);
         }
 
         if ($since_id != null) {
-            $timestamp = strtotime($since_id);
             $orders->addAttributeToFilter('main_table.entity_id', ['gt' => $since_id]);
         }
 
         if ($created_at_min != null) {
-            $timestamp = strtotime($created_at_min);
             $orders->addAttributeToFilter('main_table.created_at', ['gt' => $this->convertTime($created_at_min)]);
         }
 
         if ($created_at_max != null) {
-            $timestamp = strtotime($created_at_max);
             $orders->addAttributeToFilter('main_table.created_at', ['lt' => $this->convertTime($created_at_max)]);
         }
 
@@ -1374,7 +1369,7 @@ class Data implements DataInterface
      */
     public function getVersion()
     {
-        return '2.3.8';
+        return '2.4.0';
     }
 
     /**
