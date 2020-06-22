@@ -195,4 +195,12 @@ interface DataInterface
      * @return int
      */
     public function retryQueueItems($mage_store_id, $limit = null, $page = null, $minId = null, $maxId = null);
+
+    /**
+     * @param int $mage_store_id
+     * @param string $email
+     *
+     * @return \Remarkety\Mgconnector\Api\Data\UnsubscribeResponseInterface
+     */
+    public function unsubscribe($mage_store_id, $email);
 }

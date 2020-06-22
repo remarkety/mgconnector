@@ -28,7 +28,6 @@ class ConfigHelper
     const EVENT_SEARCH_VIEW_ENABLED = 'remarkety/mgconnector/event_search_view_enabled';
     const EVENT_CATEGORY_VIEW_ENABLED = 'remarkety/mgconnector/event_category_view_enabled';
     const ENABLE_AHEADWORKS_REWARD_POINTS = 'remarkety/mgconnector/aheadworks_reward_points';
-    const ADDON_COUPON_EXPIRATION = 'remarkety/mgconnector/coupon_expiration';
 
     const ASYNC_MODE_OFF = 0;
     const ASYNC_MODE_ON = 1;
@@ -122,25 +121,6 @@ class ConfigHelper
     public function isEventCategoryViewEnabled() {
         $category_view_code = $this->_scopeConfig->getValue(self::EVENT_CATEGORY_VIEW_ENABLED);
         return $category_view_code == 1;
-    }
-
-    public function isAddonCouponExpiration() {
-        $coupon_expiration = $this->_scopeConfig->getValue(self::ADDON_COUPON_EXPIRATION);
-        return $coupon_expiration == 1;
-    }
-
-    public function setAddonCouponExpiration($status) {
-        $current_status = $this->isAddonCouponExpiration();
-        $this->configResource->saveConfig(
-            self::ADDON_COUPON_EXPIRATION,
-            $status ? 1 : 0,
-            ScopeConfigInterface::SCOPE_TYPE_DEFAULT,
-            0
-        );
-        if($current_status != $status){
-            $this->cacheTypeList->cleanType('config');
-            $this->cacheTypeList->cleanType('full_page');
-        }
     }
 
     /**

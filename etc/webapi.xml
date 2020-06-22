@@ -91,4 +91,10 @@
             <resource ref="Magento_Backend::all"/>
         </resources>
     </route>
+    <route url="/V1/mgconnector/unsubscribe" method="POST">
+        <service class="Remarkety\Mgconnector\Api\DataInterface" method="unsubscribe"/>
+        <resources>
+            <resource ref="Magento_Backend::all"/>
+        </resources>
+    </route>
 </routes>

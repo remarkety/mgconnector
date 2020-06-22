@@ -57,8 +57,4 @@
     <event name="catalog_product_delete_commit_after">
         <observer name="remarkety_catalog_product_delete_commit_after_observer" instance="Remarkety\Mgconnector\Observer\TriggerProductDelete"/>
     </event>
-
-    <event name="controller_action_predispatch_checkout_cart_couponPost">
-        <observer name="remarkety_checkout_cart_coupon_post_before" instance="Remarkety\Mgconnector\Observer\TriggerCouponExpiration"/>
-    </event>
 </config>

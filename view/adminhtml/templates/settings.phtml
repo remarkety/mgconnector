@@ -143,29 +143,5 @@
         </div>
     </fieldset>
 
-    <fieldset class="admin__fieldset">
-        <legend class="admin__legend">Addons</legend>
-        <div class="admin__field">
-            <label for="pos_id" class="admin__field-label">
-                <span><?php echo __('Coupon Expiration') ?></span>
-            </label>
-
-            <div class="admin__field-control _with-tooltip">
-                <select id="coupon_expiration" name="coupon_expiration" class="admin__control-select">
-                    <?php foreach($this->getEnabledDisabledOptions() as $code => $name): ?>
-                        <option
-                                value="<?php echo $code; ?>"
-                            <?php if($code && $this->getAddonCouponExpiration()){ echo 'selected="selected"'; } ?>
-                        ><?php echo $name; ?></option>
-                    <?php endforeach; ?>
-                </select>
-                <div class="admin__field-tooltip">
-                    <span class="admin__field-tooltip-action action-help"></span>
-                    <div class="admin__field-tooltip-content">Check Expiration date to coupons.</div>
-                </div>
-            </div>
-        </div>
-    </fieldset>
-
     <input name="form_key" type="hidden" value="<?php echo $this->getFormKey() ?>" />
 </form>

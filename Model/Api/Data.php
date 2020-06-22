@@ -5,6 +5,7 @@ use Magento\Catalog\Model\Category;
 use Magento\Customer\Model\Address;
 use Magento\Framework\App\Cache\TypeListInterface;
 use Magento\Framework\DataObject;
+use Magento\Newsletter\Model\SubscriberFactory;
 use Magento\Quote\Model\Quote\Item;
 use Magento\Sales\Model\Order;
 use Remarkety\Mgconnector\Api\Data\QueueInterface;
@@ -80,6 +81,7 @@ class Data implements DataInterface
     protected $stockRegistry;
     protected $recoveryHelper;
     protected $addressSerializer;
+    protected $subscriberFactory;
     /**
      * @var \Magento\Newsletter\Model\Subscriber
      */
@@ -329,7 +331,8 @@ class Data implements DataInterface
         AddressSerializer $addressSerializer,
         ConfigHelper $configHelper,
         DataOverride $dataOverride,
-        RewardPointsFactory $rewardPointsFactory
+        RewardPointsFactory $rewardPointsFactory,
+        SubscriberFactory $subscriberFactory
     )
     {
         $this->dataHelper = $dataHelper;
@@ -372,6 +375,7 @@ class Data implements DataInterface
         $this->dataOverride = $dataOverride;
         $this->pos_id_attribute_code = $this->configHelper->getPOSAttributeCode();
         $this->customerRewardPointsService = $rewardPointsFactory->create();
+        $this->subscriberFactory = $subscriberFactory;
     }
 
     /**
@@ -841,22 +845,27 @@ class Data implements DataInterface
 
         $orders->addFieldToFilter('main_table.store_id', array('eq' => $mage_store_id));
         if ($updated_at_min != null) {
+            $timestamp = strtotime($updated_at_min);
             $orders->addAttributeToFilter('main_table.updated_at', ['gt' => $this->convertTime($updated_at_min)]);
         }
 
         if ($updated_at_max != null) {
+            $timestamp = strtotime($updated_at_max);
             $orders->addAttributeToFilter('main_table.updated_at', ['lt' => $this->convertTime($updated_at_max)]);
         }
 
         if ($since_id != null) {
+            $timestamp = strtotime($since_id);
             $orders->addAttributeToFilter('main_table.entity_id', ['gt' => $since_id]);
         }
 
         if ($created_at_min != null) {
+            $timestamp = strtotime($created_at_min);
             $orders->addAttributeToFilter('main_table.created_at', ['gt' => $this->convertTime($created_at_min)]);
         }
 
         if ($created_at_max != null) {
+            $timestamp = strtotime($created_at_max);
             $orders->addAttributeToFilter('main_table.created_at', ['lt' => $this->convertTime($created_at_max)]);
         }
 
@@ -1365,7 +1374,7 @@ class Data implements DataInterface
      */
     public function getVersion()
     {
-        return '2.3.12';
+        return '2.3.8';
     }
 
     /**
@@ -1511,6 +1520,37 @@ class Data implements DataInterface
             ]
         ];
         return $ret;
+    }
+
+    public function unsubscribe($mage_store_id, $email) {
+        $result = new DataObject();
+        $result->setStatus('success');
+
+        if (empty($mage_store_id)) {
+            $result->setStatus('error');
+            $result->setMessage('mage_store_id is required parameter');
+        }
+
+        if (empty($email)) {
+            $result->setStatus('error');
+            $result->setMessage('email is required parameter');
+        }
+
+        if ($result->getStatus() == 'error') {
+            throw new \Magento\Framework\Webapi\Exception(__($result->getMessage()), 400);
+        }
+
+        $email = strtolower(trim($email));
+        $subscriber = $this->subscriberFactory->create()->loadByEmail($email);
+        $found_email = strtolower(trim($subscriber->getEmail()));
+        if($found_email == $email){
+            $subscriber->unsubscribe();
+            $result->setMessage('Customer unsubscribed successfuly');
+        } else {
+            $result->setMessage('Newsletter subscriber does not exists');
+        }
+
+        return $result;
     }
 
     private function getFinalPrice($row) {
