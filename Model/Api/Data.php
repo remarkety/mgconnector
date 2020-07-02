@@ -1369,7 +1369,7 @@ class Data implements DataInterface
      */
     public function getVersion()
     {
-        return '2.4.0';
+        return '2.4.1';
     }
 
     /**
@@ -1561,6 +1561,6 @@ class Data implements DataInterface
     private function convertTime($string) {
         $timestamp = strtotime($string);
 
-        return date('Y-m-d h:i:s', $timestamp);
+        return date('Y-m-d H:i:s', $timestamp);
     }
 }
