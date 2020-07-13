@@ -16,6 +16,7 @@ use Magento\Paypal\Model\Express\Checkout\Factory;
 use Magento\Quote\Model\QuoteFactory;
 use Magento\Framework\Controller\ResultFactory;
 use \Magento\Framework\Exception\NotFoundException;
+use Psr\Log\LoggerInterface;
 
 class Recovery extends \Magento\Framework\App\Action\Action
 {
@@ -28,13 +29,20 @@ class Recovery extends \Magento\Framework\App\Action\Action
     protected $context;
     protected $recoveryHelper;
 
+    /**
+     * @var LoggerInterface
+     */
+    protected $logger;
+
     public function __construct(
         Context $context,
         QuoteFactory $quoteFactory,
         Session $checkoutSession,
         ResponseFactory $responseFactory,
-        \Remarkety\Mgconnector\Helper\Recovery $recoveryHelper
+        \Remarkety\Mgconnector\Helper\Recovery $recoveryHelper,
+        LoggerInterface $logger
     ) {
+        $this->logger = $logger;
         $this->quoteFactory = $quoteFactory;
         $this->checkoutSession = $checkoutSession;
         $this->responseFactory = $responseFactory;
@@ -75,7 +83,7 @@ class Recovery extends \Magento\Framework\App\Action\Action
                 }
             }
         } catch (\Exception $e) {
-            throw new NotFoundException(__(self::MESSAGE_ERROR_DURING_PROCESSING));
+            $this->logger->error($e->getMessage());
         }
 
         $resultRedirect = $this->resultRedirect->create(ResultFactory::TYPE_REDIRECT);
