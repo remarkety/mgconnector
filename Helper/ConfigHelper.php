@@ -7,6 +7,7 @@
  */
 
 namespace Remarkety\Mgconnector\Helper;
+use Magento\Customer\Model\Data\Customer;
 use Magento\Framework\App\Cache\TypeList;
 use \Magento\Framework\App\Config\ScopeConfigInterface;
 use Magento\Store\Model\ScopeInterface;
@@ -253,5 +254,16 @@ class ConfigHelper
             0
         );
         $this->cacheTypeList->cleanType('config');
+    }
+
+    public function customerPendingConfirmation(Customer $customer){
+        if(!$customer->getConfirmation()){
+            return false;
+        }
+        return (bool)$this->_scopeConfig->getValue(
+            'customer/create_account/confirm',
+            ScopeInterface::SCOPE_WEBSITES,
+            $customer->getWebsiteId()
+        );
     }
 }

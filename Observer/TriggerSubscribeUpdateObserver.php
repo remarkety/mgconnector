@@ -108,9 +108,15 @@ class TriggerSubscribeUpdateObserver extends EventMethods implements ObserverInt
                         $eventType = 'newsletter/unsubscribed';
                         break;
                     case Subscriber::STATUS_UNCONFIRMED:
-                        return $this;
                     case Subscriber::STATUS_NOT_ACTIVE:
                         return $this;
+                }
+                if($eventType == 'newsletter/unsubscribed') {
+                    if ($this->request->getFullActionName() === 'customer_account_createpost') {
+                        //workaround to prevent "unsubscribe" event when email verification is required
+                        //for new account and email is already approved
+                        return $this;
+                    }
                 }
 
                 $data = $this->_prepareCustomerSubscribtionUpdateData($subscriber, $this->remoteAddress->getRemoteAddress());

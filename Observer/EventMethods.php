@@ -394,4 +394,15 @@ class EventMethods {
 
         $this->_webhooksTimingLogger->info(";" . $eventName . ";" . $totalTime);
     }
+
+    protected function ignoreCustomerUpdate(){
+        $path = $this->request->getFullActionName();
+        if($path == "customer_account_loginPost"){
+            return true;
+        }
+        if($path == "customer_account_confirm"){
+            return true;
+        }
+        return false;
+    }
 }

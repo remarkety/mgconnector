@@ -18,7 +18,7 @@ class TriggerCustomerUpdateObserver extends EventMethods implements ObserverInte
     {
         try {
             $this->startTiming(self::class);
-            if($this->request->getFullActionName() == "customer_account_loginPost"){
+            if($this->ignoreCustomerUpdate()){
                 return $this;
             }
             /**

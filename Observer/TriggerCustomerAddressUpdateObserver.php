@@ -18,7 +18,7 @@ class TriggerCustomerAddressUpdateObserver extends EventMethods implements Obser
     {
         try {
             $this->startTiming(self::class);
-            if($this->request->getFullActionName() == "customer_account_loginPost"){
+            if($this->ignoreCustomerUpdate()){
                 return $this;
             }
             $address = $observer->getEvent()->getCustomerAddress();

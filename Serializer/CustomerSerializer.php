@@ -51,7 +51,14 @@ class CustomerSerializer
 
     public function serialize(Customer $customer){
         if ($this->request->getParam('is_subscribed', false)) {
-            $subscribed = true;
+            //check if waiting for email approval
+            $needsConfirmation = $this->configHelper->customerPendingConfirmation($customer);
+            if($needsConfirmation){
+                //if needs approval, the email might already be subscribed
+                $subscribed = $this->checkSubscriber($customer->getEmail(), $customer->getId());
+            } else {
+                $subscribed = false;
+            }
         } else {
             $subscribed = $this->checkSubscriber($customer->getEmail(), $customer->getId());
         }
