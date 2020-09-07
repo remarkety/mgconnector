@@ -20,8 +20,6 @@ use Psr\Log\LoggerInterface;
 
 class Recovery extends \Magento\Framework\App\Action\Action
 {
-    const MESSAGE_ERROR_WRONG_QUOTE_ID = 'Quote identifier has been not passed or it does not exists.';
-
     protected $quoteFactory;
     protected $checkoutSession;
     protected $responseFactory;
@@ -61,19 +59,16 @@ class Recovery extends \Magento\Framework\App\Action\Action
      */
     public function execute()
     {
-        $hashCart = $this->getRequest()->getParam('cart');
-
-        if (!$hashCart) {
-            throw new NotFoundException(__(self::MESSAGE_ERROR_WRONG_QUOTE_ID));
-        }
-
-        $quote_id = $this->recoveryHelper->decodeQuoteId($hashCart);
-
-        if (!is_int($quote_id)) {
-            throw new NotFoundException(__(self::MESSAGE_ERROR_WRONG_QUOTE_ID));
-        }
-
         try {
+            $hashCart = $this->getRequest()->getParam('cart');
+            if (!$hashCart) {
+                throw new NotFoundException(__('Missing cart id in URL'));
+            }
+            $quote_id = $this->recoveryHelper->decodeQuoteId($hashCart);
+            if (!is_int($quote_id)) {
+                throw new NotFoundException(__('Invalid cart id from URL'));
+            }
+
             $current_quote = $this->checkoutSession->getQuoteId();
             if($current_quote != $quote_id) {
                 $quote = $this->quoteFactory->create()->load($quote_id);
