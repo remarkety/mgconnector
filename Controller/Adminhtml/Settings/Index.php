@@ -90,6 +90,10 @@ class Index extends \Magento\Backend\App\Action
             $this->configHelper->setAheadworksRewardPointsEnabled($data['aw_rewards_integrate'] == 1);
         }
 
+        if(isset($data['customer_address'])) {
+            $this->configHelper->setCustomerAddressType($data['customer_address']);
+        }
+
         return true;
     }
 }

@@ -29,6 +29,7 @@ class CustomerSerializer
     private $configHelper;
     private $pos_id_attribute_code;
     private $dataOverride;
+    private $dataHelper;
     public function __construct(
         Subscriber $subscriber,
         AddressSerializer $addressSerializer,
@@ -36,7 +37,8 @@ class CustomerSerializer
         RequestInterface $request,
         \Psr\Log\LoggerInterface $logger = null,
         ConfigHelper $configHelper,
-        DataOverride $dataOverride
+        DataOverride $dataOverride,
+        Data $dataHelper
     )
     {
         $this->subscriber = $subscriber;
@@ -47,6 +49,7 @@ class CustomerSerializer
         $this->configHelper = $configHelper;
         $this->pos_id_attribute_code = $configHelper->getPOSAttributeCode();
         $this->dataOverride = $dataOverride;
+        $this->dataHelper = $dataHelper;
     }
 
     public function serialize(Customer $customer){
@@ -89,11 +92,7 @@ class CustomerSerializer
                 break;
         }
 
-        $addresses = $customer->getAddresses();
-        if(!empty($addresses)){
-            $address = array_pop($addresses);
-        }
-
+        $address = $this->dataHelper->getCustomerAddresses($customer);
         $pos_id = $this->getPosId($customer);
 
         $customerInfo = [
@@ -106,7 +105,7 @@ class CustomerSerializer
             'created_at' => $created_at->format(\DateTime::ATOM ),
             'updated_at' => $updated_at->format(\DateTime::ATOM ),
             'guest' => false,
-            'default_address' => empty($address) ? null : $this->addressSerializer->serialize($address),
+            'default_address' => $address,
             'groups' => $groups,
             'gender' => $gender,
             'birthdate' => $customer->getDob(),

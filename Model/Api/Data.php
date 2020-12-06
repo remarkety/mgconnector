@@ -677,7 +677,7 @@ class Data implements DataInterface
                     }
                 }
             }
-            $customers['default_address'] = $this->getCustomerAddresses($customer);
+            $customers['default_address'] = $this->dataHelper->getCustomerAddresses($customer);
             $group = $this->customerGroupFactory->load($customer->getGroupId());
             $customers['groups'] = array();
             $customers['groups'][] = [
@@ -700,32 +700,6 @@ class Data implements DataInterface
         $object = new DataObject();
         $object->setCustomers($customerArray);
         return $object;
-    }
-
-
-    public function getCustomerAddresses($customer){
-
-        $addresses = $customer->getAddresses();
-        $address = null;
-        if(!empty($addresses)){
-            $billingAddressId = $customer->getDefaultBilling();
-            $shippingAddressId = $customer->getDefaultShipping();
-            if($shippingAddressId) {
-                if (array_key_exists($shippingAddressId, $addresses)) {
-                    $address = $addresses[$shippingAddressId];
-                }
-            }
-            if(empty($address) && $billingAddressId) {
-                if (array_key_exists($billingAddressId, $addresses)) {
-                    $address = $addresses[$billingAddressId];
-                }
-            }
-            if(empty($address)){
-                $address = array_pop($addresses);
-            }
-        }
-
-        return $address ? $this->addressSerializer->serialize($address) : null;
     }
 
     /**
@@ -787,7 +761,7 @@ class Data implements DataInterface
         }
         $customers['pos_id'] = $pos_id;
         $customers['accepts_marketing'] = $this->checkSubscriber($customerData->getEmail(), $customer_id);
-        $customers['default_address'] = $this->getCustomerAddresses($customerData);
+        $customers['default_address'] = $this->dataHelper->getCustomerAddresses($customerData);
         return $this->dataOverride->customer($customerData, $customers);
     }
 
@@ -903,10 +877,14 @@ class Data implements DataInterface
             if ($order->getCustomerId()) {
                 $ord['customer'] = $this->getCustomerDataById($order->getCustomerId());
             } else {
+                $addressId = $order->getBillingAddressId();
+                if($this->configHelper->getCustomerAddressType() === ConfigHelper::CUSTOMER_ADDRESS_SHIPPING){
+                    $addressId = $order->getShippingAddressId();
+                }
                 /**
                  * @var Order\Address $billingAddressData
                  */
-                $billingAddressData = $this->getGuestBillingAddressData($order->getBillingAddressId());
+                $billingAddressData = $this->getGuestBillingAddressData($addressId);
                 $address = $this->getAddressData($billingAddressData);
 
                 $ord['customer']['email'] = $billingAddressData->getEmail();
@@ -1369,7 +1347,7 @@ class Data implements DataInterface
      */
     public function getVersion()
     {
-        return '2.4.4';
+        return '2.4.5';
     }
 
     /**

@@ -6,6 +6,7 @@ use Magento\Catalog\Api\Data\ProductAttributeMediaGalleryEntryInterface;
 use Magento\Catalog\Api\Data\ProductInterface;
 use Magento\TestFramework\Inspection\Exception;
 use \Remarkety\Mgconnector\Model\Install as InstallModel;
+use Remarkety\Mgconnector\Serializer\AddressSerializer;
 
 class Data extends \Magento\Framework\App\Helper\AbstractHelper
 {
@@ -15,6 +16,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
     private $categoryMapCache = [];
     protected $categoryFactory;
     protected $configHelper;
+    protected $addressSerializer;
     public function __construct(\Magento\Framework\App\Helper\Context $context,
                                 \Magento\Framework\Module\ModuleResource $moduleResource,
                                 \Magento\Integration\Model\Integration $integration,
@@ -24,7 +26,8 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
                                 \Magento\Catalog\Model\Product\Gallery\GalleryManagement $galleryManagement,
                                 \Magento\ConfigurableProduct\Model\ResourceModel\Product\Type\Configurable $catalogProductTypeConfigurable,
                                 \Magento\Catalog\Model\CategoryFactory $categoryFactory,
-                                ConfigHelper $configHelper
+                                ConfigHelper $configHelper,
+                                AddressSerializer $addressSerializer
     ){
         $this->integration = $integration;
         $this->moduleResource = $moduleResource;
@@ -35,6 +38,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         $this->_catalogProductTypeConfigurable = $catalogProductTypeConfigurable;
         $this->categoryFactory = $categoryFactory;
         $this->configHelper = $configHelper;
+        $this->addressSerializer = $addressSerializer;
         parent::__construct($context);
     }
 
@@ -203,5 +207,33 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
             $str[0] = strtolower($str[0]);
         }
         return $str;
+    }
+
+    public function getCustomerAddresses($customer){
+        $addresses = $customer->getAddresses();
+        $address = null;
+        $toUse = $this->configHelper->getCustomerAddressType();
+        if(!empty($addresses)){
+            $addressId = null;
+            if($toUse === ConfigHelper::CUSTOMER_ADDRESS_BILLING){
+                $addressId = $customer->getDefaultBilling();
+            } else {
+                $addressId = $customer->getDefaultShipping();
+            }
+            if($addressId) {
+                $address = $this->findAddressById($addresses, $addressId);
+            }
+        }
+
+        return $address ? $this->addressSerializer->serialize($address) : null;
+    }
+
+    private function findAddressById($addresses, $id){
+        foreach ($addresses as $address){
+            if($address->getId() === $id){
+                return $address;
+            }
+        }
+        return null;
     }
 }

@@ -5,6 +5,7 @@ namespace Remarkety\Mgconnector\Observer;
 use Magento\Framework\Event\ObserverInterface;
 use Magento\Customer\Model\Address;
 use Magento\Customer\Model\CustomerFactory;
+use Remarkety\Mgconnector\Helper\ConfigHelper;
 
 class TriggerCustomerAddressUpdateObserver extends EventMethods implements ObserverInterface
 {
@@ -30,14 +31,20 @@ class TriggerCustomerAddressUpdateObserver extends EventMethods implements Obser
             $this->customerRegistry->remove($customerId);
             $customer = $this->customerRepository->getById($customerId);
 
+            $toUse = $this->configHelper->getCustomerAddressType();
+            $isDefaultAddress = false;
+            if($toUse === ConfigHelper::CUSTOMER_ADDRESS_BILLING && $address->getIsDefaultBilling()){
+                $isDefaultAddress = true;
+            } elseif($toUse === ConfigHelper::CUSTOMER_ADDRESS_SHIPPING && $address->getIsDefaultShipping()){
+                $isDefaultAddress = true;
+            }
+            if (!$isDefaultAddress || !$customer->getId()) {
+                return $this;
+            }
             if($this->_coreRegistry->registry('remarkety_customer_address_updated_'.$customer->getId())) {
                 return $this;
             }
 
-            $isDefaultAddress = $address->getIsDefaultShipping() || $address->getIsDefaultBilling();
-            if (!$isDefaultAddress || !$customer->getId()) {
-                return $this;
-            }
             $this->_coreRegistry->register('remarkety_customer_address_updated_'.$customer->getId(),true);
 
             $this->_customerUpdate($customer);

@@ -49,6 +49,10 @@ class Form extends Template
         return $this->formKey->getFormKey();
     }
 
+    public function getCustomerAddress(){
+        return $this->configHelper->getCustomerAddressType();
+    }
+
     public function getPosIdOptions(){
         $attribute_data = [];
         foreach ($this->attributesCollection as $item) {

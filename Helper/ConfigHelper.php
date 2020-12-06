@@ -29,10 +29,14 @@ class ConfigHelper
     const EVENT_SEARCH_VIEW_ENABLED = 'remarkety/mgconnector/event_search_view_enabled';
     const EVENT_CATEGORY_VIEW_ENABLED = 'remarkety/mgconnector/event_category_view_enabled';
     const ENABLE_AHEADWORKS_REWARD_POINTS = 'remarkety/mgconnector/aheadworks_reward_points';
+    const CUSTOMER_ADDRESS_TO_USE = 'remarkety/mgconnector/customer_address_to_use';
 
     const ASYNC_MODE_OFF = 0;
     const ASYNC_MODE_ON = 1;
     const ASYNC_MODE_ON_CUSTOMERS_SYNC = 2;
+
+    const CUSTOMER_ADDRESS_BILLING = 'billing';
+    const CUSTOMER_ADDRESS_SHIPPING = 'shipping';
 
     protected $_activeStore;
     protected $_scopeConfig;
@@ -207,6 +211,28 @@ class ConfigHelper
             return true;
         }
         return false;
+    }
+
+    public function getCustomerAddressType(){
+        $val = $this->_scopeConfig->getValue(self::CUSTOMER_ADDRESS_TO_USE);
+        if(!empty($val)){
+            return $val;
+        }
+        return self::CUSTOMER_ADDRESS_BILLING;
+    }
+
+    public function setCustomerAddressType($type){
+        $val = self::CUSTOMER_ADDRESS_BILLING;
+        if($type === self::CUSTOMER_ADDRESS_SHIPPING){
+            $val = $type;
+        }
+        $this->configResource->saveConfig(
+            self::CUSTOMER_ADDRESS_TO_USE,
+            $val,
+            ScopeConfigInterface::SCOPE_TYPE_DEFAULT,
+            0
+        );
+        $this->cacheTypeList->cleanType('config');
     }
 
     public function forceSyncCustomersWebhooks(){

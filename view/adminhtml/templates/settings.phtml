@@ -58,6 +58,22 @@
                 </div>
             </div>
         </div>
+        <div class="admin__field">
+            <label for="with_fpt" class="admin__field-label">
+                <span><?php echo __('Customer address field') ?></span>
+            </label>
+
+            <div class="admin__field-control _with-tooltip">
+                <select id="customer_address" name="customer_address" class="admin__control-select">
+                    <option value="billing" <?php if('billing' == $this->getCustomerAddress()){ echo 'selected="selected"'; } ?>>Billing Address</option>
+                    <option value="shipping" <?php if('shipping' == $this->getCustomerAddress()){ echo 'selected="selected"'; } ?>>Shipping Address</option>
+                </select>
+                <div class="admin__field-tooltip">
+                    <span class="admin__field-tooltip-action action-help"></span>
+                    <div class="admin__field-tooltip-content">Which default customer address should be sent to Remarkety (default: Billing address).</div>
+                </div>
+            </div>
+        </div>
         <?php if($this->isIsAwPointsPluginExists()): ?>
             <div class="admin__field">
                 <label for="aw_rewards_integrate" class="admin__field-label">

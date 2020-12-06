@@ -6,6 +6,7 @@ use Magento\Customer\Model\ResourceModel\CustomerRepository;
 use Magento\Newsletter\Model\Subscriber;
 use Magento\Sales\Model\Order\Shipment;
 use Magento\ConfigurableProduct\Model\Product\Type\Configurable;
+use Remarkety\Mgconnector\Helper\ConfigHelper;
 use Remarkety\Mgconnector\Helper\DataOverride;
 
 class OrderSerializer
@@ -21,6 +22,7 @@ class OrderSerializer
     private $customerSerializer;
     private $subscriber;
     private $dataOverride;
+    private $configHelper;
 
     public function __construct(
         CustomerRepository $customerRepository,
@@ -29,7 +31,8 @@ class OrderSerializer
         AddressSerializer $addressSerializer,
         CustomerSerializer $customerSerializer,
         Subscriber $subscriber,
-        DataOverride $dataOverride
+        DataOverride $dataOverride,
+        ConfigHelper $configHelper
     )
     {
         $this->customerRepository = $customerRepository;
@@ -39,6 +42,7 @@ class OrderSerializer
         $this->customerSerializer = $customerSerializer;
         $this->subscriber = $subscriber;
         $this->dataOverride = $dataOverride;
+        $this->configHelper = $configHelper;
     }
 
     public function serialize(\Magento\Sales\Model\Order $order){
@@ -113,17 +117,21 @@ class OrderSerializer
             $customer = $this->customerRepository->getById($order->getCustomerId());
             $customerInfo = $this->customerSerializer->serialize($customer);
         } else {
-            $billingAddress = $order->getBillingAddress();
+            if($this->configHelper->getCustomerAddressType() === ConfigHelper::CUSTOMER_ADDRESS_BILLING){
+                $address = $order->getBillingAddress();
+            } else {
+                $address = $order->getShippingAddress();
+            }
             $customerInfo = [
                 'accepts_marketing' => $this->checkSubscriber($order->getCustomerEmail(), null),
                 'email' => $order->getCustomerEmail(),
-                'title' => empty($billingAddress) ? null : $billingAddress->getPrefix(),
-                'first_name' => empty($billingAddress) ? null : $billingAddress->getFirstname(),
-                'last_name' => empty($billingAddress) ? null : $billingAddress->getLastname(),
+                'title' => empty($address) ? null : $address->getPrefix(),
+                'first_name' => empty($address) ? null : $address->getFirstname(),
+                'last_name' => empty($address) ? null : $address->getLastname(),
                 'created_at' => $created_at->format(\DateTime::ATOM ),
                 'updated_at' => $created_at->format(\DateTime::ATOM ),
                 'guest' => true,
-                'default_address' => empty($billingAddress) ? null : $this->addressSerializer->serialize($billingAddress)
+                'default_address' => empty($address) ? null : $this->addressSerializer->serialize($address)
             ];
         }
 
