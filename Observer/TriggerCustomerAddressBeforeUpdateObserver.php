@@ -5,7 +5,6 @@ namespace Remarkety\Mgconnector\Observer;
 use Magento\Framework\Event\ObserverInterface;
 use Magento\Customer\Model\CustomerFactory;
 
-
 class TriggerCustomerAddressBeforeUpdateObserver extends EventMethods implements ObserverInterface
 {
 
@@ -18,10 +17,10 @@ class TriggerCustomerAddressBeforeUpdateObserver extends EventMethods implements
     public function execute(\Magento\Framework\Event\Observer $observer)
     {
         try {
-            if($this->request->getFullActionName() == "customer_account_loginPost"){
+            if ($this->request->getFullActionName() == "customer_account_loginPost") {
                 return $this;
             }
-        } catch (\Exception $ex){
+        } catch (\Exception $ex) {
             $this->logError($ex);
         }
         return $this;

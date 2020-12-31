@@ -1,5 +1,6 @@
 <?php
 namespace Remarkety\Mgconnector\Model;
+
 class Queue extends \Magento\Framework\Model\AbstractModel implements \Remarkety\Mgconnector\Api\Data\QueueInterface, \Magento\Framework\DataObject\IdentityInterface
 {
     const CACHE_TAG = 'remarkety_mgconnector_queue';
@@ -89,7 +90,7 @@ class Queue extends \Magento\Framework\Model\AbstractModel implements \Remarkety
     {
 
         return $this->setData('queue_id', $queueId);
-}
+    }
     /**
      * Set ID
      *
@@ -172,7 +173,7 @@ class Queue extends \Magento\Framework\Model\AbstractModel implements \Remarkety
      */
     public function getStoreId()
     {
-        return $this->getData('store_id' );
+        return $this->getData('store_id');
     }
 
     /**
@@ -181,6 +182,6 @@ class Queue extends \Magento\Framework\Model\AbstractModel implements \Remarkety
      */
     public function setStoreId($storeId)
     {
-        return $this->setData( 'store_id', $storeId );
+        return $this->setData('store_id', $storeId);
     }
 }

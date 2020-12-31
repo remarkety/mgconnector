@@ -23,17 +23,17 @@ class Form extends Generic
 
         $fieldset = $form->addFieldset(
             'general',
-            array(
+            [
                 'legend' => __('Upgrade Remarkety extension')
-            )
+            ]
         );
 
-        $fieldset->addField('mode', 'hidden', array(
+        $fieldset->addField('mode', 'hidden', [
             'name' => 'data[mode]',
             'value' => 'upgrade',
-        ));
+        ]);
 
-            $fieldset->addField('instruction', 'note', array(
+            $fieldset->addField('instruction', 'note', [
             'text'     => '',
             'label' => false,
             'after_element_html' =>
@@ -42,15 +42,15 @@ class Form extends Generic
                 . '<br><br>'
                 . __('It seems that you have already installed Remarkety on this website before. This
                 version of the plugin will create a new API key, and automatically inform
-                Remarkety. If this is a mistake, please <a href="%s">click here</a>.</p>', $this->getUrl('*/install/install', array('mode' => 'install_create')))
-        ));
+                Remarkety. If this is a mistake, please <a href="%s">click here</a>.</p>', $this->getUrl('*/install/install', ['mode' => 'install_create']))
+            ]);
 
-        $fieldset->addField('button', 'note', array(
+        $fieldset->addField('button', 'note', [
             'label' => false,
             'name' => 'button',
             'after_element_html' => '<button id="submit-form" type="button" class="save"><span><span>'
                 . 'Complete Installation' . '</span></span></button>',
-        ));
+        ]);
         $this->setForm($form);
         return parent::_prepareForm();
     }

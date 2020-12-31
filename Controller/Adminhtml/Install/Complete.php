@@ -18,15 +18,15 @@ class Complete extends \Magento\Backend\App\Action
     protected $resultPageFactory;
     protected $installModel;
 
-    public function __construct(Context $context,
-                                PageFactory $resultPageFactory,
-                                InstallModel $installModel
-    ){
+    public function __construct(
+        Context $context,
+        PageFactory $resultPageFactory,
+        InstallModel $installModel
+    ) {
         parent::__construct($context);
         $this->installModel = $installModel;
         $this->resultPageFactory = $resultPageFactory;
         $this->_messageManager = $context->getMessageManager();
-
     }
 
     public function execute()
@@ -34,14 +34,14 @@ class Complete extends \Magento\Backend\App\Action
         $redirectBack = true;
         $params = $this->getRequest()->getParams();
 
-        if($this->getRequest()->isPost()) {
+        if ($this->getRequest()->isPost()) {
             $params = $this->getRequest()->getParams();
 
             try {
                 $install = $this->installModel
                     ->setData($params['data']);
 
-                switch($params['data']['mode']) {
+                switch ($params['data']['mode']) {
                     case InstallModel::MODE_INSTALL_CREATE:
                         $install->installByCreateExtension();
                         break;
@@ -59,18 +59,18 @@ class Complete extends \Magento\Backend\App\Action
                 }
 //
                 $redirectBack = false;
-            } catch(\Exception $e) {
+            } catch (\Exception $e) {
                 $this->_messageManager->addError(__($e->getMessage()));
 
                 $this->_redirect('*/install/install');
             }
         }
 
-        if($redirectBack) {
+        if ($redirectBack) {
             $mode = isset($params['data']['mode']) ? $params['data']['mode'] : null;
-            $this->_redirect('*/install/install', array('mode' => $mode));
+            $this->_redirect('*/install/install', ['mode' => $mode]);
         } else {
-            $this->_redirect('*/install/install', array('mode' => 'welcome'));
+            $this->_redirect('*/install/install', ['mode' => 'welcome']);
         }
     }
 }

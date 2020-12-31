@@ -19,7 +19,8 @@ use Remarkety\Mgconnector\Serializer\OrderSerializer;
 use Remarkety\Mgconnector\Serializer\ProductSerializer;
 use Psr\Log\LoggerInterface;
 
-class EventMethods {
+class EventMethods
+{
 
     const REMARKETY_EVENTS_ENDPOINT = 'https://webhooks.remarkety.com/webhooks';
     const REMARKETY_METHOD = 'POST';
@@ -95,7 +96,7 @@ class EventMethods {
         CustomerRepository $customerRepository,
         CustomerRegistry $customerRegistry,
         StoreManager $storeManager
-        ){
+    ) {
         $this->storeManager = $storeManager;
         $this->customerRegistry = $customerRegistry;
         $this->customerRepository = $customerRepository;
@@ -118,7 +119,7 @@ class EventMethods {
 
         $this->_token = $this->scopeConfigInterface->getValue('remarkety/mgconnector/api_key');
         $intervals = $this->scopeConfigInterface->getValue('remarkety/mgconnector/intervals');
-        if(empty($intervals)){
+        if (empty($intervals)) {
             $this->_intervals = [1,3,10];
         } else {
             $this->_intervals = explode(',', $intervals);
@@ -128,36 +129,39 @@ class EventMethods {
         $this->_enableWebhooksTiming = $configHelper->shouldLogWebhooksTiming();
 
         try {
-            if($this->_enableWebhooksTiming) {
+            if ($this->_enableWebhooksTiming) {
                 $writer = new \Zend\Log\Writer\Stream(BP . '/var/log/remarkety_webhooks_timing.log');
                 $this->_webhooksTimingLogger = new \Zend\Log\Logger();
                 $this->_webhooksTimingLogger->addWriter($writer);
             }
-        } catch (\Exception $ex){
+        } catch (\Exception $ex) {
             $this->logError($ex);
         }
     }
 
-    protected function isWebhooksEnabled($store){
-        if(!$this->configHelper->isWebhooksGloballyEnabled()){
+    protected function isWebhooksEnabled($store)
+    {
+        if (!$this->configHelper->isWebhooksGloballyEnabled()) {
             return false;
         }
         return $this->isWebhooksEnabledSpecificStore($store);
     }
 
-    protected function isWebhooksEnabledSpecificStore($store){
+    protected function isWebhooksEnabledSpecificStore($store)
+    {
         return !empty($this->configHelper->getRemarketyPublicId($store));
     }
 
-    protected function shouldSendProductUpdates(){
+    protected function shouldSendProductUpdates()
+    {
         return $this->configHelper->shouldSendProductUpdates();
     }
 
     protected function _customerUpdate(\Magento\Customer\Api\Data\CustomerInterface $customer, $isNew = false)
     {
-        if($this->isWebhooksEnabled($customer->getStoreId())) {
+        if ($this->isWebhooksEnabled($customer->getStoreId())) {
             $eventType = self::EVENT_CUSTOMERS_UPDATED;
-            if($isNew){
+            if ($isNew) {
                 $eventType = self::EVENT_CUSTOMERS_CREATE;
             }
             $data = $this->customerSerializer->serialize($customer);
@@ -178,19 +182,19 @@ class EventMethods {
                 CURLOPT_HEADER => true
             ]
         ];
-        if($async){
+        if ($async) {
             $config['timeout'] = 10;
             $config['request_timeout'] = 10;
         }
         return $config;
     }
 
-    protected function _getHeaders($eventType,$payload, $storeId = null)
+    protected function _getHeaders($eventType, $payload, $storeId = null)
     {
         $domain = $this->_store->getBaseUrl(UrlInterface::URL_TYPE_WEB);
         $domain = substr($domain, 7, -1);
 
-        if(empty($storeId) && isset($payload['storeId'])){
+        if (empty($storeId) && isset($payload['storeId'])) {
             $storeId = $payload['storeId'];
         }
 
@@ -205,14 +209,15 @@ class EventMethods {
         return $headers;
     }
 
-    protected function shouldSendEvent($eventType, $payload, $storeId){
-        $data = array(
+    protected function shouldSendEvent($eventType, $payload, $storeId)
+    {
+        $data = [
             'eventType' => $eventType,
             'payload' => $payload,
             'storeId' => $storeId
-        );
+        ];
         $hash = md5(serialize($data));
-        if($this->_coreRegistry->registry($hash)){
+        if ($this->_coreRegistry->registry($hash)) {
             return false;
         }
         $this->_coreRegistry->register($hash, 1);
@@ -223,16 +228,16 @@ class EventMethods {
     {
         try {
             $this->startTiming('makeRequest_'.$eventType);
-            if(!$this->shouldSendEvent($eventType, $payload, $storeId)){
+            if (!$this->shouldSendEvent($eventType, $payload, $storeId)) {
                 //safety for not sending the same event on same event
                 $this->logger->debug('Event already sent ' . $eventType);
                 return true;
             }
 
             $url = self::REMARKETY_EVENTS_ENDPOINT;
-            if(!empty($storeId)){
+            if (!empty($storeId)) {
                 $remarketyId = $this->configHelper->getRemarketyPublicId($storeId);
-                if(empty($remarketyId)){
+                if (empty($remarketyId)) {
                     return false;
                 }
                 $url .= '?storeId=' . $remarketyId;
@@ -240,7 +245,7 @@ class EventMethods {
             $payload = array_merge($payload, $this->_getPayloadBase($eventType));
 
             $sync = $forceSync || ($this->_forceSyncWebhooks && $this->_countEvents < 3);
-            if(empty($queueId) && !$sync){
+            if (empty($queueId) && !$sync) {
                 //batch update, push to queue
                 $this->_queueRequest($eventType, $payload, 0, null, $storeId);
                 return true;
@@ -268,7 +273,7 @@ class EventMethods {
                     $err = $response->getStatus() . ' - ' . $response->getRawBody();
                     $this->_queueRequest($eventType, $payload, $attempt+1, $queueId, $storeId, $err);
             }
-        } catch(\Exception $e) {
+        } catch (\Exception $e) {
             $err = $e->getCode() . ' - ' . $e->getMessage();
             $this->_queueRequest($eventType, $payload, $attempt+1, $queueId, $storeId, $err);
         }
@@ -280,26 +285,26 @@ class EventMethods {
     {
 
         $queueModel = null;
-        if($attempt == 0 || !empty($this->_intervals[$attempt-1])) {
+        if ($attempt == 0 || !empty($this->_intervals[$attempt-1])) {
             $now = time();
-            if($attempt == 0){
+            if ($attempt == 0) {
                 $nextAttempt = $now;
             } else {
                 $nextAttempt = $now + (int)$this->_intervals[$attempt-1] * 60;
             }
-            if($queueId) {
+            if ($queueId) {
                 $queueModel = $this->_remarketyQueueRepo->getById($queueId);
                 $queueModel->setAttempts($attempt);
-                $queueModel->setLastAttempt( date("Y-m-d H:i:s", $now) );
-                $queueModel->setNextAttempt( date("Y-m-d H:i:s", $nextAttempt) );
+                $queueModel->setLastAttempt(date("Y-m-d H:i:s", $now));
+                $queueModel->setNextAttempt(date("Y-m-d H:i:s", $nextAttempt));
                 $queueModel->setStoreId($storeId);
-                if(!empty($err)){
+                if (!empty($err)) {
                     $queueModel->setLastErrorMessage($err);
                 }
             } else {
                 $queueModel = $this->queueFactory->create();
                 $this->_remarketyQueueRepo->save($queueModel);
-                $queueModel->setData(array(
+                $queueModel->setData([
                     'event_type' => $eventType,
                     'payload' => json_encode($payload),
                     'attempts' => $attempt,
@@ -307,13 +312,13 @@ class EventMethods {
                     'next_attempt' => date("Y-m-d H:i:s", $nextAttempt),
                     'status' => 1,
                     'store_id' => $storeId
-                ));
-                if(!empty($err)){
+                ]);
+                if (!empty($err)) {
                     $queueModel->setLastErrorMessage($err);
                 }
             }
             return $this->_remarketyQueueRepo->save($queueModel);
-        } elseif($queueId) {
+        } elseif ($queueId) {
             $queueModel = $this->_remarketyQueueRepo->getById($queueId);
             $queueModel->setAttempts($attempt);
             $queueModel->setStatus(0);
@@ -325,28 +330,28 @@ class EventMethods {
     protected function _getPayloadBase($eventType)
     {
         date_default_timezone_set('UTC');
-        $arr = array(
+        $arr = [
             'timestamp' => (string)time(),
             'event_id' => $eventType,
-        );
+        ];
         return $arr;
     }
 
 
     protected function _prepareCustomerSubscribtionUpdateData(Subscriber $subscriber, $clientIp = null)
     {
-        $arr = array(
+        $arr = [
             'email' => $subscriber->getSubscriberEmail(),
             'accepts_marketing' => $subscriber->getSubscriberStatus() == \Magento\Newsletter\Model\Subscriber::STATUS_SUBSCRIBED,
             'storeId' => $subscriber->getStoreId()
-        );
+        ];
 
-        if(!empty($clientIp)){
+        if (!empty($clientIp)) {
             $arr['client_ip'] = $clientIp;
         }
 
         $customerId = $subscriber->getCustomerId();
-        if(!empty($customerId)){
+        if (!empty($customerId)) {
             $arr['customerId'] = $customerId;
         }
 
@@ -355,16 +360,17 @@ class EventMethods {
 
     protected function _prepareCustomerSubscribtionDeleteData(Subscriber $subscriber)
     {
-        $arr = array(
+        $arr = [
             'email' => $subscriber->getSubscriberEmail(),
             'accepts_marketing' => false,
             'storeId' => $subscriber->getStoreId()
-        );
+        ];
 
         return $arr;
     }
 
-    public function logError(\Exception $exception){
+    public function logError(\Exception $exception)
+    {
         $this->logger->error("Remarkety:".self::class." - " . $exception->getMessage(), [
             'message' => $exception->getMessage(),
             'line' => $exception->getLine(),
@@ -373,20 +379,24 @@ class EventMethods {
         ]);
     }
 
-    protected function startTiming($eventName){
-        if(!$this->_enableWebhooksTiming)
+    protected function startTiming($eventName)
+    {
+        if (!$this->_enableWebhooksTiming) {
             return;
+        }
         $eventName = trim(strtolower($eventName));
         $this->_timings[$eventName] = microtime(true);
     }
 
     protected function endTiming($eventName)
     {
-        if(!$this->_enableWebhooksTiming || !$this->_webhooksTimingLogger)
+        if (!$this->_enableWebhooksTiming || !$this->_webhooksTimingLogger) {
             return;
+        }
         $eventName = trim(strtolower($eventName));
-        if(!isset($this->_timings[$eventName]))
+        if (!isset($this->_timings[$eventName])) {
             return;
+        }
         $ended = microtime(true);
         $started = $this->_timings[$eventName];
         unset($this->_timings[$eventName]);
@@ -395,12 +405,13 @@ class EventMethods {
         $this->_webhooksTimingLogger->info(";" . $eventName . ";" . $totalTime);
     }
 
-    protected function ignoreCustomerUpdate(){
+    protected function ignoreCustomerUpdate()
+    {
         $path = $this->request->getFullActionName();
-        if($path == "customer_account_loginPost"){
+        if ($path == "customer_account_loginPost") {
             return true;
         }
-        if($path == "customer_account_confirm"){
+        if ($path == "customer_account_confirm") {
             return true;
         }
         return false;

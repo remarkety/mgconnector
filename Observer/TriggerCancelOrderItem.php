@@ -8,7 +8,6 @@
 
 namespace Remarkety\Mgconnector\Observer;
 
-
 use Magento\Framework\Event\ObserverInterface;
 
 class TriggerCancelOrderItem extends EventMethods implements ObserverInterface

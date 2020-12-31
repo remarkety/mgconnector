@@ -46,7 +46,8 @@ class UpgradeSchema implements UpgradeSchemaInterface
         $setup->endSetup();
     }
 
-    private function getConnection($setup) {
+    private function getConnection($setup)
+    {
         if (!$this->connection) {
             $this->connection = $setup->getConnection();
         }

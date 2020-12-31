@@ -8,7 +8,6 @@
 
 namespace Remarkety\Mgconnector\Observer;
 
-
 use Magento\Framework\Event\Observer;
 use Magento\Framework\Event\ObserverInterface;
 use Magento\Sales\Model\Order;
@@ -41,9 +40,8 @@ class TriggerOrderUpdated extends EventMethods implements ObserverInterface
                 $this->makeRequest($eventType, $data, $order->getStore()->getId());
             }
             $this->endTiming(self::class);
-        } catch (\Exception $ex){
+        } catch (\Exception $ex) {
             $this->logError($ex);
         }
     }
-
 }

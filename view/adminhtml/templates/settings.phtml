@@ -24,10 +24,10 @@
             <div class="admin__field-control _with-tooltip">
                 <select id="pos_id" name="pos_id" class="admin__control-select">
                     <option value="">- Do not sync POS ID -</option>
-                    <?php foreach($this->getPosIdOptions() as $code => $name): ?>
+                    <?php foreach ($this->getPosIdOptions() as $code => $name): ?>
                         <option
                                 value="<?php echo $code; ?>"
-                            <?php if($code == $this->getCurrentPOSCode()){ echo 'selected="selected"'; } ?>
+                            <?php if ($code == $this->getCurrentPOSCode()) { echo 'selected="selected"'; } ?>
                         ><?php echo $name; ?></option>
                     <?php endforeach; ?>
                 </select>
@@ -45,10 +45,10 @@
 
             <div class="admin__field-control _with-tooltip">
                 <select id="with_fpt" name="with_fpt" class="admin__control-select">
-                    <?php foreach($this->getEnabledDisabledOptions() as $code => $name): ?>
+                    <?php foreach ($this->getEnabledDisabledOptions() as $code => $name): ?>
                         <option
                                 value="<?php echo $code; ?>"
-                            <?php if($code && $this->getFptEnabled()){ echo 'selected="selected"'; } ?>
+                            <?php if ($code && $this->getFptEnabled()) { echo 'selected="selected"'; } ?>
                         ><?php echo $name; ?></option>
                     <?php endforeach; ?>
                 </select>
@@ -65,8 +65,8 @@
 
             <div class="admin__field-control _with-tooltip">
                 <select id="customer_address" name="customer_address" class="admin__control-select">
-                    <option value="billing" <?php if('billing' == $this->getCustomerAddress()){ echo 'selected="selected"'; } ?>>Billing Address</option>
-                    <option value="shipping" <?php if('shipping' == $this->getCustomerAddress()){ echo 'selected="selected"'; } ?>>Shipping Address</option>
+                    <option value="billing" <?php if ('billing' == $this->getCustomerAddress()) { echo 'selected="selected"'; } ?>>Billing Address</option>
+                    <option value="shipping" <?php if ('shipping' == $this->getCustomerAddress()) { echo 'selected="selected"'; } ?>>Shipping Address</option>
                 </select>
                 <div class="admin__field-tooltip">
                     <span class="admin__field-tooltip-action action-help"></span>
@@ -74,7 +74,7 @@
                 </div>
             </div>
         </div>
-        <?php if($this->isIsAwPointsPluginExists()): ?>
+        <?php if ($this->isIsAwPointsPluginExists()): ?>
             <div class="admin__field">
                 <label for="aw_rewards_integrate" class="admin__field-label">
                     <span><?php echo __('Enabled integration with Aheadworks Reward Points') ?></span>
@@ -82,10 +82,10 @@
 
                 <div class="admin__field-control _with-tooltip">
                     <select id="aw_rewards_integrate" name="aw_rewards_integrate" class="admin__control-select">
-                        <?php foreach($this->getEnabledDisabledOptions() as $code => $name): ?>
+                        <?php foreach ($this->getEnabledDisabledOptions() as $code => $name): ?>
                             <option
                                     value="<?php echo $code; ?>"
-                                <?php if($code && $this->isAWRewradPointsEnabled()){ echo 'selected="selected"'; } ?>
+                                <?php if ($code && $this->isAWRewradPointsEnabled()) { echo 'selected="selected"'; } ?>
                             ><?php echo $name; ?></option>
                         <?php endforeach; ?>
                     </select>
@@ -104,10 +104,10 @@
 
             <div class="admin__field-control _with-tooltip">
                 <select id="category_view" name="category_view" class="admin__control-select">
-                    <?php foreach($this->getEnabledDisabledOptions() as $code => $name): ?>
+                    <?php foreach ($this->getEnabledDisabledOptions() as $code => $name): ?>
                         <option
                                 value="<?php echo $code; ?>"
-                            <?php if($code && $this->getEventCategoryView()){ echo 'selected="selected"'; } ?>
+                            <?php if ($code && $this->getEventCategoryView()) { echo 'selected="selected"'; } ?>
                         ><?php echo $name; ?></option>
                     <?php endforeach; ?>
                 </select>
@@ -124,10 +124,10 @@
 
             <div class="admin__field-control _with-tooltip">
                 <select id="search_view" name="search_view" class="admin__control-select">
-                    <?php foreach($this->getEnabledDisabledOptions() as $code => $name): ?>
+                    <?php foreach ($this->getEnabledDisabledOptions() as $code => $name): ?>
                         <option
                                 value="<?php echo $code; ?>"
-                            <?php if($code && $this->getEventSearchView()){ echo 'selected="selected"'; } ?>
+                            <?php if ($code && $this->getEventSearchView()) { echo 'selected="selected"'; } ?>
                         ><?php echo $name; ?></option>
                     <?php endforeach; ?>
                 </select>
@@ -144,10 +144,10 @@
 
             <div class="admin__field-control _with-tooltip">
                 <select id="cart_updated" name="cart_updated" class="admin__control-select">
-                    <?php foreach($this->getEnabledDisabledOptions() as $code => $name): ?>
+                    <?php foreach ($this->getEnabledDisabledOptions() as $code => $name): ?>
                         <option
                                 value="<?php echo $code; ?>"
-                            <?php if($code && $this->getEventCartView()){ echo 'selected="selected"'; } ?>
+                            <?php if ($code && $this->getEventCartView()) { echo 'selected="selected"'; } ?>
                         ><?php echo $name; ?></option>
                     <?php endforeach; ?>
                 </select>

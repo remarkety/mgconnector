@@ -6,7 +6,8 @@ namespace Remarkety\Mgconnector\Api\Data;
  *
  * @api
  */
-interface ProductInterface extends \Magento\Framework\Api\ExtensibleDataInterface {
+interface ProductInterface extends \Magento\Framework\Api\ExtensibleDataInterface
+{
 
     /**
      * @return int|null

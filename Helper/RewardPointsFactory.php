@@ -12,13 +12,12 @@ class RewardPointsFactory
     public function __construct(
         Manager $moduleManager,
         ObjectManagerInterface $objectManager
-    )
-    {
+    ) {
         $this->moduleManager = $moduleManager;
         $this->objectManager = $objectManager;
     }
 
-    public function create(array $data = array())
+    public function create(array $data = [])
     {
         if ($this->moduleManager->isEnabled('Aheadworks_RewardPoints')) {
             $instanceName = 'Aheadworks\RewardPoints\Api\CustomerRewardPointsManagementInterface';

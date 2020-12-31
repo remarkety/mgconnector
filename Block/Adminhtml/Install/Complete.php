@@ -14,8 +14,7 @@ class Complete extends Container
         Context $context,
         Registry $registry,
         array $data = []
-    )
-    {
+    ) {
         $this->_coreRegistry = $registry;
         parent::__construct($context, $data);
     }
@@ -30,12 +29,10 @@ class Complete extends Container
         $this->removeButton('reset');
         $this->removeButton('save');
         $this->removeButton('back');
-
     }
 
     protected function _prepareLayout()
     {
         parent::_prepareLayout();
     }
-
 }

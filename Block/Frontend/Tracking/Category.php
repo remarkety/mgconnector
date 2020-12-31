@@ -8,7 +8,8 @@ use Remarkety\Mgconnector\Helper\ConfigHelper;
 use \Remarkety\Mgconnector\Model\Webtracking;
 use Magento\Customer\Model\Session;
 
-class Category extends View {
+class Category extends View
+{
     private $config_helper;
     private $category;
 
@@ -24,21 +25,25 @@ class Category extends View {
         $this->config_helper = $config_helper;
     }
 
-    public function isEventCategoryViewActivated() {
+    public function isEventCategoryViewActivated()
+    {
         return $this->config_helper->isEventCategoryViewEnabled();
     }
 
-    public function getCategoryId() {
+    public function getCategoryId()
+    {
 
         return $this->getCategory()->getId();
     }
 
-    public function getCategoryName() {
+    public function getCategoryName()
+    {
 
         return $this->getCategory()->getName();
     }
     
-    private function getCategory() {
+    private function getCategory()
+    {
         if (!$this->category) {
             $this->category = $this->getCurrentCategory();
         }

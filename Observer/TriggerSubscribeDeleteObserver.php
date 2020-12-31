@@ -43,7 +43,7 @@ class TriggerSubscribeDeleteObserver extends EventMethods implements ObserverInt
         CustomerRegistry $customerRegistry,
         StoreManager $storeManager,
         DataOverride $dataOverride
-    ){
+    ) {
         parent::__construct($logger, $coreRegistry, $subscriber, $customerGroupModel, $remarketyQueueRepo, $queueFactory, $store, $scopeConfig, $orderSerializer, $customerSerializer, $addressSerializer, $configHelper, $productSerializer, $request, $customerRepository, $customerRegistry, $storeManager);
         $this->dataOverride = $dataOverride;
     }
@@ -55,7 +55,7 @@ class TriggerSubscribeDeleteObserver extends EventMethods implements ObserverInt
             $subscriber = $observer->getEvent()->getSubscriber();
             $regKey = 'remarkety_subscriber_deleted_' . $subscriber->getEmail();
             if (!$this->_coreRegistry->registry($regKey) && $subscriber->getId()) {
-                if(!$this->isWebhooksEnabledSpecificStore($subscriber->getStoreId())){
+                if (!$this->isWebhooksEnabledSpecificStore($subscriber->getStoreId())) {
                     return $this;
                 }
 
@@ -69,7 +69,7 @@ class TriggerSubscribeDeleteObserver extends EventMethods implements ObserverInt
                 $this->_coreRegistry->register($regKey, 1, true);
             }
             $this->endTiming(self::class);
-        } catch (\Exception $ex){
+        } catch (\Exception $ex) {
             $this->logError($ex);
         }
         return $this;

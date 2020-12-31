@@ -8,7 +8,6 @@
 
 namespace Remarkety\Mgconnector\Observer;
 
-
 use Magento\Framework\Event\ObserverInterface;
 use Magento\Sales\Model\Order\Creditmemo;
 
@@ -18,7 +17,7 @@ class TriggerRefundOrderInventory extends EventMethods implements ObserverInterf
     {
         try {
             $this->startTiming(self::class);
-            if(!$this->shouldSendProductUpdates()){
+            if (!$this->shouldSendProductUpdates()) {
                 return;
             }
 
@@ -27,8 +26,8 @@ class TriggerRefundOrderInventory extends EventMethods implements ObserverInterf
              * @var $creditMemo Creditmemo
              */
             $creditMemo = $event->getCreditmemo();
-            foreach ($creditMemo->getAllItems() as $item){
-                if($item->getBackToStock()) {
+            foreach ($creditMemo->getAllItems() as $item) {
+                if ($item->getBackToStock()) {
                     $product = $this->productSerializer->loadProduct($item->getProductId());
                     $storeIds = $product->getStoreIds();
                     if (!empty($storeIds)) {
@@ -42,7 +41,7 @@ class TriggerRefundOrderInventory extends EventMethods implements ObserverInterf
                 }
             }
             $this->endTiming(self::class);
-        } catch (\Exception $ex){
+        } catch (\Exception $ex) {
             $this->logError($ex);
         }
     }

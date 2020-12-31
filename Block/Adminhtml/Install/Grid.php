@@ -19,8 +19,7 @@ class Grid extends \Magento\Backend\Block\Widget\Grid\Extended
         \Magento\Backend\Block\Template\Context $context,
         \Magento\Backend\Helper\Data $backendHelper,
         array $data = []
-    )
-    {
+    ) {
         parent::__construct($context, $backendHelper, $data);
         $this->setPagerVisibility(false);
         $this->setFilterVisibility(false);
@@ -58,10 +57,10 @@ class Grid extends \Magento\Backend\Block\Widget\Grid\Extended
             'renderer' => 'Remarkety\Mgconnector\Block\Adminhtml\Install\Grid\Render\Group'
         ]);
 
-        $this->addColumn('name', array(
+        $this->addColumn('name', [
             'header' => __('Store view'),
             'index' => 'name'
-        ));
+        ]);
 
         $this->addColumn('store_id', [
             'header' => __('Status'),

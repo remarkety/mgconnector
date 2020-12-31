@@ -14,7 +14,6 @@ use \Magento\Store\Model\Store;
 use \Magento\Customer\Model\Session;
 
 class Request
-
 {
     const REMARKETY_URI = 'https://app.remarkety.com/public/install/notify';
     const REMARKETY_METHOD = 'POST';
@@ -23,25 +22,26 @@ class Request
     const REMARKETY_PLATFORM = 'MAGENTO_2';
 
 
-    public function __construct(Store $store,
-                                Session $customerSession
-                                ){
+    public function __construct(
+        Store $store,
+        Session $customerSession
+    ) {
         $this->store = $store;
         $this->session = $customerSession;
     }
 
     protected function _getRequestConfig()
     {
-        return array(
+        return [
             'adapter' => 'Zend_Http_Client_Adapter_Curl',
-            'curloptions' => array(
+            'curloptions' => [
 //                CURLOPT_FOLLOWLOCATION => true,
                 CURLOPT_HEADER => true,
                 CURLOPT_CONNECTTIMEOUT => self::REMARKETY_TIMEOUT,
-//	            CURLOPT_SSL_CIPHER_LIST => "RC4-SHA"
+//                CURLOPT_SSL_CIPHER_LIST => "RC4-SHA"
 //                CURLOPT_SSL_VERIFYPEER => false,
-            ),
-        );
+            ],
+        ];
     }
 
     protected function _getPayloadBase()
@@ -53,11 +53,11 @@ class Request
         $productMetadata = $objectManager->get('Magento\Framework\App\ProductMetadataInterface');
         $version = $productMetadata->getVersion(); //will return the magento version
 
-        $arr = array(
+        $arr = [
             'domain' => $domain,
             'platform' => \Remarkety\Mgconnector\Model\Request::REMARKETY_PLATFORM,
             'version' => $version,
-        );
+        ];
 
         return $arr;
     }
@@ -90,7 +90,7 @@ class Request
                     throw new \Exception('Request to remarkety servers failed ('.$response->getStatus().')');
             }
 
-        } catch(\Exception $e) {
+        } catch (\Exception $e) {
             throw new \Exception($e->getMessage());
         }
     }

@@ -3,7 +3,6 @@
 
 namespace Remarkety\Mgconnector\Observer;
 
-
 use \Magento\Framework\Message\ManagerInterface;
 use Magento\Framework\App\ResponseFactory;
 use Magento\Framework\Event\ObserverInterface;
@@ -67,7 +66,8 @@ class TriggerCouponExpiration implements ObserverInterface
      * @return bool
      * @throws \Exception
      */
-    private function isCouponExpired($coupon_code) {
+    private function isCouponExpired($coupon_code)
+    {
         $is_expired = false;
         $coupon = $this->loadCoupon($coupon_code);
         $expiration_date = $coupon->getExpirationDate();
@@ -91,7 +91,8 @@ class TriggerCouponExpiration implements ObserverInterface
      *
      * @return \Magento\SalesRule\Model\Coupon
      */
-    private function loadCoupon($coupon_code) {
+    private function loadCoupon($coupon_code)
+    {
         $coupon = $this->coupon_factory->create();
         $coupon->load($coupon_code, 'code');
 

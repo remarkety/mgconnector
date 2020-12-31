@@ -19,7 +19,7 @@ class TriggerCustomerAddressUpdateObserver extends EventMethods implements Obser
     {
         try {
             $this->startTiming(self::class);
-            if($this->ignoreCustomerUpdate()){
+            if ($this->ignoreCustomerUpdate()) {
                 return $this;
             }
             $address = $observer->getEvent()->getCustomerAddress();
@@ -33,23 +33,23 @@ class TriggerCustomerAddressUpdateObserver extends EventMethods implements Obser
 
             $toUse = $this->configHelper->getCustomerAddressType();
             $isDefaultAddress = false;
-            if($toUse === ConfigHelper::CUSTOMER_ADDRESS_BILLING && $address->getIsDefaultBilling()){
+            if ($toUse === ConfigHelper::CUSTOMER_ADDRESS_BILLING && $address->getIsDefaultBilling()) {
                 $isDefaultAddress = true;
-            } elseif($toUse === ConfigHelper::CUSTOMER_ADDRESS_SHIPPING && $address->getIsDefaultShipping()){
+            } elseif ($toUse === ConfigHelper::CUSTOMER_ADDRESS_SHIPPING && $address->getIsDefaultShipping()) {
                 $isDefaultAddress = true;
             }
             if (!$isDefaultAddress || !$customer->getId()) {
                 return $this;
             }
-            if($this->_coreRegistry->registry('remarkety_customer_address_updated_'.$customer->getId())) {
+            if ($this->_coreRegistry->registry('remarkety_customer_address_updated_'.$customer->getId())) {
                 return $this;
             }
 
-            $this->_coreRegistry->register('remarkety_customer_address_updated_'.$customer->getId(),true);
+            $this->_coreRegistry->register('remarkety_customer_address_updated_'.$customer->getId(), true);
 
             $this->_customerUpdate($customer);
             $this->endTiming(self::class);
-        } catch (\Exception $ex){
+        } catch (\Exception $ex) {
             $this->logError($ex);
         }
         return $this;

@@ -8,7 +8,6 @@
 
 namespace Remarkety\Mgconnector\Serializer;
 
-
 use Magento\Customer\Model\Data\Customer;
 use Magento\Framework\App\RequestInterface;
 use Magento\Newsletter\Model\Subscriber;
@@ -39,8 +38,7 @@ class CustomerSerializer
         ConfigHelper $configHelper,
         DataOverride $dataOverride,
         Data $dataHelper
-    )
-    {
+    ) {
         $this->subscriber = $subscriber;
         $this->addressSerializer = $addressSerializer;
         $this->customerGroupRepository = $customerGroupRepository;
@@ -52,11 +50,12 @@ class CustomerSerializer
         $this->dataHelper = $dataHelper;
     }
 
-    public function serialize(Customer $customer){
+    public function serialize(Customer $customer)
+    {
         if ($this->request->getParam('is_subscribed', false)) {
             //check if waiting for email approval
             $needsConfirmation = $this->configHelper->customerPendingConfirmation($customer);
-            if($needsConfirmation){
+            if ($needsConfirmation) {
                 //if needs approval, the email might already be subscribed
                 $subscribed = $this->checkSubscriber($customer->getEmail(), $customer->getId());
             } else {
@@ -69,7 +68,7 @@ class CustomerSerializer
         $updated_at = new \DateTime($customer->getUpdatedAt());
 
         $groups = [];
-        if(!empty($customer->getGroupId())){
+        if (!empty($customer->getGroupId())) {
             try {
                 $group = $this->customerGroupRepository->getById($customer->getGroupId());
                 if ($group) {
@@ -78,12 +77,12 @@ class CustomerSerializer
                         'name' => $group->getCode(),
                     ];
                 }
-            } catch (\Exception $ex){
+            } catch (\Exception $ex) {
                 $this->logError($ex);
             }
         }
         $gender = null;
-        switch($customer->getGender()){
+        switch ($customer->getGender()) {
             case 1:
                 $gender = 'male';
                 break;
@@ -102,8 +101,8 @@ class CustomerSerializer
             'title' => $customer->getPrefix(),
             'first_name' => $customer->getFirstname(),
             'last_name' => $customer->getLastname(),
-            'created_at' => $created_at->format(\DateTime::ATOM ),
-            'updated_at' => $updated_at->format(\DateTime::ATOM ),
+            'created_at' => $created_at->format(\DateTime::ATOM),
+            'updated_at' => $updated_at->format(\DateTime::ATOM),
             'guest' => false,
             'default_address' => $address,
             'groups' => $groups,
@@ -115,7 +114,8 @@ class CustomerSerializer
         return $this->dataOverride->customer($customer, $customerInfo);
     }
 
-    protected function logError(\Exception $exception){
+    protected function logError(\Exception $exception)
+    {
         $this->logger->error("Remarkety:".self::class." - " . $exception->getMessage(), [
             'message' => $exception->getMessage(),
             'line' => $exception->getLine(),
@@ -124,16 +124,17 @@ class CustomerSerializer
         ]);
     }
 
-    protected function getPosId(Customer $customer){
+    protected function getPosId(Customer $customer)
+    {
         $pos_id = null;
-        if(!empty($this->pos_id_attribute_code)){
+        if (!empty($this->pos_id_attribute_code)) {
             $attr = $customer->getCustomAttribute($this->pos_id_attribute_code);
-            if($attr){
+            if ($attr) {
                 $attr_val = $attr->getValue();
                 $pos_id = !empty($attr_val) ? $attr_val : null;
             } else {
                 $pos_get_method = "get" . Data::toCamelCase($this->pos_id_attribute_code, true);
-                if(method_exists($customer, $pos_get_method)){
+                if (method_exists($customer, $pos_get_method)) {
                     $pos_id = $customer->$pos_get_method();
                 }
             }

@@ -7,10 +7,11 @@ use \Magento\Backend\Block\Widget\Form\Generic;
 class Form extends Generic
 {
 
-    public function __construct(\Magento\Backend\Block\Template\Context $context,
-                                \Magento\Framework\Registry $registry,
-                                \Magento\Framework\Data\FormFactory $formFactory
-                                ){
+    public function __construct(
+        \Magento\Backend\Block\Template\Context $context,
+        \Magento\Framework\Registry $registry,
+        \Magento\Framework\Data\FormFactory $formFactory
+    ) {
         parent::__construct($context, $registry, $formFactory);
     }
 
@@ -30,16 +31,16 @@ class Form extends Generic
 
         $fieldset = $form->addFieldset(
             'general',
-            array(
+            [
                 'legend' => __('Remarkety')
-            )
+            ]
         );
 
-        $fieldset->addField('mode', 'hidden', array(
+        $fieldset->addField('mode', 'hidden', [
             'name' => 'data[mode]',
             'value' => 'complete',
-        ));
-        $fieldset->addField('instruction', 'note', array(
+        ]);
+        $fieldset->addField('instruction', 'note', [
             'text' => '<p style="font-weight:bold;font-size:25px;">' . __('Welcome to Remarkety - What\'s next?') . '</p>
             <ol style="list-style-type:decimal;margin-left:20px;font-weight:bold;font-size:12px;">
                 <li>Sign in to your account <a href="https://app.remarkety.com/?utm_source=plugin&utm_medium=link&utm_campaign=magento-plugin" target="_blank">here</a></li>
@@ -49,7 +50,7 @@ class Form extends Generic
             </ol>
             ',
             'label' => false,
-        ));
+        ]);
 
         $this->setForm($form);
         return parent::_prepareForm();

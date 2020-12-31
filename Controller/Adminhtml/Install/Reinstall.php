@@ -20,14 +20,15 @@ class Reinstall extends \Magento\Backend\App\Action
     protected $installModel;
     private $configHelper;
 
-    public function __construct(Context $context,
-                                PageFactory $resultPageFactory,
-                                InstallModel $installModel,
-                                \Magento\Config\Model\ResourceModel\Config $resourceConfig,
-                                \Magento\Store\Model\StoreManager $storeManager,
-                                \Magento\Customer\Model\Session $customerSession,
-                                ConfigHelper $configHelper
-    ){
+    public function __construct(
+        Context $context,
+        PageFactory $resultPageFactory,
+        InstallModel $installModel,
+        \Magento\Config\Model\ResourceModel\Config $resourceConfig,
+        \Magento\Store\Model\StoreManager $storeManager,
+        \Magento\Customer\Model\Session $customerSession,
+        ConfigHelper $configHelper
+    ) {
         parent::__construct($context);
         $this->installModel = $installModel;
         $this->resultPageFactory = $resultPageFactory;
@@ -36,19 +37,17 @@ class Reinstall extends \Magento\Backend\App\Action
         $this->storeManager = $storeManager;
         $this->session = $customerSession;
         $this->configHelper = $configHelper;
-
-
     }
 
     public function execute()
     {
         $config = $this->config;
         $config
-            ->deleteConfig(\Remarkety\Mgconnector\Model\Install::XPATH_INSTALLED, 'default',0)
-            ->deleteConfig('remarkety/mgconnector/api_key', 'default',0)
-            ->deleteConfig('remarkety/mgconnector/intervals', 'default',0)
-            ->deleteConfig('remarkety/mgconnector/last_response_status', 'default',0)
-            ->deleteConfig('remarkety/mgconnector/last_response_message', 'default',0);
+            ->deleteConfig(\Remarkety\Mgconnector\Model\Install::XPATH_INSTALLED, 'default', 0)
+            ->deleteConfig('remarkety/mgconnector/api_key', 'default', 0)
+            ->deleteConfig('remarkety/mgconnector/intervals', 'default', 0)
+            ->deleteConfig('remarkety/mgconnector/last_response_status', 'default', 0)
+            ->deleteConfig('remarkety/mgconnector/last_response_message', 'default', 0);
         $this->configHelper->setCategoriesFullPath($this->configHelper->useCategoriesFullPath());
 
         foreach ($this->storeManager->getWebsites() as $_website) {
@@ -65,6 +64,6 @@ class Reinstall extends \Magento\Backend\App\Action
         $this->session->unsRemarketyLastResponseMessage();
         $this->session->unsRemarketyLastResponseStatus();
 
-        $this->_redirect('*/install/install', array('mode' => 'install_create'));
+        $this->_redirect('*/install/install', ['mode' => 'install_create']);
     }
 }

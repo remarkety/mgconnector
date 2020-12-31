@@ -26,8 +26,7 @@ class Form extends Template
         \Magento\Customer\Model\ResourceModel\Attribute\Collection $attributesCollection,
         ConfigHelper $configHelper,
         RewardPointsFactory $rewardPointsFactory
-    )
-    {
+    ) {
         parent::__construct($context, $data);
         $this->formKey = $formKey;
         $this->attributesCollection = $attributesCollection;
@@ -39,7 +38,7 @@ class Form extends Template
         $this->is_fpt_enabled = $configHelper->getWithFixedProductTax();
         $this->is_aw_points_enabled = $configHelper->isAheadworksRewardPointsEnabled();
         $aw_service = $rewardPointsFactory->create();
-        if($aw_service){
+        if ($aw_service) {
             $this->is_aw_points_plugin_exists = true;
         }
     }
@@ -49,15 +48,17 @@ class Form extends Template
         return $this->formKey->getFormKey();
     }
 
-    public function getCustomerAddress(){
+    public function getCustomerAddress()
+    {
         return $this->configHelper->getCustomerAddressType();
     }
 
-    public function getPosIdOptions(){
+    public function getPosIdOptions()
+    {
         $attribute_data = [];
         foreach ($this->attributesCollection as $item) {
             $name = $item->getFrontendLabel();
-            if(empty($name)){
+            if (empty($name)) {
                 continue;
             }
             $attribute_data[$item->getAttributeCode()] = $name;
@@ -65,11 +66,13 @@ class Form extends Template
         return $attribute_data;
     }
 
-    public function getCurrentPOSCode(){
+    public function getCurrentPOSCode()
+    {
         return $this->current_pos_id;
     }
 
-    public function getEnabledDisabledOptions() {
+    public function getEnabledDisabledOptions()
+    {
         $attribute_data = [];
 
         $attribute_data[0] = 'Disable';
@@ -102,11 +105,13 @@ class Form extends Template
         return $this->event_category_view;
     }
 
-    public function getFptEnabled() {
+    public function getFptEnabled()
+    {
         return $this->is_fpt_enabled;
     }
 
-    public function isAWRewradPointsEnabled() {
+    public function isAWRewradPointsEnabled()
+    {
         return $this->is_aw_points_enabled;
     }
 

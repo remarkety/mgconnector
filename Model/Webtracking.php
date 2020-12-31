@@ -5,7 +5,7 @@ use \Magento\Config\Model\ResourceModel\Config;
 use Magento\Store\Model\StoreManager;
 use \Magento\Framework\App\Config\ScopeConfigInterface;
 
-Class Webtracking extends \Magento\Framework\Model\AbstractModel
+class Webtracking extends \Magento\Framework\Model\AbstractModel
 {
     const RM_STORE_ID = 'remarkety/mgconnector/public_storeId';
     const STORE_SCOPE = 'stores';
@@ -13,7 +13,8 @@ Class Webtracking extends \Magento\Framework\Model\AbstractModel
     protected $_activeStore;
     protected $_configResource;
     protected $_configRead;
-    public function __construct(Config $resourceConfig, StoreManager $sManager, ScopeConfigInterface $scopeConfig){
+    public function __construct(Config $resourceConfig, StoreManager $sManager, ScopeConfigInterface $scopeConfig)
+    {
         $this->_configResource = $resourceConfig;
         $this->_activeStore = $sManager->getStore();
         $this->_configRead = $scopeConfig;

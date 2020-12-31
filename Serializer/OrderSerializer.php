@@ -33,8 +33,7 @@ class OrderSerializer
         Subscriber $subscriber,
         DataOverride $dataOverride,
         ConfigHelper $configHelper
-    )
-    {
+    ) {
         $this->customerRepository = $customerRepository;
         $this->statusCollection = $statusCollection;
         $this->remarketyHelper = $remarketyHelper;
@@ -45,16 +44,17 @@ class OrderSerializer
         $this->configHelper = $configHelper;
     }
 
-    public function serialize(\Magento\Sales\Model\Order $order){
+    public function serialize(\Magento\Sales\Model\Order $order)
+    {
         //find order status
         $statusVal = $order->getStatus();
         $status = [
             'code' => 'unknown',
             'name' => 'unknown'
         ];
-        if(!empty($statusVal)){
+        if (!empty($statusVal)) {
             $statusObj = $this->statusCollection->getItemByColumnValue('status', $statusVal);
-            if(!empty($statusObj)){
+            if (!empty($statusObj)) {
                 $status = [
                     'code' => $statusObj->getStatus(),
                     'name' => $statusObj->getLabel()
@@ -66,13 +66,13 @@ class OrderSerializer
          */
         $items = $order->getAllItems();
         $line_items = [];
-        foreach($items as $item){
+        foreach ($items as $item) {
             if ($item->getProductType() === Configurable::TYPE_CODE) {
                 continue;
             }
 
             $parentItem = $item->getParentItem();
-            if($parentItem && $parentItem->getProductType() == Configurable::TYPE_CODE){
+            if ($parentItem && $parentItem->getProductType() == Configurable::TYPE_CODE) {
                 $price = (float)$parentItem->getPrice();
                 $lineQty = (float)$parentItem->getQtyOrdered();
                 $lineTax = (float)$parentItem->getTaxAmount();
@@ -87,7 +87,7 @@ class OrderSerializer
             }
 
             $product = $item->getProduct();
-            if($lineQty > 0 && $lineTax > 0){
+            if ($lineQty > 0 && $lineTax > 0) {
                 $itemTax = $lineTax / $lineQty;
             } else {
                 $itemTax = 0;
@@ -113,11 +113,11 @@ class OrderSerializer
         $created_at = new \DateTime($order->getCreatedAt());
         $updated_at = new \DateTime($order->getUpdatedAt());
 
-        if(!$order->getCustomerIsGuest()){
+        if (!$order->getCustomerIsGuest()) {
             $customer = $this->customerRepository->getById($order->getCustomerId());
             $customerInfo = $this->customerSerializer->serialize($customer);
         } else {
-            if($this->configHelper->getCustomerAddressType() === ConfigHelper::CUSTOMER_ADDRESS_BILLING){
+            if ($this->configHelper->getCustomerAddressType() === ConfigHelper::CUSTOMER_ADDRESS_BILLING) {
                 $address = $order->getBillingAddress();
             } else {
                 $address = $order->getShippingAddress();
@@ -128,8 +128,8 @@ class OrderSerializer
                 'title' => empty($address) ? null : $address->getPrefix(),
                 'first_name' => empty($address) ? null : $address->getFirstname(),
                 'last_name' => empty($address) ? null : $address->getLastname(),
-                'created_at' => $created_at->format(\DateTime::ATOM ),
-                'updated_at' => $created_at->format(\DateTime::ATOM ),
+                'created_at' => $created_at->format(\DateTime::ATOM),
+                'updated_at' => $created_at->format(\DateTime::ATOM),
                 'guest' => true,
                 'default_address' => empty($address) ? null : $this->addressSerializer->serialize($address)
             ];
@@ -140,12 +140,12 @@ class OrderSerializer
          * @var $shipments Shipment[]
          */
         $shipments = $order->getShipmentsCollection();
-        foreach($shipments as $shipment){
+        foreach ($shipments as $shipment) {
             /**
              * @var $trackings Shipment\Track[]
              */
             $trackings = $shipment->getAllTracks();
-            foreach($trackings as $tracking){
+            foreach ($trackings as $tracking) {
                 $shipping_lines[] = [
                     'tracking_number' => $tracking->getTrackNumber(),
                     'title' => $tracking->getTitle()
@@ -155,16 +155,16 @@ class OrderSerializer
 
         $paymentMethodTitle = null;
         $payment = $order->getPayment();
-        if(!empty($payment)){
+        if (!empty($payment)) {
             $method = $payment->getMethodInstance();
-            if(!empty($method)){
+            if (!empty($method)) {
                 $paymentMethodTitle = $method->getTitle();
             }
         }
 
         $discount_codes = [];
         $coupon = $order->getCouponCode();
-        if(!empty($coupon)){
+        if (!empty($coupon)) {
             $discount_codes[] = [
                 'code' => $coupon,
                 'amount' => (float)$order->getDiscountAmount()
@@ -174,8 +174,8 @@ class OrderSerializer
         $data = [
             'id' => empty($order->getOriginalIncrementId()) ? $order->getIncrementId() : $order->getOriginalIncrementId(),
             'name' => $order->getIncrementId(),
-            'created_at' => $created_at->format(\DateTime::ATOM ),
-            'updated_at' => $updated_at->format(\DateTime::ATOM ),
+            'created_at' => $created_at->format(\DateTime::ATOM),
+            'updated_at' => $updated_at->format(\DateTime::ATOM),
             'currency' => $order->getOrderCurrencyCode(),
             'email' => $order->getCustomerEmail(),
             'discount_codes' => $discount_codes,

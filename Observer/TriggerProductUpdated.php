@@ -8,7 +8,6 @@
 
 namespace Remarkety\Mgconnector\Observer;
 
-
 use Magento\Catalog\Api\Data\ProductInterface;
 use Magento\Framework\Event\Observer;
 use Magento\Framework\Event\ObserverInterface;
@@ -24,7 +23,7 @@ class TriggerProductUpdated extends EventMethods implements ObserverInterface
     {
         try {
             $this->startTiming(self::class);
-            if(!$this->shouldSendProductUpdates()){
+            if (!$this->shouldSendProductUpdates()) {
                 return;
             }
 
@@ -35,7 +34,7 @@ class TriggerProductUpdated extends EventMethods implements ObserverInterface
             $product = $event->getDataByKey('product');
             $eventType = self::EVENT_PRODUCTS_UPDATED;
 
-            if(!empty($product)) {
+            if (!empty($product)) {
                 if ($product->isObjectNew()) {
                     $eventType = self::EVENT_PRODUCTS_CREATED;
                 }
@@ -55,9 +54,8 @@ class TriggerProductUpdated extends EventMethods implements ObserverInterface
                 }
             }
             $this->endTiming(self::class);
-        } catch (\Exception $ex){
+        } catch (\Exception $ex) {
             $this->logError($ex);
         }
     }
-
 }

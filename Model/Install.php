@@ -93,24 +93,25 @@ class Install extends \Magento\Framework\Model\AbstractModel
 
     protected $_cache;
 
-    public function __construct(Context $context,
-                                \Magento\Framework\Registry $registry,
-                                ScopeConfigInterface $scopeConfig,
-                                \Magento\Config\Model\ResourceModel\Config $resourceConfig,
-                                Integration $integration,
-                                Role $role,
-                                Rules $rules,
-                                \Magento\User\Model\User $user,
-                                Store $store,
-                                MgconnectorRequest $mgconnectorRequest,
-                                Webtracking $rmWebtracking,
-                                ModuleResource $moduleResource,
-                                Config $config,
-                                \Magento\Integration\Model\IntegrationService $integrationService,
-                                \Magento\Integration\Model\OauthService $oauthService,
-                                Session $session,
-                                TypeList $cache
-){
+    public function __construct(
+        Context $context,
+        \Magento\Framework\Registry $registry,
+        ScopeConfigInterface $scopeConfig,
+        \Magento\Config\Model\ResourceModel\Config $resourceConfig,
+        Integration $integration,
+        Role $role,
+        Rules $rules,
+        \Magento\User\Model\User $user,
+        Store $store,
+        MgconnectorRequest $mgconnectorRequest,
+        Webtracking $rmWebtracking,
+        ModuleResource $moduleResource,
+        Config $config,
+        \Magento\Integration\Model\IntegrationService $integrationService,
+        \Magento\Integration\Model\OauthService $oauthService,
+        Session $session,
+        TypeList $cache
+    ) {
         parent::__construct($context, $registry);
         $this->_cache = $cache;
         $this->context = $context;
@@ -131,7 +132,7 @@ class Install extends \Magento\Framework\Model\AbstractModel
     }
 
 
-    public function setData($key, $value = NULL)
+    public function setData($key, $value = null)
     {
         $this->_data['mode'] = $key['mode'];
         $this->_data['email']= array_key_exists('email', $key) ? $key['email'] : null;
@@ -149,7 +150,7 @@ class Install extends \Magento\Framework\Model\AbstractModel
     }
 
 
-    public function getData($key = '', $index = NULL)
+    public function getData($key = '', $index = null)
     {
         return $this->_data;
     }
@@ -160,7 +161,7 @@ class Install extends \Magento\Framework\Model\AbstractModel
         $wsFirstName = array_key_exists('first_name', $this->_data) && !empty($this->_data['first_name']) ? $this->_data['first_name'] : "Remarkety";
         $wsLastName = array_key_exists('last_name', $this->_data) && !empty($this->_data['last_name']) ? $this->_data['last_name'] : "API";
 
-        if(!$this->_getWebServiceUser()) {
+        if (!$this->_getWebServiceUser()) {
             $email = $this->_data['email'];
 
             $user = [
@@ -211,22 +212,22 @@ class Install extends \Magento\Framework\Model\AbstractModel
     {
         $this->_webServiceConfiguration();
         // Make sure that store_id entry is an array
-        if(!empty($this->_data['store_id']) && !is_array($this->_data['store_id'])) {
+        if (!empty($this->_data['store_id']) && !is_array($this->_data['store_id'])) {
             $this->_data['store_id'] = (array)$this->_data['store_id'];
         }
 //        // Create request for each store view separately
-        foreach($this->_data['store_id'] as $_storeId) {
+        foreach ($this->_data['store_id'] as $_storeId) {
             $store = $this->store->load($_storeId);
-            $this->_sendRequest(array(
+            $this->_sendRequest([
                 'key' => $this->_data['key'],
                 'email' => $this->_data['email'],
                 'password' => $this->_data['password'],
                 'acceptTerms' => $this->_data['terms'],
-                'selectedView' => json_encode(array(
+                'selectedView' => json_encode([
                     'website_id' => $store->getWebsiteId(),
                     'store_id' => $store->getGroupId(),
                     'view_id' => $_storeId,
-                )),
+                ]),
                 'isNewUser' => true,
                 'firstName' => $this->_data['first_name'],
                 'lastName' => $this->_data['last_name'],
@@ -235,7 +236,7 @@ class Install extends \Magento\Framework\Model\AbstractModel
                 'httpPassword' => $this->_data['http_password'],
                 'storeFrontUrl' => $store->getBaseUrl(UrlInterface::URL_TYPE_LINK),
                 'viewName' => $store->getName()
-            ));
+            ]);
             $this->_markInstalled($_storeId);
         }
         return $this;
@@ -246,29 +247,29 @@ class Install extends \Magento\Framework\Model\AbstractModel
     {
             $this->_webServiceConfiguration();
 
-        if(!empty($this->_data['store_id']) && !is_array($this->_data['store_id'])) {
+        if (!empty($this->_data['store_id']) && !is_array($this->_data['store_id'])) {
             $this->_data['store_id'] = (array)$this->_data['store_id'];
         }
 
-        foreach($this->_data['store_id'] as $_storeId) {
+        foreach ($this->_data['store_id'] as $_storeId) {
             $store = $this->store->load($_storeId);
 
-            $this->_sendRequest(array(
+            $this->_sendRequest([
                 'key' => $this->_data['key'],
                 'email' => $this->_data['email'],
                 'password' => $this->_data['password'],
                 'acceptTerms' => $this->_data['terms'],
-                'selectedView' => json_encode(array(
+                'selectedView' => json_encode([
                     'website_id' => $store->getWebsiteId(),
                     'store_id' => $store->getGroupId(),
                     'view_id' => $_storeId,
-                )),
+                ]),
                 'isNewUser' => false,
                 'httpUser' => $this->_data['http_user'],
                 'httpPassword' => $this->_data['http_password'],
                 'storeFrontUrl' => $store->getBaseUrl(UrlInterface::URL_TYPE_LINK),
                 'viewName' => $store->getName()
-            ));
+            ]);
 
             $this->_markInstalled($_storeId);
         }
@@ -293,7 +294,7 @@ class Install extends \Magento\Framework\Model\AbstractModel
 
         $this->_resourceConfig->saveConfig('remarkety/mgconnector/api_key', $this->_data['key'], 'default', 0);
 
-        $this->_sendRequest(array());
+        $this->_sendRequest([]);
 
         return $this;
     }
@@ -302,19 +303,19 @@ class Install extends \Magento\Framework\Model\AbstractModel
     public function completeExtensionInstallation()
     {
             $ver = $this->moduleResource->getDataVersion('Remarkety_Mgconnector');
-            $this->_resourceConfig->saveConfig(self::XPATH_INSTALLED, $ver,'default', 0);
+            $this->_resourceConfig->saveConfig(self::XPATH_INSTALLED, $ver, 'default', 0);
 
             $intervals = $collection = $this->scopeConfigInterface->getValue('mgconnector_options/mgconnector_options_group/intervals');
-            if(!empty($intervals)) {
-                $this->_resourceConfig->saveConfig('remarkety/mgconnector/intervals', $intervals,'default', 0);
-            } else {
-                $this->_resourceConfig->saveConfig('remarkety/mgconnector/intervals', "1,3,10",'default', 0);
-            }
+        if (!empty($intervals)) {
+            $this->_resourceConfig->saveConfig('remarkety/mgconnector/intervals', $intervals, 'default', 0);
+        } else {
+            $this->_resourceConfig->saveConfig('remarkety/mgconnector/intervals', "1,3,10", 'default', 0);
+        }
 
             // remove old config entries if exist
             $this->_resourceConfig
-                ->deleteConfig('mgconnector_options/mgconnector_options_group/api_key','default', 0)
-                ->deleteConfig('mgconnector_options/mgconnector_options_group/intervals','default', 0);
+                ->deleteConfig('mgconnector_options/mgconnector_options_group/api_key', 'default', 0)
+                ->deleteConfig('mgconnector_options/mgconnector_options_group/intervals', 'default', 0);
 
 
 
@@ -325,9 +326,10 @@ class Install extends \Magento\Framework\Model\AbstractModel
     protected function _generateApiKey()
     {
         $apiKey = $this->scopeConfigInterface->getValue('remarkety/mgconnector/api_key');
-        if (!empty($apiKey))
+        if (!empty($apiKey)) {
             return $apiKey;
-        if(!empty($this->_data['email'])) {
+        }
+        if (!empty($this->_data['email'])) {
             return md5($this->_data['email'] . time());
         }
         throw new \Exception('Can not generate api key');
@@ -341,23 +343,24 @@ class Install extends \Magento\Framework\Model\AbstractModel
         return $integration->getData();
     }
 
-    protected function _markInstalled($storeId) {
+    protected function _markInstalled($storeId)
+    {
         $ver = $this->moduleResource->getDataVersion('Remarkety_Mgconnector');
         $this->_resourceConfig->saveConfig(
-                self::XPATH_INSTALLED,
-                $ver,
-                self::STORE_SCOPE,
-                $storeId
-            );
+            self::XPATH_INSTALLED,
+            $ver,
+            self::STORE_SCOPE,
+            $storeId
+        );
 
         $response = $this->_session->getRemarketyLastResponseMessage();
-        $response = !empty($response) ? unserialize($response) : array();
-        if(!empty($response['storePublicId'])){
+        $response = !empty($response) ? unserialize($response) : [];
+        if (!empty($response['storePublicId'])) {
             $this->_webtracking->setRemarketyPublicId($storeId, $response['storePublicId']);
         }
         //check if we should use full categories path
         $use_full_cat_path = $this->scopeConfigInterface->getValue(ConfigHelper::USE_CATEGORIES_FULL_PATH);
-        if(is_null($use_full_cat_path)){
+        if (is_null($use_full_cat_path)) {
             $this->_resourceConfig->saveConfig(
                 ConfigHelper::USE_CATEGORIES_FULL_PATH,
                 1,
@@ -372,7 +375,7 @@ class Install extends \Magento\Framework\Model\AbstractModel
 
     public function getConfiguredStores()
     {
-        $collection = $this->scopeConfigInterface->isSetFlag(self::XPATH_INSTALLED,self::STORE_SCOPE);
+        $collection = $this->scopeConfigInterface->isSetFlag(self::XPATH_INSTALLED, self::STORE_SCOPE);
 
         return $collection;
     }

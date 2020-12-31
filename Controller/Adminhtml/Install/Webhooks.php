@@ -22,15 +22,16 @@ class Webhooks extends \Magento\Backend\App\Action
         Context $context,
         ConfigHelper $configHelper,
         StoreManager $storeManager
-    ){
+    ) {
         parent::__construct($context);
         $this->configHelper = $configHelper;
         $this->storeManager = $storeManager;
     }
 
-    public function execute(){
+    public function execute()
+    {
         $enabled = $this->getRequest()->getParam('enabled');
-        if($enabled == 0){
+        if ($enabled == 0) {
             //disable
             $this->configHelper->setWebhooksGloballStatus(false);
         } else {

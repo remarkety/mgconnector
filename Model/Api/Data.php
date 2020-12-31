@@ -293,7 +293,8 @@ class Data implements DataInterface
      */
     private $customerRewardPointsService;
 
-    public function __construct(ProductFactory $productFactory,
+    public function __construct(
+        ProductFactory $productFactory,
         \Remarkety\Mgconnector\Api\Data\ProductCollectionInterfaceFactory $searchResultFactory,
         \Remarkety\Mgconnector\Api\Data\CustomerCollectionInterfaceFactory $customerResultFactory,
         \Magento\Catalog\Model\ResourceModel\Product\CollectionFactory $collectionFactory,
@@ -333,8 +334,7 @@ class Data implements DataInterface
         DataOverride $dataOverride,
         RewardPointsFactory $rewardPointsFactory,
         SubscriberFactory $subscriberFactory
-    )
-    {
+    ) {
         $this->dataHelper = $dataHelper;
         $this->eventMethods = $eventMethods;
         $this->queueRepo = $queueRepository;
@@ -404,8 +404,7 @@ class Data implements DataInterface
         $created_at_max = null,
         $product_id = null,
         $enabled_only = false
-    )
-    {
+    ) {
         $this->_storeManagerInterface->setCurrentStore($mage_store_id);
 
         $pageNumber = null;
@@ -414,7 +413,7 @@ class Data implements DataInterface
         $collection = $this->collectionFactory->create();
         $collection->addAttributeToSelect('*');
 
-        if($mage_store_id !== null){
+        if ($mage_store_id !== null) {
             $collection->addStoreFilter($mage_store_id);
         }
 
@@ -442,7 +441,7 @@ class Data implements DataInterface
             $collection->addAttributeToFilter('entity_id', $product_id);
         }
 
-        if($enabled_only){
+        if ($enabled_only) {
             $collection->addAttributeToFilter('status', Status::STATUS_ENABLED);
             $collection->addAttributeToFilter('visibility', ['neq' => Visibility::VISIBILITY_NOT_VISIBLE]);
         }
@@ -458,22 +457,24 @@ class Data implements DataInterface
             }
         }
 
-        if (!is_null($pageSize)) $collection->setPage($pageNumber, $pageSize);
+        if (!is_null($pageSize)) {
+            $collection->setPage($pageNumber, $pageSize);
+        }
 
 
         $vendorAttr = $collection->getResource()->getAttribute('vendor');
-        if(!$vendorAttr){
+        if (!$vendorAttr) {
             $vendorAttr = $collection->getResource()->getAttribute('brand');
         }
         $manufacturerAttr = $collection->getResource()->getAttribute('manufacturer');
 
         $map = $this->response_mask;
         $productsArray = [];
-        foreach ($collection AS $row) {
+        foreach ($collection as $row) {
             $prod = [];
             $mappedArray = $row->getData();
             if ($row->getCategoryIds()) {
-                foreach ($row->getCategoryIds() AS $category_id) {
+                foreach ($row->getCategoryIds() as $category_id) {
                     $prod['categories'][] = $this->dataHelper->getCategory($category_id, $mage_store_id);
                 }
             }
@@ -492,7 +493,7 @@ class Data implements DataInterface
             $status = array_key_exists('status', $mappedArray) ? $mappedArray['status'] : 1;
 
             $active = true;
-            if($status == Status::STATUS_DISABLED || $visibility == Visibility::VISIBILITY_NOT_VISIBLE){
+            if ($status == Status::STATUS_DISABLED || $visibility == Visibility::VISIBILITY_NOT_VISIBLE) {
                 $active = false;
             }
             $prod['product_exists'] = $active;
@@ -518,10 +519,10 @@ class Data implements DataInterface
             }
 
             $variants = [];
-            if($row->getTypeId() == Configurable::TYPE_CODE){
+            if ($row->getTypeId() == Configurable::TYPE_CODE) {
                 //configurable products sends variants
                 $childrenIdsGroups = $this->_catalogProductTypeConfigurable->getChildrenIds($row->getId());
-                if(isset($childrenIdsGroups[0])) {
+                if (isset($childrenIdsGroups[0])) {
                     $childrenIds = $childrenIdsGroups[0];
                     foreach ($childrenIds as $childId) {
                         $childProd = $this->loadProduct($childId);
@@ -551,16 +552,16 @@ class Data implements DataInterface
                 ];
             }
             $prod['variants'] = $variants;
-            if($vendorAttr){
-                if(!empty($row->getData($vendorAttr->getAttributeCode()))){
+            if ($vendorAttr) {
+                if (!empty($row->getData($vendorAttr->getAttributeCode()))) {
                     $vendor = $vendorAttr->getFrontend()->getValue($row);
                     $prod['vendor'] = $vendor;
                 } else {
                     $prod['vendor'] = null;
                 }
             }
-            if($manufacturerAttr){
-                if(!empty($row->getData($manufacturerAttr->getAttributeCode()))){
+            if ($manufacturerAttr) {
+                if (!empty($row->getData($manufacturerAttr->getAttributeCode()))) {
                     $manufacturer = $manufacturerAttr->getFrontend()->getValue($row);
                     $prod['manufacturer'] = $manufacturer;
                 } else {
@@ -575,7 +576,8 @@ class Data implements DataInterface
         return $object;
     }
 
-    private function loadProduct($product_id){
+    private function loadProduct($product_id)
+    {
         return $this->productRepository->getById($product_id);
     }
     /**
@@ -598,8 +600,7 @@ class Data implements DataInterface
         $page = null,
         $since_id = null,
         $customer_id = null
-    )
-    {
+    ) {
 
         $pageNumber = null;
         $pageSize = null;
@@ -638,7 +639,7 @@ class Data implements DataInterface
         }
         $pos_id_attribute_code = $this->configHelper->getPOSAttributeCode();
 
-        if(!empty($pos_id_attribute_code)){
+        if (!empty($pos_id_attribute_code)) {
             //make sure we get the POS id attribute
             $customerData->addAttributeToSelect([$pos_id_attribute_code]);
         }
@@ -647,15 +648,15 @@ class Data implements DataInterface
         $map = $this->response_mask;
 
         $aw_rewards_integrate = false;
-        if($this->customerRewardPointsService){
-            if($this->configHelper->isAheadworksRewardPointsEnabled()){
+        if ($this->customerRewardPointsService) {
+            if ($this->configHelper->isAheadworksRewardPointsEnabled()) {
                 $aw_rewards_integrate = true;
             }
         }
         /**
          * @var \Magento\Customer\Model\Customer\Interceptor[] $customerData
          */
-        foreach ($customerData AS $customer) {
+        foreach ($customerData as $customer) {
             $customers = [];
             $mappedCustomer = $customer->getData();
 
@@ -679,20 +680,21 @@ class Data implements DataInterface
             }
             $customers['default_address'] = $this->dataHelper->getCustomerAddresses($customer);
             $group = $this->customerGroupFactory->load($customer->getGroupId());
-            $customers['groups'] = array();
+            $customers['groups'] = [];
             $customers['groups'][] = [
                 'id' => $group->getId(),
                 'name' => $group->getCustomerGroupCode(),
             ];
 
             $pos_id = null;
-            if(!empty($pos_id_attribute_code)){
-                if(isset($mappedCustomer[$pos_id_attribute_code]))
+            if (!empty($pos_id_attribute_code)) {
+                if (isset($mappedCustomer[$pos_id_attribute_code])) {
                     $pos_id = $mappedCustomer[$pos_id_attribute_code];
+                }
             }
             $customers['pos_id'] = $pos_id;
             $customers['accepts_marketing'] = $this->checkSubscriber($customer->getEmail(), $customer->getId());
-            if($aw_rewards_integrate){
+            if ($aw_rewards_integrate) {
                 $customers['rewards_points'] = $this->customerRewardPointsService->getCustomerRewardPointsBalance($customer->getId());
             }
             $customerArray[] = $this->dataOverride->customer($customer, $customers);
@@ -706,9 +708,10 @@ class Data implements DataInterface
      * @param Order\Address $customerAddresses
      * @return array|null
      */
-    protected function getAddressData($customerAddresses){
+    protected function getAddressData($customerAddresses)
+    {
         $addressData = null;
-        if($customerAddresses){
+        if ($customerAddresses) {
             $countryCode = $customerAddresses->getCountryId();
             $addressData = [
                 'first_name' => $customerAddresses->getFirstname(),
@@ -755,9 +758,10 @@ class Data implements DataInterface
             }
         }
         $pos_id = null;
-        if(!empty($this->pos_id_attribute_code)){
-            if(isset($mappedCustomer[$this->pos_id_attribute_code]))
+        if (!empty($this->pos_id_attribute_code)) {
+            if (isset($mappedCustomer[$this->pos_id_attribute_code])) {
                 $pos_id = $mappedCustomer[$this->pos_id_attribute_code];
+            }
         }
         $customers['pos_id'] = $pos_id;
         $customers['accepts_marketing'] = $this->checkSubscriber($customerData->getEmail(), $customer_id);
@@ -770,7 +774,7 @@ class Data implements DataInterface
         $customerData = $this->customerFactory->create()->load($id);
         $customerArray = [];
 
-        if($customerData->getId()){
+        if ($customerData->getId()) {
             $customerArray = $this->mapCustomer($customerData, true);
         }
         return $customerArray;
@@ -807,8 +811,7 @@ class Data implements DataInterface
         $created_at_max = null,
         $order_status = null,
         $order_id = null
-    )
-    {
+    ) {
         $pageNumber = null;
         $pageSize = null;
 
@@ -817,7 +820,7 @@ class Data implements DataInterface
          */
         $orders = $this->_salesOrderResourceCollectionFactory->create();
 
-        $orders->addFieldToFilter('main_table.store_id', array('eq' => $mage_store_id));
+        $orders->addFieldToFilter('main_table.store_id', ['eq' => $mage_store_id]);
         if ($updated_at_min != null) {
             $orders->addAttributeToFilter('main_table.updated_at', ['gt' => $this->convertTime($updated_at_min)]);
         }
@@ -878,7 +881,7 @@ class Data implements DataInterface
                 $ord['customer'] = $this->getCustomerDataById($order->getCustomerId());
             } else {
                 $addressId = $order->getBillingAddressId();
-                if($this->configHelper->getCustomerAddressType() === ConfigHelper::CUSTOMER_ADDRESS_SHIPPING){
+                if ($this->configHelper->getCustomerAddressType() === ConfigHelper::CUSTOMER_ADDRESS_SHIPPING) {
                     $addressId = $order->getShippingAddressId();
                 }
                 /**
@@ -901,7 +904,7 @@ class Data implements DataInterface
              * @var Order\Item[] $items
              */
             $items = $order->getAllItems();
-            foreach($items as $item){
+            foreach ($items as $item) {
                 if ($item->getProductType() === Configurable::TYPE_CODE) {
                     continue;
                 }
@@ -916,7 +919,7 @@ class Data implements DataInterface
                 }
 
                 $parentItem = $item->getParentItem();
-                if($parentItem && $parentItem->getProductType() == Configurable::TYPE_CODE){
+                if ($parentItem && $parentItem->getProductType() == Configurable::TYPE_CODE) {
                     $price = (float)$parentItem->getPrice();
                     $qty = (float)$parentItem->getQtyOrdered();
                     $totalTax = (float)$parentItem->getTaxAmount();
@@ -930,7 +933,7 @@ class Data implements DataInterface
 
                 $newItem['price'] = $price;
                 $newItem['quantity'] = $qty;
-                if($totalTax > 0 && $qty > 0){
+                if ($totalTax > 0 && $qty > 0) {
                     $newItem['tax_amount'] = ($totalTax / $qty);
                 }
                 $newItem['line_total_incl_tax'] = $total_with_tax;
@@ -974,7 +977,7 @@ class Data implements DataInterface
     public function getCustomersCount($mage_store_id)
     {
         $customerData = $this->_customerCollectionFactory->create();
-        $customerData->addFieldToFilter('store_id', array('eq' => $mage_store_id));
+        $customerData->addFieldToFilter('store_id', ['eq' => $mage_store_id]);
         $object = new DataObject();
         $object->setCount(count($customerData));
         return $object;
@@ -988,7 +991,7 @@ class Data implements DataInterface
     public function getOrdersCount($mage_store_id)
     {
         $orders = $this->_salesOrderResourceCollectionFactory->create();
-        $orders->addFieldToFilter('store_id', array('eq' => $mage_store_id));
+        $orders->addFieldToFilter('store_id', ['eq' => $mage_store_id]);
 
         $object = new DataObject();
         $object->setCount(count($orders));
@@ -1014,8 +1017,7 @@ class Data implements DataInterface
         $page = null,
         $since_id = null,
         $quote_id = null
-    )
-    {
+    ) {
         $pageNumber = null;
         $pageSize = null;
 
@@ -1023,8 +1025,8 @@ class Data implements DataInterface
          * @var Quote[] $quotes
          */
         $quotes = $this->quoteFactory->create()->getCollection();
-        $quotes->addFieldToFilter('is_active' , 1);
-        $quotes->addFieldToFilter('customer_email' , ['neq' => null]);
+        $quotes->addFieldToFilter('is_active', 1);
+        $quotes->addFieldToFilter('customer_email', ['neq' => null]);
 
         if ($mage_store_id != null) {
             $quotes->addFieldToFilter('store_id', ['eq' => $mage_store_id]);
@@ -1053,17 +1055,17 @@ class Data implements DataInterface
             }
         }
 
-        if (!is_null($pageSize)){
+        if (!is_null($pageSize)) {
             $quotes->setPageSize($pageSize)->setCurPage($pageNumber);
         }
 
-        if($quote_id !== null) {
+        if ($quote_id !== null) {
             $quotes->addFieldToFilter('entity_id', $quote_id);
         }
         $map = $this->response_mask;
 
         $quoteCartArray = [];
-        foreach($quotes as $quote) {
+        foreach ($quotes as $quote) {
 
             $quoteData = $quote->getData();
             $quoteArray = [];
@@ -1098,7 +1100,7 @@ class Data implements DataInterface
             }
             $quoteArray['total_shipping'] = empty($defaultShipping['shipping_amount']) ? 0 : (float)$defaultShipping['shipping_amount'];
             $itemsCollection = $quote->getItemsCollection();
-            if($quote->getCustomerId()) {
+            if ($quote->getCustomerId()) {
                 $customer = $this->mapCustomer($quote->getCustomerId());
                 $quoteArray['customer'] = $customer;
             } else {
@@ -1122,7 +1124,7 @@ class Data implements DataInterface
                 }
 
                 $parentItem = $item->getParentItem();
-                if($parentItem && $parentItem->getProductType() == Configurable::TYPE_CODE){
+                if ($parentItem && $parentItem->getProductType() == Configurable::TYPE_CODE) {
                     $itemData['price'] = $parentItem->getPrice();
                     $qty = (float)$parentItem->getQty();
                     $totalTax = empty($parentItem['tax_amount']) ? 0 : (float)$parentItem['tax_amount'];
@@ -1133,7 +1135,7 @@ class Data implements DataInterface
                 $cartTotalTax += $totalTax;
                 $itemData['quantity'] = $qty;
 
-                if(!empty($totalTax) && $qty > 0){
+                if (!empty($totalTax) && $qty > 0) {
                     $taxAmount = $totalTax / $qty;
                 } else {
                     $taxAmount = 0;
@@ -1198,7 +1200,7 @@ class Data implements DataInterface
         $address->setZip($zip);
 
         $logo = (!empty($logo_url) ? $store->getBaseUrl(\Magento\Framework\UrlInterface::URL_TYPE_MEDIA) . \Magento\Config\Model\Config\Backend\Image\Logo::UPLOAD_DIR . '/' . $logo_url : '');
-        $configData = array(
+        $configData = [
             'domain' => $baseUrl,
             'store_front_url' => $store->getBaseUrl(),
             'name' => $name,
@@ -1209,7 +1211,7 @@ class Data implements DataInterface
             'locale' =>$locale,
             'address'=> $address,
             'order_statuses'=>$this->getStoreOrderStatuses()
-        );
+        ];
 
         $object = new DataObject();
         $object->setData($configData);
@@ -1226,7 +1228,7 @@ class Data implements DataInterface
         $orderStatuses = $this->statusFactory->create()->getCollection();
 
         $statuses = [];
-        foreach($orderStatuses as $status){
+        foreach ($orderStatuses as $status) {
             $mappedStatuses['code'] = $status->getData('status');
             $mappedStatuses['name'] = $status->getData('label');
             $statuses[] = $mappedStatuses;
@@ -1254,12 +1256,13 @@ class Data implements DataInterface
      *
      * @return array $response
      */
-    public function createCoupon($ruleId, $couponCode, $expiration = null){
+    public function createCoupon($ruleId, $couponCode, $expiration = null)
+    {
         $error_message = null;
         try {
             $rule = $this->ruleFactory->create()->load($ruleId);
 
-            if(!empty($rule->getId())) {
+            if (!empty($rule->getId())) {
                 $coupon = $this->couponFactory->create();
                 $coupon->setRule($rule)
                     ->setIsPrimary(false)
@@ -1280,7 +1283,7 @@ class Data implements DataInterface
                 throw new LocalizedException(__('Rule with id '.$ruleId.' dosent found.'));
             }
             $status = true;
-        } catch(LocalizedException $e) {
+        } catch (LocalizedException $e) {
             $status = false;
             $error_message = $e->getMessage();
 
@@ -1307,7 +1310,7 @@ class Data implements DataInterface
     public function getConfig($mage_store_id, $configName, $scope)
     {
         $store_id = 0;
-        if($scope == 'stores'){
+        if ($scope == 'stores') {
             $store_id = $mage_store_id;
         } else {
             $scope = 'default';
@@ -1325,7 +1328,7 @@ class Data implements DataInterface
     public function setConfig($mage_store_id, $configName, $scope, $newValue)
     {
         $store_id = 0;
-        if($scope == 'stores'){
+        if ($scope == 'stores') {
             $store_id = $mage_store_id;
         } else {
             $scope = 'default';
@@ -1365,24 +1368,24 @@ class Data implements DataInterface
         $sel->where('store_id', $mage_store_id)
             ->order('queue_id asc');
 
-        if(empty($limit) || !is_numeric($limit)){
+        if (empty($limit) || !is_numeric($limit)) {
             $limit = 10;
         }
 
-        if(empty($limit) || !is_numeric($limit)){
+        if (empty($limit) || !is_numeric($limit)) {
             $page = 0;
         }
 
-        if(is_numeric($limit) && is_numeric($page)){
+        if (is_numeric($limit) && is_numeric($page)) {
             $page++;
             $sel->limitPage($page, $limit);
         }
 
-        if(is_numeric($minId)){
+        if (is_numeric($minId)) {
             $sel->where('queue_id >= ' . $minId);
         }
 
-        if(is_numeric($maxId)){
+        if (is_numeric($maxId)) {
             $sel->where('queue_id <= ' . $maxId);
         }
 
@@ -1406,20 +1409,20 @@ class Data implements DataInterface
         $sel->where('store_id = '. $mage_store_id)
             ->order('queue_id asc');
 
-        if(is_numeric($minId)){
+        if (is_numeric($minId)) {
             $sel->where('queue_id >= ' . $minId);
         }
 
-        if(is_numeric($maxId)){
+        if (is_numeric($maxId)) {
             $sel->where('queue_id <= ' . $maxId);
         }
         $toDelete = $this->queueCollection->count();
         $itemsDeleted = 0;
-        foreach ($this->queueCollection as $item){
+        foreach ($this->queueCollection as $item) {
             try {
                 $this->queueRepo->delete($item);
                 $itemsDeleted++;
-            } catch (\Exception $ex){
+            } catch (\Exception $ex) {
             }
         }
         $ret = [
@@ -1446,23 +1449,23 @@ class Data implements DataInterface
         $sel->where('store_id = '. $mage_store_id)
             ->order('queue_id asc');
 
-        if(is_numeric($minId)){
+        if (is_numeric($minId)) {
             $sel->where('queue_id >= ' . $minId);
         }
 
-        if(is_numeric($maxId)){
+        if (is_numeric($maxId)) {
             $sel->where('queue_id <= ' . $maxId);
         }
 
-        if(empty($limit) || !is_numeric($limit)){
+        if (empty($limit) || !is_numeric($limit)) {
             $limit = 10;
         }
 
-        if(empty($limit) || !is_numeric($limit)){
+        if (empty($limit) || !is_numeric($limit)) {
             $page = 0;
         }
 
-        if(is_numeric($limit) && is_numeric($page)){
+        if (is_numeric($limit) && is_numeric($page)) {
             $page++;
             $sel->limitPage($page, $limit);
         }
@@ -1471,9 +1474,9 @@ class Data implements DataInterface
         /**
          * @var $item QueueInterface
          */
-        foreach ($this->queueCollection as $item){
+        foreach ($this->queueCollection as $item) {
             try {
-                if($this->eventMethods->makeRequest(
+                if ($this->eventMethods->makeRequest(
                     $item->getEventType(),
                     json_decode($item->getPayload(), true),
                     $item->getStoreId(),
@@ -1483,7 +1486,7 @@ class Data implements DataInterface
                     $itemsSent++;
                     $this->queueRepo->delete($item);
                 }
-            } catch (\Exception $ex){
+            } catch (\Exception $ex) {
             }
         }
         $ret = [
@@ -1495,7 +1498,8 @@ class Data implements DataInterface
         return $ret;
     }
 
-    public function unsubscribe($mage_store_id, $email) {
+    public function unsubscribe($mage_store_id, $email)
+    {
         $result = new DataObject();
         $result->setStatus('success');
 
@@ -1516,7 +1520,7 @@ class Data implements DataInterface
         $email = strtolower(trim($email));
         $subscriber = $this->subscriberFactory->create()->loadByEmail($email);
         $found_email = strtolower(trim($subscriber->getEmail()));
-        if($found_email == $email){
+        if ($found_email == $email) {
             $subscriber->unsubscribe();
             $result->setMessage('Customer unsubscribed successfuly');
         } else {
@@ -1526,7 +1530,8 @@ class Data implements DataInterface
         return $result;
     }
 
-    private function getFinalPrice($row) {
+    private function getFinalPrice($row)
+    {
         $price = $row->getFinalPrice();
         $price_info = 0;
         if ($this->configHelper->getWithFixedProductTax()) {
@@ -1536,7 +1541,8 @@ class Data implements DataInterface
         return (float)$price + (float)$price_info;
     }
 
-    private function convertTime($string) {
+    private function convertTime($string)
+    {
         $timestamp = strtotime($string);
 
         return date('Y-m-d H:i:s', $timestamp);

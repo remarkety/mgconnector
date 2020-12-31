@@ -8,7 +8,6 @@
 
 namespace Remarkety\Mgconnector\Observer;
 
-
 use Magento\Framework\Event\ObserverInterface;
 
 class TriggerCatalogInventorySave extends EventMethods implements ObserverInterface

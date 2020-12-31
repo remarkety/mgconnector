@@ -16,10 +16,11 @@ class Install extends \Magento\Backend\App\Action
 {
     protected $resultPageFactory;
 
-    public function __construct(Context $context,
-                                PageFactory $resultPageFactory
-//                                \Magento\Framework\App\RequestInterface $request
-){
+    public function __construct(
+        Context $context,
+        PageFactory $resultPageFactory
+        //                                \Magento\Framework\App\RequestInterface $request
+    ) {
 
         parent::__construct($context);
         $this->resultPageFactory = $resultPageFactory;

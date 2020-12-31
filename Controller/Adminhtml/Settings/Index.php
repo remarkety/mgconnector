@@ -44,8 +44,8 @@ class Index extends \Magento\Backend\App\Action
     public function execute()
     {
         $request = $this->getRequest();
-        if($request->getMethod() === "POST"){
-            if($this->saveSettings($request->getPost())){
+        if ($request->getMethod() === "POST") {
+            if ($this->saveSettings($request->getPost())) {
                 $this->messageManager->addSuccessMessage('Settings saved');
             } else {
                 $this->messageManager->addErrorMessage('Could not save the settings');
@@ -55,7 +55,8 @@ class Index extends \Magento\Backend\App\Action
         return  $resultPage = $this->resultPageFactory->create();
     }
 
-    private function returnRedirect(){
+    private function returnRedirect()
+    {
         /**
          * @var Redirect $resultRedirect
          */
@@ -65,32 +66,33 @@ class Index extends \Magento\Backend\App\Action
 
         return $resultRedirect;
     }
-    private function saveSettings($data){
-        if(isset($data['pos_id'])){
+    private function saveSettings($data)
+    {
+        if (isset($data['pos_id'])) {
             $this->configHelper->setPOSAttributeCode($data['pos_id']);
         }
 
-        if(isset($data['category_view'])) {
+        if (isset($data['category_view'])) {
             $this->configHelper->setEventCategoryViewEnabled($data['category_view'] == 1);
         }
 
-        if(isset($data['search_view'])) {
+        if (isset($data['search_view'])) {
             $this->configHelper->setEventSearchViewEnabled($data['search_view'] == 1);
         }
 
-        if(isset($data['cart_updated'])) {
+        if (isset($data['cart_updated'])) {
             $this->configHelper->setEventCartViewEnabled($data['cart_updated'] == 1);
         }
 
-        if(isset($data['with_fpt'])) {
+        if (isset($data['with_fpt'])) {
             $this->configHelper->setWithFixedProductTax($data['with_fpt'] == 1);
         }
 
-        if(isset($data['aw_rewards_integrate'])) {
+        if (isset($data['aw_rewards_integrate'])) {
             $this->configHelper->setAheadworksRewardPointsEnabled($data['aw_rewards_integrate'] == 1);
         }
 
-        if(isset($data['customer_address'])) {
+        if (isset($data['customer_address'])) {
             $this->configHelper->setCustomerAddressType($data['customer_address']);
         }
 

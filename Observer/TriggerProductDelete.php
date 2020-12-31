@@ -8,7 +8,6 @@
 
 namespace Remarkety\Mgconnector\Observer;
 
-
 use Magento\Catalog\Api\Data\ProductInterface;
 use Magento\Framework\Event\ObserverInterface;
 
@@ -18,7 +17,7 @@ class TriggerProductDelete extends EventMethods implements ObserverInterface
     {
         try {
             $this->startTiming(self::class);
-            if(!$this->shouldSendProductUpdates()){
+            if (!$this->shouldSendProductUpdates()) {
                 return;
             }
 
@@ -27,7 +26,7 @@ class TriggerProductDelete extends EventMethods implements ObserverInterface
              * @var $product ProductInterface
              */
             $product = $event->getDataByKey('product');
-            if(!empty($product)) {
+            if (!empty($product)) {
                 $storeIds = $this->_coreRegistry->registry('product_stores_' . $product->getId());
                 if (!empty($storeIds)) {
                     foreach ($storeIds as $storeId) {
@@ -40,7 +39,7 @@ class TriggerProductDelete extends EventMethods implements ObserverInterface
                 }
             }
             $this->endTiming(self::class);
-        } catch (\Exception $ex){
+        } catch (\Exception $ex) {
             $this->logError($ex);
         }
     }

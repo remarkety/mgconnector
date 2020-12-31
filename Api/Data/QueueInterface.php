@@ -1,7 +1,8 @@
 <?php
 namespace Remarkety\Mgconnector\Api\Data;
 
-interface QueueInterface extends \Magento\Framework\Api\ExtensibleDataInterface {
+interface QueueInterface extends \Magento\Framework\Api\ExtensibleDataInterface
+{
     /**
      * Get ID
      *

@@ -6,13 +6,15 @@ use Magento\Framework\View\Element\Template\Context;
 use \Remarkety\Mgconnector\Model\Webtracking;
 use \Magento\Customer\Model\Session;
 
-class Base extends \Magento\Framework\View\Element\Template {
+class Base extends \Magento\Framework\View\Element\Template
+{
 
     protected $_activeStore = null;
     protected $_webtracking;
     protected $_session;
 
-    public function __construct(Context $context, array $data = [], StoreManager $sManager, Webtracking $webtracking, Session $session){
+    public function __construct(Context $context, array $data = [], StoreManager $sManager, Webtracking $webtracking, Session $session)
+    {
         parent::__construct($context, $data);
         $this->_activeStore = $sManager->getStore();
         $this->_webtracking = $webtracking;
@@ -34,16 +36,18 @@ class Base extends \Magento\Framework\View\Element\Template {
         return $this->_session->getCustomer();
     }
 
-    public function getEmail(){
+    public function getEmail()
+    {
 
-        if($this->_session->isLoggedIn()){
+        if ($this->_session->isLoggedIn()) {
             return $this->getCustomer()->getEmail();
         }
         $email = $this->_session->getSubscriberEmail();
         return empty($email) ? false : $email;
     }
 
-    public function _prepareLayout(){
+    public function _prepareLayout()
+    {
         return parent::_prepareLayout();
     }
 }

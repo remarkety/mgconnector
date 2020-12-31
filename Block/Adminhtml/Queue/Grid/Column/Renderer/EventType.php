@@ -8,10 +8,10 @@
  * @author     Piotr Pierzak <piotrek.pierzak@gmail.com>
  */
 namespace Remarkety\Mgconnector\Block\Adminhtml\Queue\Grid\Column\Renderer;
+
 use Magento\Framework\DataObject;
 
-class EventType
-    extends \Magento\Backend\Block\Widget\Grid\Column\Renderer\AbstractRenderer
+class EventType extends \Magento\Backend\Block\Widget\Grid\Column\Renderer\AbstractRenderer
 {
     /**
      * Column renderer
@@ -23,10 +23,10 @@ class EventType
     {
         $value = $row->getData($this->getColumn()->getIndex());
         try {
-			$payload = json_encode(unserialize($row->getData('payload')));
+            $payload = json_encode(unserialize($row->getData('payload')));
         } catch (\Exception $e) {
-        	$payload = "?";
+            $payload = "?";
         }
-		return '<span title="'.htmlentities($payload).'">'.$value.'</span>';
+        return '<span title="'.htmlentities($payload).'">'.$value.'</span>';
     }
 }

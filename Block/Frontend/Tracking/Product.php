@@ -7,7 +7,9 @@ use Magento\Framework\View\Element\Template\Context;
 use \Remarkety\Mgconnector\Model\Webtracking;
 use \Magento\Customer\Model\Session;
 use Magento\Catalog\Model\Product as MageProduct;
-class Product extends Base {
+
+class Product extends Base
+{
     
     protected $_activeProduct;
     public function __construct(
@@ -16,8 +18,8 @@ class Product extends Base {
         StoreManager $sManager,
         Webtracking $webtracking,
         Session $session,
-        Registry $registry)
-    {
+        Registry $registry
+    ) {
         parent::__construct($context, $data, $sManager, $webtracking, $session);
         $this->_activeProduct = $registry->registry('current_product');
     }
@@ -25,24 +27,27 @@ class Product extends Base {
     /**
      * @return MageProduct
      */
-    public function getActiveProduct(){
+    public function getActiveProduct()
+    {
         return $this->_activeProduct;
     }
-    public function getCategoryNames(){
+    public function getCategoryNames()
+    {
         $cat = $this->getActiveProduct()->getCategory();
-        if($cat){
+        if ($cat) {
             return $cat->getName();
         }
         return '';
     }
-    public function getCategoryIds(){
+    public function getCategoryIds()
+    {
         $cat = $this->getActiveProduct()->getCategory();
-        if($cat){
+        if ($cat) {
             return $cat->getId();
         }
         return '';
     }
-    public function categoriesData(){
-
+    public function categoriesData()
+    {
     }
 }

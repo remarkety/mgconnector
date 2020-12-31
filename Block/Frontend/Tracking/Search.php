@@ -3,7 +3,6 @@
 
 namespace Remarkety\Mgconnector\Block\Frontend\Tracking;
 
-
 use Magento\Catalog\Model\Layer\Resolver as LayerResolver;
 use Magento\CatalogSearch\Block\Result;
 use Magento\CatalogSearch\Helper\Data;
@@ -34,11 +33,13 @@ class Search extends Result
         $this->config_helper = $config_helper;
     }
 
-    public function isEventSearchViewActivated() {
+    public function isEventSearchViewActivated()
+    {
         return $this->config_helper->isEventSearchViewEnabled();
     }
 
-    public function getQueryTerm() {
+    public function getQueryTerm()
+    {
         if (!$this->term) {
             $this->term = $this->catalogSearchData->getEscapedQueryText();
         }
@@ -46,7 +47,8 @@ class Search extends Result
         return $this->term;
     }
 
-    public function getResultProducts() {
+    public function getResultProducts()
+    {
         $data = [];
         $size = 3;
 
@@ -72,14 +74,16 @@ class Search extends Result
         return $data;
     }
 
-    private function getProducts() {
+    private function getProducts()
+    {
         $layout = $this->getLayout()->getBlock('search_result_list');
         $product_collection = $layout->getLoadedProductCollection();
 
         return $product_collection;
     }
 
-    private function getMediaPath($entity) {
+    private function getMediaPath($entity)
+    {
         if (!$this->media_path) {
             $this->media_path = $entity->getStore()->getBaseUrl(\Magento\Framework\UrlInterface::URL_TYPE_MEDIA) . 'catalog/product';
         }
@@ -94,7 +98,8 @@ class Search extends Result
      *
      * @return array
      */
-    private function getFinalPrice($row) {
+    private function getFinalPrice($row)
+    {
         if (Configurable::TYPE_CODE == $row->getTypeId() || 'bundle' == $row->getTypeId()) {
             $sale_price = $row->getMinimalPrice();
             $price = $row->getMinimalPrice();

@@ -8,7 +8,6 @@
 
 namespace Remarkety\Mgconnector\Serializer;
 
-
 use Magento\Catalog\Api\Data\ProductInterface;
 use Magento\Catalog\Model\Product\Attribute\Source\Status;
 use Magento\Catalog\Model\Product\Url;
@@ -43,8 +42,7 @@ class ProductSerializer
         StoreManagerInterface $storeManager,
         DataOverride $dataOverride,
         ConfigHelper $configHelper
-    )
-    {
+    ) {
         $this->categoryFactory = $categoryFactory;
         $this->catalogProductTypeConfigurable = $catalogProductTypeConfigurable;
         $this->productRepository = $productRepository;
@@ -56,17 +54,19 @@ class ProductSerializer
         $this->configHelper = $configHelper;
     }
 
-    public function loadProduct($product_id, $store_id = null){
+    public function loadProduct($product_id, $store_id = null)
+    {
         return $this->productRepository->getById($product_id, false, $store_id);
     }
 
-    public function serialize(ProductInterface $product, $storeId){
+    public function serialize(ProductInterface $product, $storeId)
+    {
 
         $parent_id = null;
         $parentProduct = null;
-        if($product->getTypeId() == 'simple'){
+        if ($product->getTypeId() == 'simple') {
             $parent_id = $this->dataHelper->getParentId($product->getId());
-            if(!empty($parent_id)) {
+            if (!empty($parent_id)) {
                 $parentProduct = $this->loadProduct($parent_id, $storeId);
             }
         }
@@ -86,7 +86,7 @@ class ProductSerializer
 
         $variants = [];
 
-        if(!empty($parentProduct)){
+        if (!empty($parentProduct)) {
             $parentProduct->setStoreId($storeId);
             $url = $parentProduct->getProductUrl(false);
             $images = $this->dataHelper->getMediaGalleryImages($parentProduct);
@@ -105,10 +105,10 @@ class ProductSerializer
             $url = $product->getProductUrl(false);
             $images = $this->dataHelper->getMediaGalleryImages($product);
 
-            if($product->getTypeId() == Configurable::TYPE_CODE){
+            if ($product->getTypeId() == Configurable::TYPE_CODE) {
                 //configurable products sends variants
                 $childrenIdsGroups = $this->catalogProductTypeConfigurable->getChildrenIds($product->getId());
-                if(isset($childrenIdsGroups[0])) {
+                if (isset($childrenIdsGroups[0])) {
                     $childrenIds = $childrenIdsGroups[0];
                     foreach ($childrenIds as $childId) {
                         $childProd = $this->loadProduct($childId, $storeId);
@@ -145,8 +145,8 @@ class ProductSerializer
         }
 
         $categories = [];
-        if(!empty($categoryIds)){
-            foreach($categoryIds as $categoryId){
+        if (!empty($categoryIds)) {
+            foreach ($categoryIds as $categoryId) {
                 $categories[] = $this->dataHelper->getCategory($categoryId, $storeId);
             }
         }
@@ -158,17 +158,17 @@ class ProductSerializer
         $manufacturer = null;
 
         $vendorAttr = $product->getResource()->getAttribute('vendor');
-        if(!$vendorAttr){
+        if (!$vendorAttr) {
             $vendorAttr = $product->getResource()->getAttribute('brand');
         }
         $manufacturerAttr = $product->getResource()->getAttribute('manufacturer');
-        if($manufacturerAttr){
-            if(!empty($product->getData($manufacturerAttr->getAttributeCode()))){
+        if ($manufacturerAttr) {
+            if (!empty($product->getData($manufacturerAttr->getAttributeCode()))) {
                 $manufacturer = $manufacturerAttr->getFrontend()->getValue($product);
             }
         }
-        if($vendorAttr){
-            if(!empty($product->getData($vendorAttr->getAttributeCode()))){
+        if ($vendorAttr) {
+            if (!empty($product->getData($vendorAttr->getAttributeCode()))) {
                 $vendor = $vendorAttr->getFrontend()->getValue($product);
             }
         }
@@ -177,8 +177,8 @@ class ProductSerializer
             'sku' => $product->getSku(),
             'title' => $product->getName(),
             'categories' => $categories,
-            'created_at' => $created_at->format(\DateTime::ATOM ),
-            'updated_at' => $updated_at->format(\DateTime::ATOM ),
+            'created_at' => $created_at->format(\DateTime::ATOM),
+            'updated_at' => $updated_at->format(\DateTime::ATOM),
             'images' => $images,
             'enabled' => $enabled,
             'price' => (float)$product->getPrice(),
@@ -189,7 +189,7 @@ class ProductSerializer
             'vendor' => $vendor,
             'manufacturer' => $manufacturer
         ];
-        if(!empty($parent_id)){
+        if (!empty($parent_id)) {
             $data['parent_id'] = $parent_id;
         }
         return $this->dataOverride->product($product, $data);
@@ -205,7 +205,8 @@ class ProductSerializer
         return false;
     }
 
-    private function getFinalPrice($row) {
+    private function getFinalPrice($row)
+    {
         $price = $row->getFinalPrice();
         $price_info = 0;
         if ($this->configHelper->getWithFixedProductTax()) {

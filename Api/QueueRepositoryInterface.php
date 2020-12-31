@@ -4,7 +4,7 @@ namespace Remarkety\Mgconnector\Api;
 use Remarkety\Mgconnector\Api\Data\QueueInterface;
 use Magento\Framework\Api\SearchCriteriaInterface;
 
-interface QueueRepositoryInterface 
+interface QueueRepositoryInterface
 {
     public function save(QueueInterface $page);
 

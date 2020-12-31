@@ -16,7 +16,8 @@ class Configuration extends Container
         parent::_construct();
     }
 
-    public function _prepareLayout(){
+    public function _prepareLayout()
+    {
 
         $this->_blockGroup = 'Remarkety_Mgconnector';
         $this->_controller = 'adminhtml_queue';

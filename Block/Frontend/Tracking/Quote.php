@@ -14,30 +14,34 @@ use \Remarkety\Mgconnector\Model\Webtracking;
 use \Magento\Customer\Model\Session;
 use Magento\Catalog\Model\Product as MageProduct;
 
-class Quote extends \Magento\Framework\View\Element\Template {
+class Quote extends \Magento\Framework\View\Element\Template
+{
     private $quote;
     private $checkout_session;
     private $recovery_helper;
     private $media_path;
     private $config_helper;
 
-    public function __construct(Template\Context $context,
+    public function __construct(
+        Template\Context $context,
         \Magento\Checkout\Model\Session $checkoutSession,
         array $data = [],
         Recovery $recoveryHelper,
-        ConfigHelper $configHelper)
-    {
+        ConfigHelper $configHelper
+    ) {
         parent::__construct($context, $data);
         $this->checkout_session = $checkoutSession;
         $this->recovery_helper = $recoveryHelper;
         $this->config_helper = $configHelper;
     }
 
-    public function isEventCartViewActivated() {
+    public function isEventCartViewActivated()
+    {
         return $this->config_helper->isEventCartViewEnabled();
     }
 
-    public function getCart() {
+    public function getCart()
+    {
         if (empty($this->getQuote()) || empty($this->getQuote()->getId())) {
             return null;
         }
@@ -45,7 +49,8 @@ class Quote extends \Magento\Framework\View\Element\Template {
         $cart = [
             'abandoned_checkout_url' => $this->recovery_helper->getCartRecoveryURL(
                 $this->getQuote()->getId(),
-                $this->getQuote()->getStore()->getId()),
+                $this->getQuote()->getStore()->getId()
+            ),
             'created_at'  => $this->getQuote()->getCreatedAt(),
             'currency'    => $this->getQuote()->getQuoteCurrencyCode(),
             'id'          => $this->getQuote()->getId(),
@@ -56,13 +61,13 @@ class Quote extends \Magento\Framework\View\Element\Template {
         ];
 
         $address = $this->getQuote()->getShippingAddress();
-        if($address){
+        if ($address) {
             $shipping_amount = $address->getShippingAmount();
             $cart['total_shipping'] = floatval($shipping_amount);
         }
 
         $coupon = $this->getQuote()->getCouponCode();
-        if(!empty($coupon)){
+        if (!empty($coupon)) {
             $coupon_discount = $this->getQuote()->getSubtotal() - $this->getQuote()->getSubtotalWithDiscount();
             $cart['discount_codes'][] = [
                 'code' => $coupon,
@@ -73,7 +78,8 @@ class Quote extends \Magento\Framework\View\Element\Template {
         return $cart;
     }
 
-    private function getQuoteItems() {
+    private function getQuoteItems()
+    {
         $items = $this->getQuote()->getItemsCollection();
         $line_items = [];
 
@@ -100,7 +106,8 @@ class Quote extends \Magento\Framework\View\Element\Template {
         return $line_items;
     }
 
-    private function getQuote() {
+    private function getQuote()
+    {
         if (!$this->quote) {
             $this->checkout_session->getQuote();
             if (!$this->hasData('quote')) {
@@ -113,7 +120,8 @@ class Quote extends \Magento\Framework\View\Element\Template {
         return $this->quote;
     }
 
-    private function getMediaPath() {
+    private function getMediaPath()
+    {
         if (!$this->media_path) {
             $this->media_path = $this->getQuote()->getStore()->getBaseUrl(\Magento\Framework\UrlInterface::URL_TYPE_MEDIA) . 'catalog/product';
         }

@@ -7,6 +7,7 @@
  */
 
 namespace Remarkety\Mgconnector\Helper;
+
 use Magento\Customer\Model\Data\Customer;
 use Magento\Framework\App\Cache\TypeList;
 use \Magento\Framework\App\Config\ScopeConfigInterface;
@@ -49,14 +50,15 @@ class ConfigHelper
         StoreManager $sManager,
         Config $configResource,
         TypeList $cacheTypeList
-    ){
+    ) {
         $this->_scopeConfig = $scopeConfig;
         $this->_activeStore = $sManager->getStore();
         $this->configResource = $configResource;
         $this->cacheTypeList = $cacheTypeList;
     }
 
-    public function isStoreInstalled($storeId){
+    public function isStoreInstalled($storeId)
+    {
         $installed = $this->_scopeConfig->getValue(\Remarkety\Mgconnector\Model\Install::XPATH_INSTALLED, \Remarkety\Mgconnector\Model\Install::STORE_SCOPE, $storeId);
         return !empty($installed);
     }
@@ -69,15 +71,17 @@ class ConfigHelper
         return (empty($id) || is_null($id)) ? false : $id;
     }
 
-    public function isAheadworksRewardPointsEnabled(){
+    public function isAheadworksRewardPointsEnabled()
+    {
         $enabled = $this->_scopeConfig->getValue(self::ENABLE_AHEADWORKS_REWARD_POINTS);
-        if(is_null($enabled) || $enabled == 1){
+        if (is_null($enabled) || $enabled == 1) {
             return true;
         }
         return false;
     }
 
-    public function setAheadworksRewardPointsEnabled($enabled){
+    public function setAheadworksRewardPointsEnabled($enabled)
+    {
         $this->configResource->saveConfig(
             self::ENABLE_AHEADWORKS_REWARD_POINTS,
             $enabled ? 1 : 0,
@@ -87,25 +91,28 @@ class ConfigHelper
         $this->cacheTypeList->cleanType('config');
     }
 
-    public function isWebhooksGloballyEnabled(){
+    public function isWebhooksGloballyEnabled()
+    {
         $webhooksEnabled = $this->_scopeConfig->getValue(self::WEBHOOKS_ENABLED);
-        if(is_null($webhooksEnabled) || !empty($webhooksEnabled)){
+        if (is_null($webhooksEnabled) || !empty($webhooksEnabled)) {
             return true;
         }
         return false;
     }
 
-    public function getPOSAttributeCode(){
+    public function getPOSAttributeCode()
+    {
         $pos_attribute_code = $this->_scopeConfig->getValue(self::POS_ATTRIBUTE_CODE);
-        if(empty($pos_attribute_code)){
+        if (empty($pos_attribute_code)) {
             return null;
         }
         return $pos_attribute_code;
     }
 
-    public function getWithFixedProductTax() {
+    public function getWithFixedProductTax()
+    {
         $status = $this->_scopeConfig->getValue(self::WITH_FIXED_PRODUCT_TAX);
-        if(empty($status)){
+        if (empty($status)) {
 
             return false;
         }
@@ -113,17 +120,20 @@ class ConfigHelper
         return $status;
     }
 
-    public function isEventCartViewEnabled() {
+    public function isEventCartViewEnabled()
+    {
         $cart_view_code = $this->_scopeConfig->getValue(self::EVENT_CART_VIEW_ENABLED);
         return $cart_view_code == 1;
     }
 
-    public function isEventSearchViewEnabled() {
+    public function isEventSearchViewEnabled()
+    {
         $search_view_code = $this->_scopeConfig->getValue(self::EVENT_SEARCH_VIEW_ENABLED);
         return $search_view_code == 1;
     }
 
-    public function isEventCategoryViewEnabled() {
+    public function isEventCategoryViewEnabled()
+    {
         $category_view_code = $this->_scopeConfig->getValue(self::EVENT_CATEGORY_VIEW_ENABLED);
         return $category_view_code == 1;
     }
@@ -131,7 +141,8 @@ class ConfigHelper
     /**
      * @param string $code
      */
-    public function setPOSAttributeCode($code){
+    public function setPOSAttributeCode($code)
+    {
         $this->configResource->saveConfig(
             self::POS_ATTRIBUTE_CODE,
             $code,
@@ -141,7 +152,8 @@ class ConfigHelper
         $this->cacheTypeList->cleanType('config');
     }
 
-    public function setWithFixedProductTax($status) {
+    public function setWithFixedProductTax($status)
+    {
         $current_status = $this->isEventSearchViewEnabled();
         $this->configResource->saveConfig(
             self::WITH_FIXED_PRODUCT_TAX,
@@ -149,13 +161,14 @@ class ConfigHelper
             ScopeConfigInterface::SCOPE_TYPE_DEFAULT,
             0
         );
-        if($current_status != $status){
+        if ($current_status != $status) {
             $this->cacheTypeList->cleanType('config');
             $this->cacheTypeList->cleanType('full_page');
         }
     }
 
-    public function setEventSearchViewEnabled($status){
+    public function setEventSearchViewEnabled($status)
+    {
         $current_status = $this->isEventSearchViewEnabled();
         $this->configResource->saveConfig(
             self::EVENT_SEARCH_VIEW_ENABLED,
@@ -163,13 +176,14 @@ class ConfigHelper
             ScopeConfigInterface::SCOPE_TYPE_DEFAULT,
             0
         );
-        if($current_status != $status){
+        if ($current_status != $status) {
             $this->cacheTypeList->cleanType('config');
             $this->cacheTypeList->cleanType('full_page');
         }
     }
 
-    public function setEventCartViewEnabled($status){
+    public function setEventCartViewEnabled($status)
+    {
         $current_status = $this->isEventCartViewEnabled();
         $this->configResource->saveConfig(
             self::EVENT_CART_VIEW_ENABLED,
@@ -177,13 +191,14 @@ class ConfigHelper
             ScopeConfigInterface::SCOPE_TYPE_DEFAULT,
             0
         );
-        if($current_status != $status){
+        if ($current_status != $status) {
             $this->cacheTypeList->cleanType('config');
             $this->cacheTypeList->cleanType('full_page');
         }
     }
 
-    public function setEventCategoryViewEnabled($status){
+    public function setEventCategoryViewEnabled($status)
+    {
         $current_status = $this->isEventCategoryViewEnabled();
         $this->configResource->saveConfig(
             self::EVENT_CATEGORY_VIEW_ENABLED,
@@ -191,39 +206,43 @@ class ConfigHelper
             ScopeConfigInterface::SCOPE_TYPE_DEFAULT,
             0
         );
-        if($current_status != $status){
+        if ($current_status != $status) {
             $this->cacheTypeList->cleanType('config');
             $this->cacheTypeList->cleanType('full_page');
         }
     }
 
-    public function shouldSendProductUpdates(){
+    public function shouldSendProductUpdates()
+    {
         $webhooks = $this->_scopeConfig->getValue(self::PRODUCT_WEBHOOKS_DISABLED);
-        if(empty($webhooks)){
+        if (empty($webhooks)) {
             return true;
         }
         return false;
     }
 
-    public function forceSyncWebhooks(){
+    public function forceSyncWebhooks()
+    {
         $async = $this->_scopeConfig->getValue(self::FORCE_NON_ASYNC_WEBHOOKS);
-        if(!empty($async)){
+        if (!empty($async)) {
             return true;
         }
         return false;
     }
 
-    public function getCustomerAddressType(){
+    public function getCustomerAddressType()
+    {
         $val = $this->_scopeConfig->getValue(self::CUSTOMER_ADDRESS_TO_USE);
-        if(!empty($val)){
+        if (!empty($val)) {
             return $val;
         }
         return self::CUSTOMER_ADDRESS_BILLING;
     }
 
-    public function setCustomerAddressType($type){
+    public function setCustomerAddressType($type)
+    {
         $val = self::CUSTOMER_ADDRESS_BILLING;
-        if($type === self::CUSTOMER_ADDRESS_SHIPPING){
+        if ($type === self::CUSTOMER_ADDRESS_SHIPPING) {
             $val = $type;
         }
         $this->configResource->saveConfig(
@@ -235,17 +254,19 @@ class ConfigHelper
         $this->cacheTypeList->cleanType('config');
     }
 
-    public function forceSyncCustomersWebhooks(){
+    public function forceSyncCustomersWebhooks()
+    {
         $async = $this->_scopeConfig->getValue(self::FORCE_ASYNC_WEBHOOKS);
-        if(!empty($async) && $async == self::ASYNC_MODE_ON_CUSTOMERS_SYNC){
+        if (!empty($async) && $async == self::ASYNC_MODE_ON_CUSTOMERS_SYNC) {
             return true;
         }
         return false;
     }
 
-    public function shouldLogWebhooksTiming(){
+    public function shouldLogWebhooksTiming()
+    {
         $enabled = $this->_scopeConfig->getValue(self::ENABLE_WEBHOOKS_TIMER);
-        if(!empty($enabled)){
+        if (!empty($enabled)) {
             return true;
         }
         return false;
@@ -254,7 +275,8 @@ class ConfigHelper
     /**
      * @param bool $enabled
      */
-    public function setWebhooksGloballStatus($enabled){
+    public function setWebhooksGloballStatus($enabled)
+    {
         $this->configResource->saveConfig(
             self::WEBHOOKS_ENABLED,
             $enabled ? 1 : 0,
@@ -264,15 +286,17 @@ class ConfigHelper
         $this->cacheTypeList->cleanType('config');
     }
 
-    public function useCategoriesFullPath(){
-        if(is_null($this->_useCategoriesFullPath)) {
+    public function useCategoriesFullPath()
+    {
+        if (is_null($this->_useCategoriesFullPath)) {
             $fullPath = $this->_scopeConfig->getValue(self::USE_CATEGORIES_FULL_PATH);
             $this->_useCategoriesFullPath = !empty($fullPath);
         }
         return $this->_useCategoriesFullPath;
     }
 
-    public function setCategoriesFullPath($value = true){
+    public function setCategoriesFullPath($value = true)
+    {
         $this->configResource->saveConfig(
             self::USE_CATEGORIES_FULL_PATH,
             $value ? 1 : 0,
@@ -282,8 +306,9 @@ class ConfigHelper
         $this->cacheTypeList->cleanType('config');
     }
 
-    public function customerPendingConfirmation(Customer $customer){
-        if(!$customer->getConfirmation()){
+    public function customerPendingConfirmation(Customer $customer)
+    {
+        if (!$customer->getConfirmation()) {
             return false;
         }
         return (bool)$this->_scopeConfig->getValue(

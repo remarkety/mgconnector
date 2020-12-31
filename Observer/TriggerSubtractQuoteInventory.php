@@ -8,7 +8,6 @@
 
 namespace Remarkety\Mgconnector\Observer;
 
-
 use Magento\Framework\Event\ObserverInterface;
 use Magento\Sales\Model\Order;
 
@@ -18,7 +17,7 @@ class TriggerSubtractQuoteInventory extends EventMethods implements ObserverInte
     {
         try {
             $this->startTiming(self::class);
-            if(!$this->shouldSendProductUpdates()){
+            if (!$this->shouldSendProductUpdates()) {
                 return;
             }
 
@@ -26,7 +25,7 @@ class TriggerSubtractQuoteInventory extends EventMethods implements ObserverInte
              * @var $order Order
              */
             $order = $observer->getEvent()->getOrder();
-            if($order) {
+            if ($order) {
                 foreach ($order->getAllItems() as $item) {
                     $product = $this->productSerializer->loadProduct($item->getProductId());
                     $storeIds = $product->getStoreIds();
@@ -41,7 +40,7 @@ class TriggerSubtractQuoteInventory extends EventMethods implements ObserverInte
                 }
             }
             $this->endTiming(self::class);
-        } catch (\Exception $ex){
+        } catch (\Exception $ex) {
             $this->logError($ex);
         }
     }

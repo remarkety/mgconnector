@@ -70,9 +70,9 @@ class Recovery extends \Magento\Framework\App\Action\Action
             }
 
             $current_quote = $this->checkoutSession->getQuoteId();
-            if($current_quote != $quote_id) {
+            if ($current_quote != $quote_id) {
                 $quote = $this->quoteFactory->create()->load($quote_id);
-                if($quote && $quote->getId() == $quote_id){
+                if ($quote && $quote->getId() == $quote_id) {
                     $quote_id = $this->recoveryHelper->quoteRestore($quote);
                     $this->checkoutSession->setQuoteId($quote_id);
                 }

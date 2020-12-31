@@ -1,5 +1,6 @@
 <?php
 namespace Remarkety\Mgconnector\Model\Api\Data;
+
 class StoreSettingsContact implements \Remarkety\Mgconnector\Api\Data\StoreSettingsContactInterface
 {
 

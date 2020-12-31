@@ -14,8 +14,7 @@ class Welcome extends Container
         Context $context,
         Registry $registry,
         array $data = []
-    )
-    {
+    ) {
         $this->_coreRegistry = $registry;
         parent::__construct($context, $data);
     }
@@ -29,7 +28,6 @@ class Welcome extends Container
         $this->removeButton('reset');
         $this->removeButton('save');
         $this->removeButton('back');
-
     }
 
     protected function _prepareLayout()

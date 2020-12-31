@@ -11,6 +11,7 @@ namespace Remarkety\Mgconnector\Block\Adminhtml\Queue;
 
 use \Magento\Backend\Block\Template\Context;
 use \Magento\Backend\Helper\Data;
+
 //use \Magento\Framework\Module\Manager;
 //use \Remarkety\Mgconnector\Model\QueueFactory;
 //use \Magento\Catalog\Model\ProductFactory;
@@ -28,6 +29,4 @@ class Configure extends \Magento\Backend\Block\Widget\Form\Container
         $this->_controller = 'adminhtml_queue';
         $this->_headerText = $this->__('Queue Configuration');
     }
-
-
 }

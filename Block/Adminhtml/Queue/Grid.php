@@ -44,7 +44,8 @@ class Grid extends \Magento\Backend\Block\Widget\Grid\Extended
         parent::__construct($context, $backendHelper, $data);
     }
 
-    protected function _construct() {
+    protected function _construct()
+    {
         parent::_construct();
 
         $this->setId('queue_ids');
@@ -75,7 +76,6 @@ class Grid extends \Magento\Backend\Block\Widget\Grid\Extended
 //        $this->setCollection($collection);
 //        return $this;
 //        return parent::_prepareCollection();
-
     }
 
     /**
@@ -86,43 +86,43 @@ class Grid extends \Magento\Backend\Block\Widget\Grid\Extended
      */
     protected function _prepareColumns()
     {
-        $this->addColumn('queue_id', array(
+        $this->addColumn('queue_id', [
             'header' => __('Queue #'),
             'width' => '50px',
             'type' => 'number',
             'index' => 'queue_id'
-        ));
-        $this->addColumn('event_type', array(
+        ]);
+        $this->addColumn('event_type', [
             'header' => __('Event Type'),
             'index' => 'event_type',
-        ));
-        $this->addColumn('status', array(
+        ]);
+        $this->addColumn('status', [
             'header' => __('Status'),
             'width' => '200px',
             'index' => 'status'
-        ));
-        $this->addColumn('attempts', array(
+        ]);
+        $this->addColumn('attempts', [
             'header' => __('Attempts'),
             'index' => 'attempts'
-        ));
-        $this->addColumn('last_attempt', array(
+        ]);
+        $this->addColumn('last_attempt', [
             'header' => __('Last Attempt'),
             'width' => '200px',
             'type' => 'datetime',
             'index' => 'last_attempt'
-        ));
-        $this->addColumn('next_attempt', array(
+        ]);
+        $this->addColumn('next_attempt', [
             'header' => __('Next Attempt'),
             'width' => '200px',
             'type' => 'datetime',
             'index' => 'next_attempt'
-        ));
+        ]);
 
-        $this->addColumn('last_error_message', array(
+        $this->addColumn('last_error_message', [
             'header' => __('Last error'),
             'width' => '200px',
             'index' => 'last_error_message'
-        ));
+        ]);
 
         return parent::_prepareColumns();
     }

@@ -144,7 +144,7 @@ interface DataInterface
      *
      * @return mixed $response
      */
-    public function createCoupon($ruleId, $couponCode, $expiration  = null);
+    public function createCoupon($ruleId, $couponCode, $expiration = null);
 
     /**
      * @param int|null $mage_store_id

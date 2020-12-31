@@ -55,9 +55,10 @@ class Queue
      *
      * @return int
      */
-    protected function resend($queueItems,$resetAttempts = false) {
+    protected function resend($queueItems, $resetAttempts = false)
+    {
         $sent = 0;
-        foreach($queueItems as $queue) {
+        foreach ($queueItems as $queue) {
             $result = $this->eventMethods->makeRequest(
                 $queue->getEventType(),
                 json_decode($queue->getPayload(), true),
@@ -65,7 +66,7 @@ class Queue
                 $resetAttempts ? 0 : $queue->getAttempts(),
                 $queue->getId()
             );
-            if($result) {
+            if ($result) {
                 $this->queueRepository->deleteById($queue->getId());
                 $sent++;
             }
@@ -89,11 +90,10 @@ class Queue
             ->where('status = 1')
             ->order('main_table.next_attempt asc');
             $this->resend($collection);
-        } catch(\Exception $e) {
+        } catch (\Exception $e) {
             $this->logger->debug($e->getMessage());
         }
 
         return $this;
     }
-
 }

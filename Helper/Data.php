@@ -2,6 +2,7 @@
 
 
 namespace Remarkety\Mgconnector\Helper;
+
 use Magento\Catalog\Api\Data\ProductAttributeMediaGalleryEntryInterface;
 use Magento\Catalog\Api\Data\ProductInterface;
 use Magento\TestFramework\Inspection\Exception;
@@ -17,18 +18,19 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
     protected $categoryFactory;
     protected $configHelper;
     protected $addressSerializer;
-    public function __construct(\Magento\Framework\App\Helper\Context $context,
-                                \Magento\Framework\Module\ModuleResource $moduleResource,
-                                \Magento\Integration\Model\Integration $integration,
-                                \Magento\Customer\Model\Session $session,
-                                InstallModel $installModel,
-                                \Magento\Store\Model\StoreManagerInterface $storeManager,
-                                \Magento\Catalog\Model\Product\Gallery\GalleryManagement $galleryManagement,
-                                \Magento\ConfigurableProduct\Model\ResourceModel\Product\Type\Configurable $catalogProductTypeConfigurable,
-                                \Magento\Catalog\Model\CategoryFactory $categoryFactory,
-                                ConfigHelper $configHelper,
-                                AddressSerializer $addressSerializer
-    ){
+    public function __construct(
+        \Magento\Framework\App\Helper\Context $context,
+        \Magento\Framework\Module\ModuleResource $moduleResource,
+        \Magento\Integration\Model\Integration $integration,
+        \Magento\Customer\Model\Session $session,
+        InstallModel $installModel,
+        \Magento\Store\Model\StoreManagerInterface $storeManager,
+        \Magento\Catalog\Model\Product\Gallery\GalleryManagement $galleryManagement,
+        \Magento\ConfigurableProduct\Model\ResourceModel\Product\Type\Configurable $catalogProductTypeConfigurable,
+        \Magento\Catalog\Model\CategoryFactory $categoryFactory,
+        ConfigHelper $configHelper,
+        AddressSerializer $addressSerializer
+    ) {
         $this->integration = $integration;
         $this->moduleResource = $moduleResource;
         $this->session = $session;
@@ -42,7 +44,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         parent::__construct($context);
     }
 
-	public function getInstalledVersion()
+    public function getInstalledVersion()
     {
         return $this->moduleResource->getDataVersion('Remarkety_Mgconnector');
     }
@@ -53,33 +55,33 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         $mode = InstallModel::MODE_INSTALL_CREATE;
 
         $webServiceUser = $this->integration->load(InstallModel::WEB_SERVICE_USERNAME, 'name');
-        if($webServiceUser->getData()) {
+        if ($webServiceUser->getData()) {
             $mode = InstallModel::MODE_UPGRADE;
         }
 
         $response = $this->session->getRemarketyLastResponseStatus();
-        if($response == 1) {
+        if ($response == 1) {
             $mode = InstallModel::MODE_COMPLETE;
-        } elseif($response == 0) {
+        } elseif ($response == 0) {
             $mode = InstallModel::MODE_INSTALL_CREATE;
         }
         $configuredStores = $this->installModel->getConfiguredStores();
-        if($configuredStores) {
+        if ($configuredStores) {
             $mode = InstallModel::MODE_WELCOME;
         }
 
         $forceMode = $this->_request->getParam('mode', false);
-        if(!empty($forceMode)) {
+        if (!empty($forceMode)) {
             $mode = $forceMode;
         }
 
-        if(!in_array($mode, array(
+        if (!in_array($mode, [
             InstallModel::MODE_INSTALL_CREATE,
             InstallModel::MODE_INSTALL_LOGIN,
             InstallModel::MODE_UPGRADE,
             InstallModel::MODE_COMPLETE,
             InstallModel::MODE_WELCOME,
-        ))) {
+        ])) {
             throw new \Exception('Installation mode can not be handled.');
         }
         return $mode;
@@ -101,15 +103,15 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         $imagesData = [];
         if ($images) {
             foreach ($images as $imageAttr) {
-                if($imageAttr->getMediaType() == "image"){
+                if ($imageAttr->getMediaType() == "image") {
                     $types = $imageAttr->getTypes();
-                    if(empty($types)){
+                    if (empty($types)) {
                         $imagesData['id'] = $imageAttr->getId();
                         $imagesData['product_id'] = $imageAttr->getEntityId();
                         $imagesData['src'] = $this->getMediaUrl() . 'catalog/product' . $imageAttr->getFile();
                         $ret[] = $imagesData;
                     } else {
-                        foreach ($types as $type){
+                        foreach ($types as $type) {
                             $imagesData['id'] = $imageAttr->getId();
                             $imagesData['type'] = $type;
                             $imagesData['product_id'] = $imageAttr->getEntityId();
@@ -128,7 +130,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         $images = $this->galleryManagement->getList($product->getSku());
         $imageDet = [];
         $imagesData = [];
-        if($images) {
+        if ($images) {
             foreach ($images as $imageAttr) {
                 if ($imageAttr['types']) {
                     foreach ($imageAttr['types'] as $type) {
@@ -159,15 +161,15 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
              * @var Category $category
              */
             $category = $this->categoryFactory->create()->load($category_id);
-            if(!$fullPath){
+            if (!$fullPath) {
                 $name = $category->getName();
             } else {
                 $parents = $category->getParentCategories();
-                if(count($parents) > 1) {
+                if (count($parents) > 1) {
                     $rootCategoryId = $this->storeManager->getStore($storeId)->getRootCategoryId();
                     $nameParts = [];
                     foreach ($parents as $parentCategory) {
-                        if($parentCategory->getId() == $rootCategoryId){
+                        if ($parentCategory->getId() == $rootCategoryId) {
                             continue;
                         }
                         $nameParts[] = $parentCategory->getName();
@@ -179,7 +181,9 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
             }
             $this->categoryMapCache[$category_id] = $name;
         }
-        if (!isset($this->categoryMapCache[$category_id])) return false;
+        if (!isset($this->categoryMapCache[$category_id])) {
+            return false;
+        }
 
         return ['code' => $category_id, 'name' => $this->categoryMapCache[$category_id]];
     }
@@ -199,9 +203,11 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
      * @param bool $capitalizeFirstCharacter
      * @return string
      */
-    public static function toCamelCase($string, $capitalizeFirstCharacter = false){
-        if(strlen($string) == 0)
+    public static function toCamelCase($string, $capitalizeFirstCharacter = false)
+    {
+        if (strlen($string) == 0) {
             return "";
+        }
         $str = str_replace(' ', '', ucwords(str_replace('_', ' ', $string)));
         if (!$capitalizeFirstCharacter) {
             $str[0] = strtolower($str[0]);
@@ -209,18 +215,19 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         return $str;
     }
 
-    public function getCustomerAddresses($customer){
+    public function getCustomerAddresses($customer)
+    {
         $addresses = $customer->getAddresses();
         $address = null;
         $toUse = $this->configHelper->getCustomerAddressType();
-        if(!empty($addresses)){
+        if (!empty($addresses)) {
             $addressId = null;
-            if($toUse === ConfigHelper::CUSTOMER_ADDRESS_BILLING){
+            if ($toUse === ConfigHelper::CUSTOMER_ADDRESS_BILLING) {
                 $addressId = $customer->getDefaultBilling();
             } else {
                 $addressId = $customer->getDefaultShipping();
             }
-            if($addressId) {
+            if ($addressId) {
                 $address = $this->findAddressById($addresses, $addressId);
             }
         }
@@ -228,9 +235,10 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         return $address ? $this->addressSerializer->serialize($address) : null;
     }
 
-    private function findAddressById($addresses, $id){
-        foreach ($addresses as $address){
-            if($address->getId() === $id){
+    private function findAddressById($addresses, $id)
+    {
+        foreach ($addresses as $address) {
+            if ($address->getId() === $id) {
                 return $address;
             }
         }

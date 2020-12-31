@@ -14,8 +14,7 @@ class Upgrade extends Container
         Context $context,
         Registry $registry,
         array $data = []
-    )
-    {
+    ) {
         $this->_coreRegistry = $registry;
         parent::__construct($context, $data);
     }
@@ -36,5 +35,4 @@ class Upgrade extends Container
     {
         parent::_prepareLayout();
     }
-
 }

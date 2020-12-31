@@ -29,8 +29,7 @@ class Recovery extends \Magento\Framework\App\Helper\AbstractHelper
         Context $context,
         \Magento\Store\Model\StoreManagerInterface $storeManager,
         QuoteFactory $quoteFactory
-    )
-    {
+    ) {
         $this->storeManager = $storeManager;
         $this->quoteFactory = $quoteFactory;
         parent::__construct($context);
@@ -78,7 +77,8 @@ class Recovery extends \Magento\Framework\App\Helper\AbstractHelper
      * @param $old_quote
      * @return int
      */
-    public function quoteRestore($old_quote) {
+    public function quoteRestore($old_quote)
+    {
         $quote = $this->quoteFactory->create();
         $quote->merge($old_quote);
         $quote->setItemsCount($old_quote->getItemsCount());
@@ -98,14 +98,14 @@ class Recovery extends \Magento\Framework\App\Helper\AbstractHelper
     {
         $id = null;
         $parts = base64_decode($hashed_id);
-        if(!empty($parts)){
+        if (!empty($parts)) {
             $split = explode(':', $parts);
-            if(count($split) == 2){
+            if (count($split) == 2) {
                 $cart_id = $split[0];
-                if(is_numeric($cart_id)){
+                if (is_numeric($cart_id)) {
                     $sign = md5($cart_id . '.' . $this->getApiKey());
                     $sign_from_request = $split[1];
-                    if($sign === $sign_from_request){
+                    if ($sign === $sign_from_request) {
                         return (int)$cart_id;
                     }
                 }
@@ -132,9 +132,8 @@ class Recovery extends \Magento\Framework\App\Helper\AbstractHelper
      *
      * @return mixed
      */
-    private function getApiKey() {
+    private function getApiKey()
+    {
         return $this->getConfig('remarkety/mgconnector/api_key');
     }
 }
-
-

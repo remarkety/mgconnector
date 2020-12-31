@@ -3,7 +3,6 @@
 
 namespace Remarkety\Mgconnector\Helper;
 
-
 use Magento\Catalog\Api\Data\ProductInterface;
 use Magento\Customer\Model\Data\Customer;
 use Magento\Quote\Model\Quote;
@@ -16,11 +15,13 @@ class DataOverride
      * @param $data
      * @return mixed
      */
-    public function customer($customer, $data){
+    public function customer($customer, $data)
+    {
         return $data;
     }
 
-    public function newsletter($data){
+    public function newsletter($data)
+    {
         return $data;
     }
 
@@ -29,7 +30,8 @@ class DataOverride
      * @param $data
      * @return mixed
      */
-    public function cart($quote, $data){
+    public function cart($quote, $data)
+    {
         return $data;
     }
 
@@ -38,7 +40,8 @@ class DataOverride
      * @param $data
      * @return mixed
      */
-    public function order($order, $data){
+    public function order($order, $data)
+    {
         return $data;
     }
 
@@ -47,7 +50,8 @@ class DataOverride
      * @param $data
      * @return mixed
      */
-    public function product($product, $data){
+    public function product($product, $data)
+    {
         return $data;
     }
 }

@@ -11,6 +11,5 @@ class Setup implements InstallSchemaInterface
 {
     public function install(SchemaSetupInterface $setup, ModuleContextInterface $context)
     {
-
     }
 }

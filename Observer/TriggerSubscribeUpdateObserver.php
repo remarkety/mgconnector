@@ -25,7 +25,8 @@ use Remarkety\Mgconnector\Serializer\OrderSerializer;
 use Remarkety\Mgconnector\Serializer\ProductSerializer;
 use Psr\Log\LoggerInterface;
 
-class TriggerSubscribeUpdateObserver extends EventMethods implements ObserverInterface {
+class TriggerSubscribeUpdateObserver extends EventMethods implements ObserverInterface
+{
 
     protected $_subscriber = null;
     protected $_checkoutSession;
@@ -57,7 +58,7 @@ class TriggerSubscribeUpdateObserver extends EventMethods implements ObserverInt
         RemoteAddress $remoteAddress,
         StoreManager $storeManager,
         DataOverride $dataOverride
-    ){
+    ) {
         parent::__construct($logger, $registry, $subscriber, $customerGroupModel, $remarketyQueueRepo, $queueFactory, $store, $scopeConfig, $orderSerializer, $customerSerializer, $addressSerializer, $configHelper, $productSerializer, $request, $customerRepository, $customerRegistry, $storeManager);
         $this->session = $customerSession;
         $this->_checkoutSession = $CheckoutSession;
@@ -72,7 +73,8 @@ class TriggerSubscribeUpdateObserver extends EventMethods implements ObserverInt
      * @param \Magento\Framework\Event\Observer $observer
      * @return $this
      */
-    public function execute(\Magento\Framework\Event\Observer $observer){
+    public function execute(\Magento\Framework\Event\Observer $observer)
+    {
         try {
             $this->startTiming(self::class);
             /**
@@ -80,27 +82,30 @@ class TriggerSubscribeUpdateObserver extends EventMethods implements ObserverInt
              */
             $subscriber = $observer->getEvent()->getSubscriber();
 
-            if(!$subscriber->isStatusChanged()) {
+            if (!$subscriber->isStatusChanged()) {
                 return $this;
             }
 
-            if(!$this->_coreRegistry->registry('subscriber_object_data_observer'))
+            if (!$this->_coreRegistry->registry('subscriber_object_data_observer')) {
                 $this->_coreRegistry->register('subscriber_object_data_observer', 1);
+            }
 
-            if($subscriber->getId()) {
+            if ($subscriber->getId()) {
 
-                if(!$this->isWebhooksEnabledSpecificStore($subscriber->getStoreId())){
+                if (!$this->isWebhooksEnabledSpecificStore($subscriber->getStoreId())) {
                     return $this;
                 }
 
-                if ($this->_coreRegistry->registry('remarkety_subscriber_deleted_' . $subscriber->getSubscriberEmail()))
+                if ($this->_coreRegistry->registry('remarkety_subscriber_deleted_' . $subscriber->getSubscriberEmail())) {
                     return $this;
-                if ($this->_coreRegistry->registry('remarkety_subscriber_updated_' . $subscriber->getSubscriberEmail()))
+                }
+                if ($this->_coreRegistry->registry('remarkety_subscriber_updated_' . $subscriber->getSubscriberEmail())) {
                     return $this;
+                }
 
                 $status = $subscriber->getStatus();
                 $eventType = 'newsletter/subscribed';
-                switch($status){
+                switch ($status) {
                     case Subscriber::STATUS_SUBSCRIBED:
                         $eventType = 'newsletter/subscribed';
                         break;
@@ -111,7 +116,7 @@ class TriggerSubscribeUpdateObserver extends EventMethods implements ObserverInt
                     case Subscriber::STATUS_NOT_ACTIVE:
                         return $this;
                 }
-                if($eventType == 'newsletter/unsubscribed') {
+                if ($eventType == 'newsletter/unsubscribed') {
                     if ($this->request->getFullActionName() === 'customer_account_createpost') {
                         //workaround to prevent "unsubscribe" event when email verification is required
                         //for new account and email is already approved
@@ -123,14 +128,14 @@ class TriggerSubscribeUpdateObserver extends EventMethods implements ObserverInt
                 $data = $this->dataOverride->newsletter($data);
                 $this->makeRequest($eventType, $data, $subscriber->getStoreId(), 0, null, $this->_forceSyncCustomersWebhooks);
 
-                if($this->_store->getId() != 0){
+                if ($this->_store->getId() != 0) {
                     $email = $subscriber->getSubscriberEmail();
-                    if(!empty($email)){
+                    if (!empty($email)) {
                         //for webtracking use
                         $this->session->setSubscriberEmail($email);
                         //add email to cart
                         $cart = $this->_checkoutSession->getQuote();
-                        if($cart && !is_null($cart->getId()) && is_null($cart->getCustomerEmail())){
+                        if ($cart && !is_null($cart->getId()) && is_null($cart->getCustomerEmail())) {
                             $cart->setCustomerEmail($email);
                             $this->cartRepository->save($cart);
                         }
@@ -139,7 +144,7 @@ class TriggerSubscribeUpdateObserver extends EventMethods implements ObserverInt
                 $this->_coreRegistry->register('remarkety_subscriber_updated_' . $subscriber->getSubscriberEmail(), 1, true);
                 $this->endTiming(self::class);
             }
-        } catch (\Exception $ex){
+        } catch (\Exception $ex) {
             $this->logError($ex);
         }
         return $this;

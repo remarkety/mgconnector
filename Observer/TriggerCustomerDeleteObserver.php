@@ -5,9 +5,11 @@ namespace Remarkety\Mgconnector\Observer;
 use Magento\Customer\Model\Backend\Customer;
 use Magento\Framework\Event\ObserverInterface;
 
-class TriggerCustomerDeleteObserver extends EventMethods implements ObserverInterface {
+class TriggerCustomerDeleteObserver extends EventMethods implements ObserverInterface
+{
 
-    public function execute(\Magento\Framework\Event\Observer $observer){
+    public function execute(\Magento\Framework\Event\Observer $observer)
+    {
         try {
             $this->startTiming(self::class);
             /**
@@ -19,14 +21,14 @@ class TriggerCustomerDeleteObserver extends EventMethods implements ObserverInte
             }
             $store = $customer->getStore();
 
-            if($this->isWebhooksEnabled($store)) {
-                $this->makeRequest(self::EVENT_CUSTOMERS_DELETED, array(
+            if ($this->isWebhooksEnabled($store)) {
+                $this->makeRequest(self::EVENT_CUSTOMERS_DELETED, [
                     'id' => (int)$customer->getId(),
                     'email' => $customer->getEmail(),
-                ), $store->getId());
+                ], $store->getId());
             }
             $this->endTiming(self::class);
-        } catch (\Exception $ex){
+        } catch (\Exception $ex) {
             $this->logError($ex);
         }
         return $this;

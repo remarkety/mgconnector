@@ -4,6 +4,7 @@
  * See COPYING.txt for license details.
  */
 namespace Remarkety\Mgconnector\Block\Adminhtml\Install\Grid\Render;
+
 use Remarkety\Mgconnector\Helper\ConfigHelper;
 
 /**
@@ -25,11 +26,11 @@ class Status extends \Magento\Backend\Block\Widget\Grid\Column\Renderer\Abstract
          */
         $configHelper = $objectManager->get('Remarkety\Mgconnector\Helper\ConfigHelper');
         $installed = $configHelper->isStoreInstalled($row->getStoreId());
-        if($installed){
+        if ($installed) {
             $ret = '<span style="color:green">'. __('Connected') .'</span>';
 
             $publicId = $configHelper->getRemarketyPublicId($row->getStoreId());
-            if(empty($publicId)){
+            if (empty($publicId)) {
                 $ret .= '<br />';
                 $ret .= '<span style="color:red">(' . __('Missing Remarkety\'s store id; website tracking and live updates will not work.') . ')</span>';
             }
