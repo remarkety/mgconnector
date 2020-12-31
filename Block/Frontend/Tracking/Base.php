@@ -13,8 +13,13 @@ class Base extends \Magento\Framework\View\Element\Template
     protected $_webtracking;
     protected $_session;
 
-    public function __construct(Context $context, array $data = [], StoreManager $sManager, Webtracking $webtracking, Session $session)
-    {
+    public function __construct(
+        Context $context,
+        array $data,
+        StoreManager $sManager,
+        Webtracking $webtracking,
+        Session $session
+    ) {
         parent::__construct($context, $data);
         $this->_activeStore = $sManager->getStore();
         $this->_webtracking = $webtracking;
@@ -44,10 +49,5 @@ class Base extends \Magento\Framework\View\Element\Template
         }
         $email = $this->_session->getSubscriberEmail();
         return empty($email) ? false : $email;
-    }
-
-    public function _prepareLayout()
-    {
-        return parent::_prepareLayout();
     }
 }

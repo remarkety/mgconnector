@@ -52,7 +52,7 @@ class TriggerCouponExpiration implements ObserverInterface
                     $this->message_manager->addErrorMessage($message);
                     $cartUrl = $this->url->getUrl('checkout/cart/index');
                     $this->response_factory->create()->setRedirect($cartUrl)->sendResponse();
-                    exit;
+                    return;
                 }
             }
         }

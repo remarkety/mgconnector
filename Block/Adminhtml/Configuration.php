@@ -7,14 +7,6 @@ use \Magento\Backend\Helper\Data;
 
 class Configuration extends Container
 {
-    /**
-     * Prepare block
-     */
-    public function _construct()
-    {
-
-        parent::_construct();
-    }
 
     public function _prepareLayout()
     {

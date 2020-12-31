@@ -8,13 +8,17 @@ use \Remarkety\Mgconnector\Model\Install as InstallModel;
 class Form extends Generic
 {
 
+    private $serialize;
+    private $session;
     public function __construct(
         \Magento\Backend\Block\Template\Context $context,
         \Magento\Framework\Registry $registry,
         \Magento\Framework\Data\FormFactory $formFactory,
-        \Magento\Customer\Model\Session $session
+        \Magento\Customer\Model\Session $session,
+        \Magento\Framework\Serialize\Serializer\Serialize $serialize
     ) {
         $this->session = $session;
+        $this->serialize = $serialize;
         parent::__construct($context, $registry, $formFactory);
     }
 
@@ -50,7 +54,7 @@ class Form extends Generic
             'after_element_html' => '<p style="font-weight:bold;">' . __('Installation complete!') . '</p>'
             ]);
         $response = $this->session->getRemarketyLastResponseStatus();
-        $response = !empty($response) ? unserialize($response) : [];
+        $response = !empty($response) ? $this->serialize->unserialize($response) : [];
         $fieldset->addField('response', 'note', [
             'label' => false,
             'after_element_html' => !empty($response['info']) ? $response['info'] : __('There is no response to display')

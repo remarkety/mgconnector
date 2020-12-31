@@ -26,7 +26,7 @@ class Search extends Result
         LayerResolver $layerResolver,
         Data $catalogSearchData,
         QueryFactory $queryFactory,
-        array $data = [],
+        array $data,
         ConfigHelper $config_helper
     ) {
         parent::__construct($context, $layerResolver, $catalogSearchData, $queryFactory, $data);
@@ -85,7 +85,9 @@ class Search extends Result
     private function getMediaPath($entity)
     {
         if (!$this->media_path) {
-            $this->media_path = $entity->getStore()->getBaseUrl(\Magento\Framework\UrlInterface::URL_TYPE_MEDIA) . 'catalog/product';
+            $this->media_path = $entity
+                    ->getStore()
+                    ->getBaseUrl(\Magento\Framework\UrlInterface::URL_TYPE_MEDIA) . 'catalog/product';
         }
 
         return $this->media_path;

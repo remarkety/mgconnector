@@ -8,8 +8,13 @@ use Magento\Customer\Model\Session;
 
 class General extends Base
 {
-    public function __construct(Context $context, array $data = [], StoreManager $sManager, Webtracking $webtracking, Session $session)
-    {
+    public function __construct(
+        Context $context,
+        array $data,
+        StoreManager $sManager,
+        Webtracking $webtracking,
+        Session $session
+    ) {
         parent::__construct($context, $data, $sManager, $webtracking, $session);
         $this->_isScopePrivate = true;
     }

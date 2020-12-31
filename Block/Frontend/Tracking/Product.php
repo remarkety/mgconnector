@@ -14,7 +14,7 @@ class Product extends Base
     protected $_activeProduct;
     public function __construct(
         Context $context,
-        array $data = [],
+        array $data,
         StoreManager $sManager,
         Webtracking $webtracking,
         Session $session,
@@ -46,8 +46,5 @@ class Product extends Base
             return $cat->getId();
         }
         return '';
-    }
-    public function categoriesData()
-    {
     }
 }

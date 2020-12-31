@@ -36,8 +36,13 @@ class Grid extends \Magento\Backend\Block\Widget\Grid\Extended
      * @SuppressWarnings(PHPMD.ExcessiveParameterList)
      */
 
-    public function __construct(Context $context, Data $backendHelper, QueueFactory $queueFactory, ProductFactory $productFactory, array $data = [])
-    {
+    public function __construct(
+        Context $context,
+        Data $backendHelper,
+        QueueFactory $queueFactory,
+        ProductFactory $productFactory,
+        array $data = []
+    ) {
 //        $this->moduleManager = $moduleManager;
         $this->_queueFactory = $queueFactory;
         $this->_productFactory = $productFactory;
@@ -151,7 +156,6 @@ class Grid extends \Magento\Backend\Block\Widget\Grid\Extended
                 'confirm' => __('Are you sure?')
             ]
         );
-
 
         return $this;
     }

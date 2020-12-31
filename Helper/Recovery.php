@@ -103,7 +103,7 @@ class Recovery extends \Magento\Framework\App\Helper\AbstractHelper
             if (count($split) == 2) {
                 $cart_id = $split[0];
                 if (is_numeric($cart_id)) {
-                    $sign = md5($cart_id . '.' . $this->getApiKey());
+                    $sign = sha1($cart_id . '.' . $this->getApiKey());
                     $sign_from_request = $split[1];
                     if ($sign === $sign_from_request) {
                         return (int)$cart_id;
@@ -122,7 +122,7 @@ class Recovery extends \Magento\Framework\App\Helper\AbstractHelper
      */
     private function encodeQuoteId($id)
     {
-        $sign = md5($id . '.' . $this->getApiKey());
+        $sign = sha1($id . '.' . $this->getApiKey());
 
         return base64_encode($id . ':' . $sign);
     }

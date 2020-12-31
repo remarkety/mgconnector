@@ -42,9 +42,29 @@ class TriggerSubscribeDeleteObserver extends EventMethods implements ObserverInt
         CustomerRepository $customerRepository,
         CustomerRegistry $customerRegistry,
         StoreManager $storeManager,
-        DataOverride $dataOverride
+        DataOverride $dataOverride,
+        \Magento\Framework\Serialize\Serializer\Serialize $serialize
     ) {
-        parent::__construct($logger, $coreRegistry, $subscriber, $customerGroupModel, $remarketyQueueRepo, $queueFactory, $store, $scopeConfig, $orderSerializer, $customerSerializer, $addressSerializer, $configHelper, $productSerializer, $request, $customerRepository, $customerRegistry, $storeManager);
+        parent::__construct(
+            $logger,
+            $coreRegistry,
+            $subscriber,
+            $customerGroupModel,
+            $remarketyQueueRepo,
+            $queueFactory,
+            $store,
+            $scopeConfig,
+            $orderSerializer,
+            $customerSerializer,
+            $addressSerializer,
+            $configHelper,
+            $productSerializer,
+            $request,
+            $customerRepository,
+            $customerRegistry,
+            $storeManager,
+            $serialize
+        );
         $this->dataOverride = $dataOverride;
     }
 

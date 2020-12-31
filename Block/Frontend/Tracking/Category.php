@@ -18,7 +18,7 @@ class Category extends View
         \Magento\Catalog\Model\Layer\Resolver $layerResolver,
         \Magento\Framework\Registry $registry,
         \Magento\Catalog\Helper\Category $categoryHelper,
-        array $data = [],
+        array $data,
         ConfigHelper $config_helper
     ) {
         parent::__construct($context, $layerResolver, $registry, $categoryHelper, $data);

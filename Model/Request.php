@@ -22,12 +22,15 @@ class Request
     const REMARKETY_PLATFORM = 'MAGENTO_2';
 
 
+    private $serialize;
     public function __construct(
         Store $store,
-        Session $customerSession
+        Session $customerSession,
+        \Magento\Framework\Serialize\Serializer\Serialize $serialize
     ) {
         $this->store = $store;
         $this->session = $customerSession;
+        $this->serialize = $serialize;
     }
 
     protected function _getRequestConfig()
@@ -78,7 +81,7 @@ class Request
 
             $body = (array)json_decode($response->getBody());
             $this->session->setRemarketyLastResponseStatus($response->getStatus() === 200 ? 1 : 0);
-            $this->session->setRemarketyLastResponseMessage(serialize($body));
+            $this->session->setRemarketyLastResponseMessage($this->serialize->serialize($body));
 
 
             switch ($response->getStatus()) {

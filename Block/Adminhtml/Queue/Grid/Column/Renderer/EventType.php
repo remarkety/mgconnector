@@ -13,6 +13,14 @@ use Magento\Framework\DataObject;
 
 class EventType extends \Magento\Backend\Block\Widget\Grid\Column\Renderer\AbstractRenderer
 {
+
+    private $serialize;
+    public function __construct(\Magento\Framework\Serialize\Serializer\Serialize $serialize)
+    {
+        $this->serialize = $serialize;
+        parent::__construct();
+    }
+
     /**
      * Column renderer
      *
@@ -23,7 +31,8 @@ class EventType extends \Magento\Backend\Block\Widget\Grid\Column\Renderer\Abstr
     {
         $value = $row->getData($this->getColumn()->getIndex());
         try {
-            $payload = json_encode(unserialize($row->getData('payload')));
+            $data = $this->serialize->unserialize($row->getData('payload'));
+            $payload = json_encode($data);
         } catch (\Exception $e) {
             $payload = "?";
         }

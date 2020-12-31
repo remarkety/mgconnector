@@ -76,6 +76,7 @@ class EventMethods
     protected $_forceSyncCustomersWebhooks = false;
     private $_enableWebhooksTiming = false;
     private $_webhooksTimingLogger;
+    private $serialize;
 
     private $_timings = [];
     public function __construct(
@@ -95,7 +96,8 @@ class EventMethods
         Http $request,
         CustomerRepository $customerRepository,
         CustomerRegistry $customerRegistry,
-        StoreManager $storeManager
+        StoreManager $storeManager,
+        \Magento\Framework\Serialize\Serializer\Serialize $serialize
     ) {
         $this->storeManager = $storeManager;
         $this->customerRegistry = $customerRegistry;
@@ -106,6 +108,7 @@ class EventMethods
         $this->orderSerializer = $orderSerializer;
         $this->addressSerializer = $addressSerializer;
         $this->productSerializer = $productSerializer;
+        $this->serialize = $serialize;
 
         $this->_coreRegistry = $coreRegistry;
         $this->subscriber = $subscriber;
@@ -216,7 +219,7 @@ class EventMethods
             'payload' => $payload,
             'storeId' => $storeId
         ];
-        $hash = md5(serialize($data));
+        $hash = sha1($this->serialize->serialize($data));
         if ($this->_coreRegistry->registry($hash)) {
             return false;
         }

@@ -25,7 +25,7 @@ class Quote extends \Magento\Framework\View\Element\Template
     public function __construct(
         Template\Context $context,
         \Magento\Checkout\Model\Session $checkoutSession,
-        array $data = [],
+        array $data,
         Recovery $recoveryHelper,
         ConfigHelper $configHelper
     ) {
@@ -90,12 +90,13 @@ class Quote extends \Magento\Framework\View\Element\Template
 
             $parent_item = $item->getParentItem();
 
+            $price = $parent_item ? floatval($parent_item->getPriceInclTax()) : floatval($item->getPriceInclTax());
             $line_items[] = [
                 'product_id' => $item->getProductId(),
                 'quantity'   => $parent_item ? $parent_item->getQty() : $item->getQty(),
                 'sku'        => $item->getSku(),
                 'title'      => $item->getName(),
-                'price'      => $parent_item ? floatval($parent_item->getPriceInclTax()) : floatval($item->getPriceInclTax()),
+                'price'      => $price,
                 'taxable'    => $item->getTaxPercent() > 0,
                 'added_at'   => $item->getCreatedAt(),
                 'url'        => $item->getProduct()->getProductUrl(),
@@ -123,7 +124,10 @@ class Quote extends \Magento\Framework\View\Element\Template
     private function getMediaPath()
     {
         if (!$this->media_path) {
-            $this->media_path = $this->getQuote()->getStore()->getBaseUrl(\Magento\Framework\UrlInterface::URL_TYPE_MEDIA) . 'catalog/product';
+            $this->media_path = $this
+                    ->getQuote()
+                    ->getStore()
+                    ->getBaseUrl(\Magento\Framework\UrlInterface::URL_TYPE_MEDIA) . 'catalog/product';
         }
 
         return $this->media_path;

@@ -93,6 +93,8 @@ class Install extends \Magento\Framework\Model\AbstractModel
 
     protected $_cache;
 
+    private $serialize;
+
     public function __construct(
         Context $context,
         \Magento\Framework\Registry $registry,
@@ -110,7 +112,8 @@ class Install extends \Magento\Framework\Model\AbstractModel
         \Magento\Integration\Model\IntegrationService $integrationService,
         \Magento\Integration\Model\OauthService $oauthService,
         Session $session,
-        TypeList $cache
+        TypeList $cache,
+        \Magento\Framework\Serialize\Serializer\Serialize $serialize
     ) {
         parent::__construct($context, $registry);
         $this->_cache = $cache;
@@ -128,6 +131,7 @@ class Install extends \Magento\Framework\Model\AbstractModel
         $this->_integrationService = $integrationService;
         $this->oauthService = $oauthService;
         $this->_session = $session;
+        $this->serialize = $serialize;
         $this->_webtracking = $rmWebtracking;
     }
 
@@ -323,19 +327,6 @@ class Install extends \Magento\Framework\Model\AbstractModel
     }
 
 
-    protected function _generateApiKey()
-    {
-        $apiKey = $this->scopeConfigInterface->getValue('remarkety/mgconnector/api_key');
-        if (!empty($apiKey)) {
-            return $apiKey;
-        }
-        if (!empty($this->_data['email'])) {
-            return md5($this->_data['email'] . time());
-        }
-        throw new \Exception('Can not generate api key');
-    }
-
-
     protected function _getWebServiceUser()
     {
 
@@ -354,7 +345,7 @@ class Install extends \Magento\Framework\Model\AbstractModel
         );
 
         $response = $this->_session->getRemarketyLastResponseMessage();
-        $response = !empty($response) ? unserialize($response) : [];
+        $response = !empty($response) ? $this->serialize->unserialize($response) : [];
         if (!empty($response['storePublicId'])) {
             $this->_webtracking->setRemarketyPublicId($storeId, $response['storePublicId']);
         }

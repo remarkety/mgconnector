@@ -57,9 +57,29 @@ class TriggerSubscribeUpdateObserver extends EventMethods implements ObserverInt
         CustomerRegistry $customerRegistry,
         RemoteAddress $remoteAddress,
         StoreManager $storeManager,
-        DataOverride $dataOverride
+        DataOverride $dataOverride,
+        \Magento\Framework\Serialize\Serializer\Serialize $serialize
     ) {
-        parent::__construct($logger, $registry, $subscriber, $customerGroupModel, $remarketyQueueRepo, $queueFactory, $store, $scopeConfig, $orderSerializer, $customerSerializer, $addressSerializer, $configHelper, $productSerializer, $request, $customerRepository, $customerRegistry, $storeManager);
+        parent::__construct(
+            $logger,
+            $registry,
+            $subscriber,
+            $customerGroupModel,
+            $remarketyQueueRepo,
+            $queueFactory,
+            $store,
+            $scopeConfig,
+            $orderSerializer,
+            $customerSerializer,
+            $addressSerializer,
+            $configHelper,
+            $productSerializer,
+            $request,
+            $customerRepository,
+            $customerRegistry,
+            $storeManager,
+            $serialize
+        );
         $this->session = $customerSession;
         $this->_checkoutSession = $CheckoutSession;
         $this->_store = $sManager->getStore();
