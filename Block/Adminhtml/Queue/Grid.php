@@ -57,7 +57,6 @@ class Grid extends \Magento\Backend\Block\Widget\Grid\Extended
         $this->setDefaultSort('queue_id');
         $this->setDefaultDir('DESC');
         $this->setSaveParametersInSession(true);
-        $this->setUseAjax(true);
         $this->setVarNameFilter('grid_record');
     }
     protected function _prepareCollection()
