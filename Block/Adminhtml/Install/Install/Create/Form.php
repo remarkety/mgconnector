@@ -135,10 +135,10 @@ class Form extends Generic
             'value' => '1',
             'class' => 'required-entry',
             'after_element_html' => sprintf(
-                ' I agree to Remarkety’s <a href="%s">terms of use</a>.',
+                'I agree to Remarkety’s <a href="%s">terms of use</a>.',
                 'https://www.remarkety.com/terms-of-service-2'
             )
-        ));
+        ]);
 
         $fieldset->addField('button', 'note', [
             'label' => false,
