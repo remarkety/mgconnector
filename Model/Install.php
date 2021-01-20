@@ -172,7 +172,20 @@ class Install extends \Magento\Framework\Model\AbstractModel
                 'name' => self::WEB_SERVICE_ROLE,
                 'email' => $email,
                 'status'=> '1',
-                'all_resources'=>'1'
+                'all_resources'=> '0',
+                'resource' => [
+                    'Remarkety::admin',
+                    'Remarkety::admin_queue',
+                    'Remarkety::admin_version',
+                    'Remarkety::admin_config',
+                    'Magento_Catalog::catalog',
+                    'Magento_Customer::customer',
+                    'Magento_Sales::actions_view',
+                    'Magento_Cart::cart',
+                    'Magento_Backend::store',
+                    'Magento_SalesRule::quote',
+                    'Magento_Newsletter::subscriber'
+                ]
             ];
 
             $this->_integrationService->create($user);

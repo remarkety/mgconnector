@@ -4,97 +4,97 @@
     <route url="/V1/mgconnector/products" method="GET">
         <service class="Remarkety\Mgconnector\Api\DataInterface" method="getProducts"/>
         <resources>
-            <resource ref="Magento_Backend::all"/>
+            <resource ref="Magento_Catalog::catalog"/>
         </resources>
     </route>
     <route url="/V1/mgconnector/customers" method="GET">
         <service class="Remarkety\Mgconnector\Api\DataInterface" method="getCustomers"/>
         <resources>
-            <resource ref="Magento_Backend::all"/>
+            <resource ref="Magento_Customer::customer"/>
         </resources>
     </route>
     <route url="/V1/mgconnector/orders" method="GET">
         <service class="Remarkety\Mgconnector\Api\DataInterface" method="getOrders"/>
         <resources>
-            <resource ref="Magento_Backend::all"/>
+            <resource ref="Magento_Sales::actions_view"/>
         </resources>
     </route>
     <route url="/V1/mgconnector/products/count" method="GET">
         <service class="Remarkety\Mgconnector\Api\DataInterface" method="getProductsCount"/>
         <resources>
-            <resource ref="Magento_Backend::all"/>
+            <resource ref="Magento_Catalog::catalog"/>
         </resources>
     </route>
     <route url="/V1/mgconnector/customers/count" method="GET">
         <service class="Remarkety\Mgconnector\Api\DataInterface" method="getCustomersCount"/>
         <resources>
-            <resource ref="Magento_Backend::all"/>
+            <resource ref="Magento_Customer::customer"/>
         </resources>
     </route>
     <route url="/V1/mgconnector/orders/count" method="GET">
         <service class="Remarkety\Mgconnector\Api\DataInterface" method="getOrdersCount"/>
         <resources>
-            <resource ref="Magento_Backend::all"/>
+            <resource ref="Magento_Sales::actions_view"/>
         </resources>
     </route>
     <route url="/V1/mgconnector/carts" method="GET">
         <service class="Remarkety\Mgconnector\Api\DataInterface" method="getQuotes"/>
         <resources>
-            <resource ref="Magento_Backend::all"/>
+            <resource ref="Magento_Cart::cart"/>
         </resources>
     </route>
     <route url="/V1/mgconnector/store/settings" method="GET">
         <service class="Remarkety\Mgconnector\Api\DataInterface" method="getStoreSettings"/>
         <resources>
-            <resource ref="Magento_Backend::all"/>
+            <resource ref="Magento_Backend::store"/>
         </resources>
     </route>
     <route url="/V1/mgconnector/createCoupon" method="POST">
         <service class="Remarkety\Mgconnector\Api\DataInterface" method="createCoupon"/>
         <resources>
-            <resource ref="Magento_Backend::all"/>
+            <resource ref="Magento_SalesRule::quote"/>
         </resources>
     </route>
     <route url="/V1/mgconnector/config" method="GET">
         <service class="Remarkety\Mgconnector\Api\DataInterface" method="getConfig"/>
         <resources>
-            <resource ref="Magento_Backend::all"/>
+            <resource ref="Remarkety::admin_config"/>
         </resources>
     </route>
     <route url="/V1/mgconnector/config" method="POST">
         <service class="Remarkety\Mgconnector\Api\DataInterface" method="setConfig"/>
         <resources>
-            <resource ref="Magento_Backend::all"/>
+            <resource ref="Remarkety::admin_config"/>
         </resources>
     </route>
     <route url="/V1/mgconnector/version" method="GET">
         <service class="Remarkety\Mgconnector\Api\DataInterface" method="getVersion"/>
         <resources>
-            <resource ref="Magento_Backend::all"/>
+            <resource ref="Remarkety::admin_version"/>
         </resources>
     </route>
     <route url="/V1/mgconnector/queue" method="GET">
         <service class="Remarkety\Mgconnector\Api\DataInterface" method="getQueueItems"/>
         <resources>
-            <resource ref="Magento_Backend::all"/>
+            <resource ref="Remarkety::admin_queue"/>
         </resources>
     </route>
     <route url="/V1/mgconnector/queue" method="DELETE">
         <service class="Remarkety\Mgconnector\Api\DataInterface" method="deleteQueueItems"/>
         <resources>
-            <resource ref="Magento_Backend::all"/>
+            <resource ref="Remarkety::admin_queue"/>
         </resources>
     </route>
     <route url="/V1/mgconnector/queue" method="POST">
         <service class="Remarkety\Mgconnector\Api\DataInterface" method="retryQueueItems"/>
         <resources>
-            <resource ref="Magento_Backend::all"/>
+            <resource ref="Remarkety::admin_queue"/>
         </resources>
     </route>
     <route url="/V1/mgconnector/unsubscribe" method="POST">
         <service class="Remarkety\Mgconnector\Api\DataInterface" method="unsubscribe"/>
         <resources>
-            <resource ref="Magento_Backend::all"/>
+            <resource ref="Magento_Newsletter::subscriber"/>
         </resources>
     </route>
 </routes>

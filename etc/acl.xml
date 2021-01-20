@@ -1,0 +1,14 @@
+<?xml version="1.0"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:Acl/etc/acl.xsd">
+    <acl>
+        <resources>
+            <resource id="Magento_Backend::admin">
+                <resource id="Remarkety::admin" title="Remarkety" translate="title" sortOrder="60">
+                    <resource id="Remarkety::admin_version" title="Get plugin version" translate="title" sortOrder="40" />
+                    <resource id="Remarkety::admin_queue" title="Manage webhooks queue" translate="title" sortOrder="41" />
+                    <resource id="Remarkety::admin_config" title="Change plugin config" translate="title" sortOrder="42" />
+                </resource>
+            </resource>
+        </resources>
+    </acl>
+</config>
