@@ -102,10 +102,6 @@ class TriggerSubscribeUpdateObserver extends EventMethods implements ObserverInt
              */
             $subscriber = $observer->getEvent()->getSubscriber();
 
-            if (!$subscriber->isStatusChanged()) {
-                return $this;
-            }
-
             if (!$this->_coreRegistry->registry('subscriber_object_data_observer')) {
                 $this->_coreRegistry->register('subscriber_object_data_observer', 1);
             }
