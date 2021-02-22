@@ -5,9 +5,9 @@
     <script>
         var _rmData = _rmData || [];
         _rmData.push(['productView', {
-            productId: <?php echo json_encode($block->getActiveProduct()->getId()); ?>,
-            productCategories: <?php echo json_encode($block->getCategoryNames()); ?>,
-            productCategoriesIds: <?php echo json_encode($block->getCategoryIds()); ?>,
+            productId: <?= $block->getActiveProduct()->getId(); ?>,
+            productCategories: <?= $block->getCategoryNames(); ?>,
+            productCategoriesIds: <?= $block->getCategoryIds(); ?>,
         }]);
     </script>
 <?php endif; ?>

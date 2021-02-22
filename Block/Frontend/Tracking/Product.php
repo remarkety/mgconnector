@@ -4,47 +4,77 @@ namespace Remarkety\Mgconnector\Block\Frontend\Tracking;
 use \Magento\Framework\Registry;
 use Magento\Store\Model\StoreManager;
 use Magento\Framework\View\Element\Template\Context;
+use Remarkety\Mgconnector\Helper\Data;
 use \Remarkety\Mgconnector\Model\Webtracking;
 use \Magento\Customer\Model\Session;
-use Magento\Catalog\Model\Product as MageProduct;
+use Magento\Catalog\Model\Product as ProductModel;
 
 class Product extends Base
 {
-    
-    protected $_activeProduct;
+
+    /**
+     * @var ProductModel
+     */
+    protected $activeProduct;
+
+    /**
+     * @var Data
+     */
+    private $dataHelper;
+
+    /**
+     * @param Context $context
+     * @param array $data
+     * @param StoreManager $sManager
+     * @param Webtracking $webtracking
+     * @param Session $session
+     * @param Registry $registry
+     * @param Data $dataHelper
+     */
     public function __construct(
         Context $context,
         array $data,
         StoreManager $sManager,
         Webtracking $webtracking,
         Session $session,
-        Registry $registry
+        Registry $registry,
+        Data $dataHelper
     ) {
         parent::__construct($context, $data, $sManager, $webtracking, $session);
-        $this->_activeProduct = $registry->registry('current_product');
+
+        $this->activeProduct = $registry->registry('current_product');
+        $this->dataHelper = $dataHelper;
     }
 
     /**
-     * @return MageProduct
+     * @return ProductModel
      */
-    public function getActiveProduct()
+    public function getActiveProduct(): ProductModel
     {
-        return $this->_activeProduct;
+        return $this->activeProduct;
     }
-    public function getCategoryNames()
+
+    /**
+     * @return string
+     */
+    public function getCategoryNames(): string
     {
-        $cat = $this->getActiveProduct()->getCategory();
-        if ($cat) {
-            return $cat->getName();
+        $categoryIds = $this->getActiveProduct()->getCategoryIds();
+        $result = [];
+
+        foreach ($categoryIds as $categoryId) {
+            $category = $this->dataHelper->getCategory($categoryId);
+            $result[] = $category['name'];
         }
-        return '';
+
+        return json_encode($result);
     }
-    public function getCategoryIds()
+
+    /**
+     * @return string
+     */
+    public function getCategoryIds(): string
     {
-        $cat = $this->getActiveProduct()->getCategory();
-        if ($cat) {
-            return $cat->getId();
-        }
-        return '';
+        return json_encode($this->getActiveProduct()->getCategoryIds());
     }
 }
