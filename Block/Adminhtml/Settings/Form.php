@@ -18,6 +18,7 @@ class Form extends Template
     private $event_cart_view;
     private $event_search_view;
     private $event_category_view;
+    private $is_cart_auto_coupon_enabled;
 
     public function __construct(
         Template\Context $context,
@@ -36,6 +37,7 @@ class Form extends Template
         $this->event_search_view = $configHelper->isEventSearchViewEnabled();
         $this->event_category_view = $configHelper->isEventCategoryViewEnabled();
         $this->is_fpt_enabled = $configHelper->getWithFixedProductTax();
+        $this->is_cart_auto_coupon_enabled = $configHelper->isCartAutoCouponEnabled();
         $this->is_aw_points_enabled = $configHelper->isAheadworksRewardPointsEnabled();
         $aw_service = $rewardPointsFactory->create();
         if ($aw_service) {
@@ -121,5 +123,13 @@ class Form extends Template
     public function isIsAwPointsPluginExists()
     {
         return $this->is_aw_points_plugin_exists;
+    }
+
+    /**
+     * @return bool
+     */
+    public function getCartAutoCouponEnabled()
+    {
+        return $this->is_cart_auto_coupon_enabled;
     }
 }

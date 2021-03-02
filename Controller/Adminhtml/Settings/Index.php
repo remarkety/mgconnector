@@ -84,6 +84,10 @@ class Index extends \Magento\Backend\App\Action
             $this->configHelper->setEventCartViewEnabled($data['cart_updated'] == 1);
         }
 
+        if (isset($data['cart_auto_coupon'])) {
+            $this->configHelper->setCartAutoCouponEnabled($data['cart_auto_coupon'] == 1);
+        }
+
         if (isset($data['with_fpt'])) {
             $this->configHelper->setWithFixedProductTax($data['with_fpt'] == 1);
         }
