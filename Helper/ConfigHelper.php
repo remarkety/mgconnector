@@ -129,11 +129,7 @@ class ConfigHelper
 
     public function isCartAutoCouponEnabled()
     {
-        $value = $this->_scopeConfig->getValue(self::CART_AUTO_COUPON_ENABLED);
-        if ($value === null) {
-            return true;
-        }
-        return $value;
+        return $this->_scopeConfig->isSetFlag(self::CART_AUTO_COUPON_ENABLED);
     }
 
     public function isEventSearchViewEnabled()
