@@ -81,8 +81,13 @@ class Recovery extends \Magento\Framework\App\Action\Action
             $this->logger->error($e->getMessage());
         }
 
+        $params = $this->getRequest()->getParams();
+        if(array_key_exists('cart', $params)){
+            unset($params['cart']);
+        }
+        $query = http_build_query($params);
         $resultRedirect = $this->resultRedirect->create(ResultFactory::TYPE_REDIRECT);
-        $resultRedirect->setUrl('/checkout/cart/index');
+        $resultRedirect->setUrl('/checkout/cart/index?' . $query);
 
         return $resultRedirect;
     }
