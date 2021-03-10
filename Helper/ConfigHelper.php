@@ -31,6 +31,7 @@ class ConfigHelper
     const EVENT_CATEGORY_VIEW_ENABLED = 'remarkety/mgconnector/event_category_view_enabled';
     const ENABLE_AHEADWORKS_REWARD_POINTS = 'remarkety/mgconnector/aheadworks_reward_points';
     const CUSTOMER_ADDRESS_TO_USE = 'remarkety/mgconnector/customer_address_to_use';
+    const CART_AUTO_COUPON_ENABLED = 'remarkety/mgconnector/cart_auto_coupon_enabled';
 
     const ASYNC_MODE_OFF = 0;
     const ASYNC_MODE_ON = 1;
@@ -126,6 +127,11 @@ class ConfigHelper
         return $cart_view_code == 1;
     }
 
+    public function isCartAutoCouponEnabled()
+    {
+        return $this->_scopeConfig->isSetFlag(self::CART_AUTO_COUPON_ENABLED);
+    }
+
     public function isEventSearchViewEnabled()
     {
         $search_view_code = $this->_scopeConfig->getValue(self::EVENT_SEARCH_VIEW_ENABLED);
@@ -192,6 +198,21 @@ class ConfigHelper
             0
         );
         if ($current_status != $status) {
+            $this->cacheTypeList->cleanType('config');
+            $this->cacheTypeList->cleanType('full_page');
+        }
+    }
+
+    public function setCartAutoCouponEnabled($status)
+    {
+        $currentStatus = $this->isCartAutoCouponEnabled();
+        $this->configResource->saveConfig(
+            self::CART_AUTO_COUPON_ENABLED,
+            $status ? 1 : 0,
+            ScopeConfigInterface::SCOPE_TYPE_DEFAULT,
+            0
+        );
+        if ($currentStatus != $status) {
             $this->cacheTypeList->cleanType('config');
             $this->cacheTypeList->cleanType('full_page');
         }

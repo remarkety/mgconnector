@@ -92,6 +92,26 @@
                 </div>
             </div>
         <?php endif; ?>
+        <div class="admin__field">
+            <label for="pos_id" class="admin__field-label">
+                <span><?php echo __('Cart Auto Coupon') ?></span>
+            </label>
+
+            <div class="admin__field-control _with-tooltip">
+                <select id="cart_auto_coupon" name="cart_auto_coupon" class="admin__control-select">
+                    <?php foreach ($this->getEnabledDisabledOptions() as $code => $name): ?>
+                        <option
+                            value="<?php echo $code; ?>"
+                            <?php if ($code && $this->getCartAutoCouponEnabled()) { echo 'selected="selected"'; } ?>
+                        ><?php echo $name; ?></option>
+                    <?php endforeach; ?>
+                </select>
+                <div class="admin__field-tooltip">
+                    <span class="admin__field-tooltip-action action-help"></span>
+                    <div class="admin__field-tooltip-content">Apply coupon when a “coupon” parameter exists on the cart checkout link</div>
+                </div>
+            </div>
+        </div>
     </fieldset>
 
 

@@ -1,0 +1,12 @@
+<?php if ($block->getCartAutoCouponViewModel()->isEnabled()): ?>
+    <div id="auto-coupon" data-bind="scope:'auto-coupon'">
+        <!-- ko template: getTemplate() --><!-- /ko -->
+    </div>
+    <script type="text/x-magento-init">
+    {
+        "#auto-coupon": {
+            "Magento_Ui/js/core/app": <?= /* @noEscape */ $block->getJsLayout();?>
+        }
+    }
+    </script>
+<?php endif; ?>
