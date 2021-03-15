@@ -29,6 +29,7 @@ class ConfigHelper
     const EVENT_CART_VIEW_ENABLED = 'remarkety/mgconnector/event_cart_view_enabled';
     const EVENT_SEARCH_VIEW_ENABLED = 'remarkety/mgconnector/event_search_view_enabled';
     const EVENT_CATEGORY_VIEW_ENABLED = 'remarkety/mgconnector/event_category_view_enabled';
+    const EVENT_ADD_TO_CART_VIEW_ENABLED = 'remarkety/mgconnector/event_add_to_cart_view_enabled';
     const ENABLE_AHEADWORKS_REWARD_POINTS = 'remarkety/mgconnector/aheadworks_reward_points';
     const CUSTOMER_ADDRESS_TO_USE = 'remarkety/mgconnector/customer_address_to_use';
 
@@ -139,6 +140,14 @@ class ConfigHelper
     }
 
     /**
+     * @return bool
+     */
+    public function isEventAddToCartViewEnabled(): bool
+    {
+        return $this->_scopeConfig->isSetFlag(self::EVENT_ADD_TO_CART_VIEW_ENABLED);
+    }
+
+    /**
      * @param string $code
      */
     public function setPOSAttributeCode($code)
@@ -202,6 +211,21 @@ class ConfigHelper
         $current_status = $this->isEventCategoryViewEnabled();
         $this->configResource->saveConfig(
             self::EVENT_CATEGORY_VIEW_ENABLED,
+            $status ? 1 : 0,
+            ScopeConfigInterface::SCOPE_TYPE_DEFAULT,
+            0
+        );
+        if ($current_status != $status) {
+            $this->cacheTypeList->cleanType('config');
+            $this->cacheTypeList->cleanType('full_page');
+        }
+    }
+
+    public function setEventAddToCartViewEnabled($status)
+    {
+        $current_status = $this->isEventAddToCartViewEnabled();
+        $this->configResource->saveConfig(
+            self::EVENT_ADD_TO_CART_VIEW_ENABLED,
             $status ? 1 : 0,
             ScopeConfigInterface::SCOPE_TYPE_DEFAULT,
             0

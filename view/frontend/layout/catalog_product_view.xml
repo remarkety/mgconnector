@@ -3,6 +3,11 @@
     <body>
         <referenceContainer name="before.body.end">
             <block class="Remarkety\Mgconnector\Block\Frontend\Tracking\Product" name="remarkety.tracking.product" template="product.phtml"/>
+            <block class="Magento\Framework\View\Element\Template" name="remarkety.tracking.addToCart" template="Remarkety_Mgconnector::event/addToCart.phtml">
+                <arguments>
+                    <argument name="add_to_cart_event_view_model" xsi:type="object">Remarkety\Mgconnector\ViewModel\AddToCartEventViewModel</argument>
+                </arguments>
+            </block>
         </referenceContainer>
     </body>
 </page>

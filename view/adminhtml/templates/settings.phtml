@@ -157,6 +157,26 @@
                 </div>
             </div>
         </div>
+        <div class="admin__field">
+            <label for="pos_id" class="admin__field-label">
+                <span><?php echo __('Add To Cart') ?></span>
+            </label>
+
+            <div class="admin__field-control _with-tooltip">
+                <select id="add_to_cart" name="add_to_cart" class="admin__control-select">
+                    <?php foreach ($this->getEnabledDisabledOptions() as $code => $name): ?>
+                        <option
+                            value="<?php echo $code; ?>"
+                            <?php if ($code && $this->getEventAddToCartView()) { echo 'selected="selected"'; } ?>
+                        ><?php echo $name; ?></option>
+                    <?php endforeach; ?>
+                </select>
+                <div class="admin__field-tooltip">
+                    <span class="admin__field-tooltip-action action-help"></span>
+                    <div class="admin__field-tooltip-content">Cart updates on product added to cart</div>
+                </div>
+            </div>
+        </div>
     </fieldset>
 
     <input name="form_key" type="hidden" value="<?php echo $this->getFormKey() ?>" />

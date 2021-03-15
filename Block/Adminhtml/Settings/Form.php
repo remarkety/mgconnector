@@ -18,6 +18,7 @@ class Form extends Template
     private $event_cart_view;
     private $event_search_view;
     private $event_category_view;
+    private $event_add_to_cart_view;
 
     public function __construct(
         Template\Context $context,
@@ -35,6 +36,7 @@ class Form extends Template
         $this->event_cart_view = $configHelper->isEventCartViewEnabled();
         $this->event_search_view = $configHelper->isEventSearchViewEnabled();
         $this->event_category_view = $configHelper->isEventCategoryViewEnabled();
+        $this->event_add_to_cart_view = $configHelper->isEventAddToCartViewEnabled();
         $this->is_fpt_enabled = $configHelper->getWithFixedProductTax();
         $this->is_aw_points_enabled = $configHelper->isAheadworksRewardPointsEnabled();
         $aw_service = $rewardPointsFactory->create();
@@ -103,6 +105,11 @@ class Form extends Template
     public function getEventCategoryView()
     {
         return $this->event_category_view;
+    }
+
+    public function getEventAddToCartView()
+    {
+        return $this->event_add_to_cart_view;
     }
 
     public function getFptEnabled()
