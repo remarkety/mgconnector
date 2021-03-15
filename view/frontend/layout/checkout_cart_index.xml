@@ -1,7 +1,12 @@
-<page xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="../../../../../../../lib/internal/Magento/Framework/View/Layout/etc/page_configuration.xsd">
+<?xml version="1.0"?>
+
+<page xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:View/Layout/etc/page_configuration.xsd">
     <body>
         <referenceContainer name="before.body.end">
-            <block class="Remarkety\Mgconnector\Block\Frontend\Tracking\Quote" name="remarkety.tracking.quote" template="quote.phtml">
+            <block class="Magento\Framework\View\Element\Template" name="remarkety.tracking.cart" template="Remarkety_Mgconnector::event/cartView.phtml">
+                <arguments>
+                    <argument name="cart_event_view_model" xsi:type="object">Remarkety\Mgconnector\ViewModel\CartViewEventViewModel</argument>
+                </arguments>
             </block>
         </referenceContainer>
     </body>

@@ -1,9 +1,0 @@
-<?php
-/* @var $block Remarkety\Mgconnector\Block\Frontend\Tracking\Product */
-?>
-<?php if ($block->isEventCartViewActivated()): ?>
-    <script>
-        var _rmData = _rmData || [];
-        _rmData.push(['track', 'carts/update', <?php echo json_encode($block->getCart()); ?>]);
-    </script>
-<?php endif; ?>

@@ -1,0 +1,6 @@
+<?php if ($block->getCartEventViewModel()->isEnabled()): ?>
+    <script>
+        var _rmData = _rmData || [];
+        _rmData.push(['track', 'carts/update', <?= $block->getCartEventViewModel()->getData() ?>]);
+    </script>
+<?php endif; ?>
