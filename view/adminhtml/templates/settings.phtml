@@ -112,6 +112,30 @@
                 </div>
             </div>
         </div>
+        <div class="admin__field">
+            <label for="pos_id" class="admin__field-label">
+                <span><?= __('Product Title Source') ?></span>
+            </label>
+
+            <div class="admin__field-control _with-tooltip">
+                <select id="product_title_source" name="product_title_source" class="admin__control-select">
+                    <option value="child" <?= 'child' === $this->getProductTitleSource() ? 'selected="selected"' : ''; ?>>Child Product</option>
+                    <option value="parent" <?= 'parent' === $this->getProductTitleSource() ? 'selected="selected"' : ''; ?>>Parent Product</option>
+                </select>
+            </div>
+        </div>
+        <div class="admin__field">
+            <label for="pos_id" class="admin__field-label">
+                <span><?= __('Product Images Source') ?></span>
+            </label>
+
+            <div class="admin__field-control _with-tooltip">
+                <select id="product_images_source" name="product_images_source" class="admin__control-select">
+                    <option value="child" <?= 'child' === $this->getProductImagesSource() ? 'selected="selected"' : ''; ?>>Child Product</option>
+                    <option value="parent" <?= 'parent' === $this->getProductImagesSource() ? 'selected="selected"' : ''; ?>>Parent Product</option>
+                </select>
+            </div>
+        </div>
     </fieldset>
 
 

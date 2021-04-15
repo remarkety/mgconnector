@@ -3,36 +3,86 @@
 namespace Remarkety\Mgconnector\Serializer;
 
 use Magento\Customer\Model\ResourceModel\CustomerRepository;
-use Magento\Newsletter\Model\Subscriber;
+use Magento\Newsletter\Model\SubscriberFactory;
+use Magento\Sales\Api\Data\OrderInterface;
 use Magento\Sales\Model\Order\Shipment;
 use Magento\ConfigurableProduct\Model\Product\Type\Configurable;
+use Magento\Sales\Model\ResourceModel\Order\Status\Collection;
+use Magento\Store\Model\StoreManagerInterface;
 use Remarkety\Mgconnector\Helper\ConfigHelper;
+use Remarkety\Mgconnector\Helper\Data;
 use Remarkety\Mgconnector\Helper\DataOverride;
 
 class OrderSerializer
 {
-
     use CheckSubscriberTrait;
 
+    /**
+     * @var CustomerRepository
+     */
     private $customerRepository;
+
+    /**
+     * @var Collection
+     */
     private $statusCollection;
+
+    /**
+     * @var Data
+     */
     private $remarketyHelper;
 
+    /**
+     * @var AddressSerializer
+     */
     private $addressSerializer;
+
+    /**
+     * @var CustomerSerializer
+     */
     private $customerSerializer;
+
+    /**
+     * @var SubscriberFactory
+     */
     private $subscriber;
+
+    /**
+     * @var DataOverride
+     */
     private $dataOverride;
+
+    /**
+     * @var ConfigHelper
+     */
     private $configHelper;
 
+    /**
+     * @var StoreManagerInterface
+     */
+    private $storeManager;
+
+    /**
+     * @param CustomerRepository $customerRepository
+     * @param Collection $statusCollection
+     * @param Data $remarketyHelper
+     * @param AddressSerializer $addressSerializer
+     * @param CustomerSerializer $customerSerializer
+     * @param SubscriberFactory $subscriber
+     * @param DataOverride $dataOverride
+     * @param ConfigHelper $configHelper
+     * @param StoreManagerInterface $storeManager
+     */
     public function __construct(
         CustomerRepository $customerRepository,
-        \Magento\Sales\Model\ResourceModel\Order\Status\Collection $statusCollection,
-        \Remarkety\Mgconnector\Helper\Data $remarketyHelper,
+        Collection $statusCollection,
+        Data $remarketyHelper,
         AddressSerializer $addressSerializer,
         CustomerSerializer $customerSerializer,
-        Subscriber $subscriber,
+        SubscriberFactory $subscriber,
         DataOverride $dataOverride,
-        ConfigHelper $configHelper
+        ConfigHelper $configHelper,
+        StoreManagerInterface $storeManager
     ) {
         $this->customerRepository = $customerRepository;
         $this->statusCollection = $statusCollection;
@@ -42,9 +92,10 @@ class OrderSerializer
         $this->subscriber = $subscriber;
         $this->dataOverride = $dataOverride;
         $this->configHelper = $configHelper;
+        $this->storeManager = $storeManager;
     }
 
-    public function serialize(\Magento\Sales\Model\Order $order)
+    public function serialize(OrderInterface $order)
     {
         //find order status
         $statusVal = $order->getStatus();
@@ -61,9 +112,7 @@ class OrderSerializer
                 ];
             }
         }
-        /**
-         * @var $items \Magento\Sales\Model\Order\Item[]
-         */
+
         $items = $order->getAllItems();
         $line_items = [];
         foreach ($items as $item) {
@@ -123,7 +172,11 @@ class OrderSerializer
                 $address = $order->getShippingAddress();
             }
             $customerInfo = [
-                'accepts_marketing' => $this->checkSubscriber($order->getCustomerEmail(), null),
+                'accepts_marketing' => $this->checkSubscriber(
+                    $order->getCustomerEmail(),
+                    null,
+                    $this->storeManager->getWebsite()->getId()
+                ),
                 'email' => $order->getCustomerEmail(),
                 'title' => empty($address) ? null : $address->getPrefix(),
                 'first_name' => empty($address) ? null : $address->getFirstname(),

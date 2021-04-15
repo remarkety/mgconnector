@@ -1,26 +1,28 @@
 <?php
-/**
- * Created by PhpStorm.
- * User: bnaya
- * Date: 4/26/17
- * Time: 2:54 PM
- */
 
 namespace Remarkety\Mgconnector\Serializer;
 
+use Magento\Customer\Api\Data\AddressInterface;
+use Magento\Customer\Model\Data\Address;
+use Magento\Directory\Model\CountryFactory;
+
 class AddressSerializer
 {
-    private $_countryFactory;
+    private $countryFactory;
 
+    /**
+     * @param CountryFactory $countryFactory
+     */
     public function __construct(
-        \Magento\Directory\Model\CountryFactory $countryFactory
+        CountryFactory $countryFactory
     ) {
-        $this->_countryFactory = $countryFactory;
+        $this->countryFactory = $countryFactory;
     }
 
     /**
-     * @param \Magento\Sales\Model\Order\Address|\Magento\Customer\Api\Data\AddressInterface $address
-     * @return array
+     * @param AddressInterface|Address $address
+     *
+     * @return array|null
      */
     public function serialize($address)
     {
@@ -30,7 +32,7 @@ class AddressSerializer
         $countryCode = $address->getCountryId();
         $countryName = null;
         if (!empty($countryCode)) {
-            $country = $this->_countryFactory->create()->loadByCode($countryCode);
+            $country = $this->countryFactory->create()->loadByCode($countryCode);
             if (!empty($country)) {
                 $countryName = $country->getName();
             }

@@ -6,7 +6,7 @@ namespace Remarkety\Mgconnector\Helper;
 use Magento\Catalog\Api\Data\ProductInterface;
 use Magento\Customer\Model\Data\Customer;
 use Magento\Quote\Model\Quote;
-use Magento\Sales\Model\Order;
+use Remarkety\Mgconnector\Api\Data\OrderInterface;
 
 class DataOverride
 {
@@ -36,7 +36,7 @@ class DataOverride
     }
 
     /**
-     * @param Order $order
+     * @param OrderInterface $order
      * @param $data
      * @return mixed
      */

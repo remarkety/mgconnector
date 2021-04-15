@@ -1,6 +1,5 @@
 <?php
 
-
 namespace Remarkety\Mgconnector\Serializer;
 
 trait CheckSubscriberTrait
@@ -10,17 +9,26 @@ trait CheckSubscriberTrait
         return trim(strtolower($email));
     }
 
-    private function checkSubscriber($email, $customer_id)
+    /**
+     * @param string $email
+     * @param int|null $customerId
+     * @param int $websiteId
+     *
+     * @return bool
+     */
+    private function checkSubscriber(string $email, $customerId, int $websiteId): bool
     {
+        $subscriber = $this->subscriberFactory->create();
+
         if (!empty($email)) {
-            $newsletter = $this->subscriber->loadByEmail($email);
+            $newsletter = $subscriber->loadBySubscriberEmail($email, $websiteId);
             if ($this->cleanEmail($email) == $this->cleanEmail($newsletter->getEmail())) {
                 return $newsletter->isSubscribed();
             }
         }
-        if (!empty($customer_id)) {
-            $newsletter = $this->subscriber->loadByCustomerId($customer_id);
-            if ($newsletter->getCustomerId() == $customer_id) {
+        if (!empty($customerId)) {
+            $newsletter = $subscriber->loadByCustomer($customerId, $websiteId);
+            if ($newsletter->getCustomerId() == $customerId) {
                 return $newsletter->isSubscribed();
             }
         }

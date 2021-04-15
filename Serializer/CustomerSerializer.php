@@ -8,10 +8,12 @@
 
 namespace Remarkety\Mgconnector\Serializer;
 
+use Magento\Customer\Api\GroupRepositoryInterface as CustomerGroupRepository;
 use Magento\Customer\Model\Data\Customer;
 use Magento\Framework\App\RequestInterface;
-use Magento\Newsletter\Model\Subscriber;
-use Magento\Customer\Api\GroupRepositoryInterface as CustomerGroupRepository;
+use Magento\Newsletter\Model\SubscriberFactory;
+use Magento\Store\Model\StoreManagerInterface;
+use Psr\Log\LoggerInterface;
 use Remarkety\Mgconnector\Helper\ConfigHelper;
 use Remarkety\Mgconnector\Helper\Data;
 use Remarkety\Mgconnector\Helper\DataOverride;
@@ -20,24 +22,63 @@ class CustomerSerializer
 {
     use CheckSubscriberTrait;
 
+    /**
+     * @var SubscriberFactory
+     */
     private $subscriber;
+
+    /**
+     * @var AddressSerializer
+     */
     private $addressSerializer;
+
+    /**
+     * @var CustomerGroupRepository
+     */
     private $customerGroupRepository;
+
+    /**
+     * @var RequestInterface
+     */
     private $request;
+
+    /**
+     * @var LoggerInterface|null
+     */
     private $logger;
+
+    /**
+     * @var ConfigHelper
+     */
     private $configHelper;
+
     private $pos_id_attribute_code;
+
+    /**
+     * @var DataOverride
+     */
     private $dataOverride;
+
+    /**
+     * @var Data
+     */
     private $dataHelper;
+
+    /**
+     * @var StoreManagerInterface
+     */
+    private $storeManager;
+
     public function __construct(
-        Subscriber $subscriber,
+        SubscriberFactory $subscriber,
         AddressSerializer $addressSerializer,
         CustomerGroupRepository $customerGroupRepository,
         RequestInterface $request,
-        \Psr\Log\LoggerInterface $logger = null,
+        LoggerInterface $logger,
         ConfigHelper $configHelper,
         DataOverride $dataOverride,
-        Data $dataHelper
+        Data $dataHelper,
+        StoreManagerInterface $storeManager
     ) {
         $this->subscriber = $subscriber;
         $this->addressSerializer = $addressSerializer;
@@ -48,6 +89,7 @@ class CustomerSerializer
         $this->pos_id_attribute_code = $configHelper->getPOSAttributeCode();
         $this->dataOverride = $dataOverride;
         $this->dataHelper = $dataHelper;
+        $this->storeManager = $storeManager;
     }
 
     public function serialize(Customer $customer)
@@ -57,12 +99,12 @@ class CustomerSerializer
             $needsConfirmation = $this->configHelper->customerPendingConfirmation($customer);
             if ($needsConfirmation) {
                 //if needs approval, the email might already be subscribed
-                $subscribed = $this->checkSubscriber($customer->getEmail(), $customer->getId());
+                $subscribed = $this->checkSubscriber($customer->getEmail(), $customer->getId(), $this->storeManager->getWebsite()->getId());
             } else {
                 $subscribed = false;
             }
         } else {
-            $subscribed = $this->checkSubscriber($customer->getEmail(), $customer->getId());
+            $subscribed = $this->checkSubscriber($customer->getEmail(), $customer->getId(), $this->storeManager->getWebsite()->getId());
         }
         $created_at = new \DateTime($customer->getCreatedAt());
         $updated_at = new \DateTime($customer->getUpdatedAt());
@@ -116,7 +158,7 @@ class CustomerSerializer
 
     protected function logError(\Exception $exception)
     {
-        $this->logger->error("Remarkety:".self::class." - " . $exception->getMessage(), [
+        $this->logger->error("Remarkety:" . self::class . " - " . $exception->getMessage(), [
             'message' => $exception->getMessage(),
             'line' => $exception->getLine(),
             'file' => $exception->getFile(),

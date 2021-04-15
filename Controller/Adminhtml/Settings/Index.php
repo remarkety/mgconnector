@@ -1,10 +1,9 @@
 <?php
 namespace Remarkety\Mgconnector\Controller\Adminhtml\Settings;
 
+use Magento\Backend\App\Action\Context;
 use Magento\Framework\Controller\Result\Redirect;
 use Magento\Framework\Controller\ResultInterface;
-use Magento\Framework\Message\ManagerInterface;
-use Magento\Framework\View\Result\Page;
 use Magento\Framework\View\Result\PageFactory;
 use Remarkety\Mgconnector\Helper\ConfigHelper;
 
@@ -21,12 +20,12 @@ class Index extends \Magento\Backend\App\Action
     /**
      * Constructor
      *
-     * @param \Magento\Backend\App\Action\Context $context
-     * @param PageFactory                         $resultPageFactory
-     * @param ConfigHelper                        $configHelper
+     * @param Context $context
+     * @param PageFactory $resultPageFactory
+     * @param ConfigHelper $configHelper
      */
     public function __construct(
-        \Magento\Backend\App\Action\Context $context,
+        Context $context,
         PageFactory $resultPageFactory,
         ConfigHelper $configHelper
     ) {
@@ -86,6 +85,14 @@ class Index extends \Magento\Backend\App\Action
 
         if (isset($data['cart_auto_coupon'])) {
             $this->configHelper->setCartAutoCouponEnabled($data['cart_auto_coupon'] == 1);
+        }
+
+        if (isset($data['product_title_source'])) {
+            $this->configHelper->setProductTitleSource($data['product_title_source']);
+        }
+
+        if (isset($data['product_images_source'])) {
+            $this->configHelper->setProductImagesSource($data['product_images_source']);
         }
 
         if (isset($data['with_fpt'])) {

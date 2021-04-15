@@ -1,16 +1,9 @@
 <?php
-/**
- * Created by PhpStorm.
- * User: bnaya
- * Date: 4/30/17
- * Time: 1:25 PM
- */
 
 namespace Remarkety\Mgconnector\Serializer;
 
 use Magento\Catalog\Api\Data\ProductInterface;
 use Magento\Catalog\Model\Product\Attribute\Source\Status;
-use Magento\Catalog\Model\Product\Url;
 use Magento\Catalog\Model\Product\Visibility;
 use Magento\Catalog\Model\ProductRepository;
 use Magento\CatalogInventory\Api\StockRegistryInterface;
@@ -19,39 +12,78 @@ use Magento\Store\Model\StoreManagerInterface;
 use Remarkety\Mgconnector\Helper\ConfigHelper;
 use Remarkety\Mgconnector\Helper\Data;
 use Remarkety\Mgconnector\Helper\DataOverride;
+use Remarkety\Mgconnector\Resolver\ProductDataResolver;
+use Magento\Catalog\Model\Product\Type;
 
 class ProductSerializer
 {
-    protected $categoryFactory;
-    protected $catalogProductTypeConfigurable;
-    protected $productRepository;
-    protected $dataHelper;
-    protected $urlModel;
-    protected $stockRegistry;
-    protected $storeManager;
-    private $dataOverride;
-    protected $configHelper;
+    /**
+     * @var ProductRepository
+     */
+    private $productRepository;
 
+    /**
+     * @var Data
+     */
+    private $dataHelper;
+
+    /**
+     * @var StockRegistryInterface
+     */
+    private $stockRegistry;
+
+    /**
+     * @var StoreManagerInterface
+     */
+    private $storeManager;
+
+    /**
+     * @var DataOverride
+     */
+    private $dataOverride;
+
+    /**
+     * @var Configurable
+     */
+    private $catalogProductTypeConfigurable;
+
+    /**
+     * @var ConfigHelper
+     */
+    private $configHelper;
+
+    /**
+     * @var ProductDataResolver
+     */
+    private $productDataResolver;
+
+    /**
+     * @param ProductRepository $productRepository
+     * @param Data $dataHelper
+     * @param StockRegistryInterface $stockRegistry
+     * @param StoreManagerInterface $storeManager
+     * @param DataOverride $dataOverride
+     * @param ConfigHelper $configHelper
+     * @param ProductDataResolver $productDataResolver
+     */
     public function __construct(
-        \Magento\Catalog\Model\CategoryFactory $categoryFactory,
-        \Magento\ConfigurableProduct\Model\ResourceModel\Product\Type\Configurable $catalogProductTypeConfigurable,
+        Configurable $catalogProductTypeConfigurable,
         ProductRepository $productRepository,
         Data $dataHelper,
-        Url $urlModel,
         StockRegistryInterface $stockRegistry,
         StoreManagerInterface $storeManager,
         DataOverride $dataOverride,
-        ConfigHelper $configHelper
+        ConfigHelper $configHelper,
+        ProductDataResolver $productDataResolver
     ) {
-        $this->categoryFactory = $categoryFactory;
         $this->catalogProductTypeConfigurable = $catalogProductTypeConfigurable;
         $this->productRepository = $productRepository;
         $this->dataHelper = $dataHelper;
-        $this->urlModel = $urlModel;
         $this->stockRegistry = $stockRegistry;
         $this->storeManager = $storeManager;
         $this->dataOverride = $dataOverride;
         $this->configHelper = $configHelper;
+        $this->productDataResolver = $productDataResolver;
     }
 
     public function loadProduct($product_id, $store_id = null)
@@ -61,13 +93,13 @@ class ProductSerializer
 
     public function serialize(ProductInterface $product, $storeId)
     {
-
-        $parent_id = null;
+        $parentId = null;
         $parentProduct = null;
-        if ($product->getTypeId() == 'simple') {
-            $parent_id = $this->dataHelper->getParentId($product->getId());
-            if (!empty($parent_id)) {
-                $parentProduct = $this->loadProduct($parent_id, $storeId);
+
+        if ($product->getTypeId() === Type::TYPE_SIMPLE) {
+            $parentId = $this->dataHelper->getParentId($product->getId());
+            if (!empty($parentId)) {
+                $parentProduct = $this->loadProduct($parentId, $storeId);
             }
         }
 
@@ -88,8 +120,6 @@ class ProductSerializer
 
         if (!empty($parentProduct)) {
             $parentProduct->setStoreId($storeId);
-            $url = $parentProduct->getProductUrl(false);
-            $images = $this->dataHelper->getMediaGalleryImages($parentProduct);
             $categoryIds = $parentProduct->getCategoryIds();
 
             //contain only the current product stock level
@@ -102,10 +132,8 @@ class ProductSerializer
 
         } else {
             $categoryIds = $product->getCategoryIds();
-            $url = $product->getProductUrl(false);
-            $images = $this->dataHelper->getMediaGalleryImages($product);
 
-            if ($product->getTypeId() == Configurable::TYPE_CODE) {
+            if ($product->getTypeId() === Configurable::TYPE_CODE) {
                 //configurable products sends variants
                 $childrenIdsGroups = $this->catalogProductTypeConfigurable->getChildrenIds($product->getId());
                 if (isset($childrenIdsGroups[0])) {
@@ -151,9 +179,6 @@ class ProductSerializer
             }
         }
 
-
-        $options = [];
-
         $vendor = null;
         $manufacturer = null;
 
@@ -175,37 +200,33 @@ class ProductSerializer
         $data = [
             'id' => $product->getId(),
             'sku' => $product->getSku(),
-            'title' => $product->getName(),
+            'title' => $this->productDataResolver->getTitle($parentId, $product),
             'categories' => $categories,
             'created_at' => $created_at->format(\DateTime::ATOM),
             'updated_at' => $updated_at->format(\DateTime::ATOM),
-            'images' => $images,
+            'images' => $this->productDataResolver->getImages($parentId, $product),
             'enabled' => $enabled,
             'price' => (float)$product->getPrice(),
             'salePrice' => $this->getFinalPrice($product),
-            'url' => $url,
+            'url' => $this->productDataResolver->getUrl($parentId, $product),
             'variants' => $variants,
-            'options' => $options,
+            'options' => [],
             'vendor' => $vendor,
             'manufacturer' => $manufacturer
         ];
-        if (!empty($parent_id)) {
-            $data['parent_id'] = $parent_id;
+        if (!empty($parentId)) {
+            $data['parent_id'] = $parentId;
         }
+
         return $this->dataOverride->product($product, $data);
     }
 
-    public function getParentId($id)
-    {
-        $parentByChild = $this->_catalogProductTypeConfigurable->getParentIdsByChild($id);
-        if (isset($parentByChild[0])) {
-            $id = $parentByChild[0];
-            return $id;
-        }
-        return false;
-    }
-
-    private function getFinalPrice($row)
+    /**
+     * @param $row
+     *
+     * @return float
+     */
+    private function getFinalPrice($row): float
     {
         $price = $row->getFinalPrice();
         $price_info = 0;

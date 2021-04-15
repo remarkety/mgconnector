@@ -32,6 +32,8 @@ class ConfigHelper
     const ENABLE_AHEADWORKS_REWARD_POINTS = 'remarkety/mgconnector/aheadworks_reward_points';
     const CUSTOMER_ADDRESS_TO_USE = 'remarkety/mgconnector/customer_address_to_use';
     const CART_AUTO_COUPON_ENABLED = 'remarkety/mgconnector/cart_auto_coupon_enabled';
+    const PRODUCT_TITLE_SOURCE = 'remarkety/mgconnector/product_title_source';
+    const PRODUCT_IMAGES_SOURCE = 'remarkety/mgconnector/product_images_source';
 
     const ASYNC_MODE_OFF = 0;
     const ASYNC_MODE_ON = 1;
@@ -121,13 +123,42 @@ class ConfigHelper
         return $status;
     }
 
+    /**
+     * @return string
+     */
+    public function getProductTitleSource(): string
+    {
+        $value = $this->_scopeConfig->getValue(static::PRODUCT_TITLE_SOURCE);
+        if ($value === null) {
+            return 'child';
+        }
+
+        return $value;
+    }
+
+    /**
+     * @return string
+     */
+    public function getProductImagesSource(): string
+    {
+        $value = $this->_scopeConfig->getValue(static::PRODUCT_IMAGES_SOURCE);
+        if ($value === null) {
+            return 'child';
+        }
+
+        return $value;
+    }
+
     public function isEventCartViewEnabled()
     {
         $cart_view_code = $this->_scopeConfig->getValue(self::EVENT_CART_VIEW_ENABLED);
         return $cart_view_code == 1;
     }
 
-    public function isCartAutoCouponEnabled()
+    /**
+     * @return bool
+     */
+    public function isCartAutoCouponEnabled(): bool
     {
         return $this->_scopeConfig->isSetFlag(self::CART_AUTO_COUPON_ENABLED);
     }
@@ -216,6 +247,32 @@ class ConfigHelper
             $this->cacheTypeList->cleanType('config');
             $this->cacheTypeList->cleanType('full_page');
         }
+    }
+
+    /**
+     * @param string $value
+     */
+    public function setProductTitleSource(string $value): void
+    {
+        $this->configResource->saveConfig(
+            self::PRODUCT_TITLE_SOURCE,
+            $value
+        );
+
+        $this->cacheTypeList->cleanType('config');
+    }
+
+    /**
+     * @param string $value
+     */
+    public function setProductImagesSource(string $value): void
+    {
+        $this->configResource->saveConfig(
+            self::PRODUCT_IMAGES_SOURCE,
+            $value
+        );
+
+        $this->cacheTypeList->cleanType('config');
     }
 
     public function setEventCategoryViewEnabled($status)

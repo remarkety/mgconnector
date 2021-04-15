@@ -8,4 +8,5 @@
     <preference for="Remarkety\Mgconnector\Api\Data\StoreOrderStatusesCollectionInterface" type="Magento\Framework\Api\SearchResults" />
     <preference for="Remarkety\Mgconnector\Api\Data\StoreSettingsInterface" type="Magento\Framework\DataObject" />
     <preference for="Remarkety\Mgconnector\Api\Data\CouponCollectionInterface" type="Magento\Framework\Api\SearchResults" />
+    <preference for="Remarkety\Mgconnector\Api\QueueRepositoryInterface" type="Remarkety\Mgconnector\Model\QueueRepository"/>
 </config>

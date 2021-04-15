@@ -1,6 +1,8 @@
 <?php
 namespace Remarkety\Mgconnector\Block\Adminhtml\Settings;
 
+use Magento\Customer\Model\ResourceModel\Attribute\Collection;
+use Magento\Framework\Data\Form\FormKey;
 use Magento\Framework\View\Element\Template;
 use Remarkety\Mgconnector\Helper\ConfigHelper;
 use Remarkety\Mgconnector\Helper\RewardPointsFactory;
@@ -19,12 +21,14 @@ class Form extends Template
     private $event_search_view;
     private $event_category_view;
     private $is_cart_auto_coupon_enabled;
+    private $productTitleSource;
+    private $productImagesSource;
 
     public function __construct(
         Template\Context $context,
         array $data,
-        \Magento\Framework\Data\Form\FormKey $formKey,
-        \Magento\Customer\Model\ResourceModel\Attribute\Collection $attributesCollection,
+        FormKey $formKey,
+        Collection $attributesCollection,
         ConfigHelper $configHelper,
         RewardPointsFactory $rewardPointsFactory
     ) {
@@ -38,6 +42,8 @@ class Form extends Template
         $this->event_category_view = $configHelper->isEventCategoryViewEnabled();
         $this->is_fpt_enabled = $configHelper->getWithFixedProductTax();
         $this->is_cart_auto_coupon_enabled = $configHelper->isCartAutoCouponEnabled();
+        $this->productTitleSource = $configHelper->getProductTitleSource();
+        $this->productImagesSource = $configHelper->getProductImagesSource();
         $this->is_aw_points_enabled = $configHelper->isAheadworksRewardPointsEnabled();
         $aw_service = $rewardPointsFactory->create();
         if ($aw_service) {
@@ -131,5 +137,21 @@ class Form extends Template
     public function getCartAutoCouponEnabled()
     {
         return $this->is_cart_auto_coupon_enabled;
+    }
+
+    /**
+     * @return string
+     */
+    public function getProductTitleSource()
+    {
+        return $this->productTitleSource;
+    }
+
+    /**
+     * @return string
+     */
+    public function getProductImagesSource()
+    {
+        return $this->productImagesSource;
     }
 }

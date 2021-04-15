@@ -1,93 +1,54 @@
 <?php
+
 namespace Remarkety\Mgconnector\Model\Api;
 
-use Magento\Catalog\Model\Category;
-use Magento\Customer\Model\Address;
-use Magento\Framework\App\Cache\TypeListInterface;
-use Magento\Framework\DataObject;
-use Magento\Newsletter\Model\SubscriberFactory;
-use Magento\Quote\Model\Quote\Item;
-use Magento\Sales\Model\Order;
-use Remarkety\Mgconnector\Api\Data\QueueInterface;
-use Remarkety\Mgconnector\Api\DataInterface;
-use \Magento\Catalog\Model\ProductFactory;
-use \Magento\Customer\Model\CustomerFactory;
-use \Magento\Customer\Model\Customer;
-use \Magento\Customer\Model\AddressFactory;
-use \Magento\Customer\Model\ResourceModel\Address\CollectionFactory as AddressDataFactory;
-use \Magento\Customer\Model\ResourceModel\Customer\CollectionFactory as CustomerCollectionFactory;
-use \Magento\Sales\Model\OrderFactory;
-use \Magento\Quote\Model\QuoteFactory;
-use \Magento\Sales\Model\Order\StatusFactory;
-use \Magento\Framework\App\Config\ScopeConfigInterface;
-use Remarkety\Mgconnector\Helper\ConfigHelper;
-use Remarkety\Mgconnector\Helper\DataOverride;
-use Remarkety\Mgconnector\Helper\RewardPointsFactory;
-use Remarkety\Mgconnector\Model\Api\Data\StoreSettingsContact;
-use Magento\SalesRule\Model\RuleFactory;
-use Magento\SalesRule\Model\CouponFactory;
-use Magento\SalesRule\Helper\Coupon;
-use Magento\Framework\Exception\LocalizedException;
+use Magento\Catalog\Api\ProductRepositoryInterface;
 use Magento\Catalog\Model\Product\Attribute\Source\Status;
 use Magento\Catalog\Model\Product\Visibility;
-use Magento\Config\Model\ResourceModel\Config;
-use Remarkety\Mgconnector\Model\QueueRepository;
+use Magento\Catalog\Model\ResourceModel\Product\CollectionFactory;
+use Magento\CatalogInventory\Api\StockRegistryInterface;
+use Magento\ConfigurableProduct\Model\Product\Type\Configurable;
+use Magento\ConfigurableProduct\Model\ResourceModel\Product\Type\Configurable as ConfigurableResource;
+use Magento\Customer\Api\Data\CustomerInterface;
+use Magento\Customer\Api\GroupRepositoryInterface;
+use Magento\Customer\Model\CustomerFactory;
+use Magento\Customer\Model\ResourceModel\Customer\CollectionFactory as CustomerCollectionFactory;
+use Magento\Framework\App\Cache\TypeListInterface;
+use Magento\Framework\App\Config\ConfigResource\ConfigInterface;
+use Magento\Framework\App\Config\ScopeConfigInterface;
+use Magento\Framework\DataObject;
+use Magento\Framework\Exception\LocalizedException;
+use Magento\Framework\Webapi\Exception;
+use Magento\Newsletter\Model\Subscriber;
+use Magento\Newsletter\Model\SubscriberFactory;
+use Magento\Quote\Model\QuoteFactory;
+use Magento\Sales\Model\Order;
+use Magento\Sales\Model\Order\StatusFactory;
+use Magento\Sales\Model\ResourceModel\Order\CollectionFactoryInterface as OrderCollectionFactory;
+use Magento\SalesRule\Api\RuleRepositoryInterface;
+use Magento\SalesRule\Helper\Coupon;
+use Magento\SalesRule\Model\CouponFactory;
+use Magento\Store\Model\StoreManagerInterface;
+use Remarkety\Mgconnector\Api\Data\QueueInterface;
+use Remarkety\Mgconnector\Api\DataInterface;
+use Remarkety\Mgconnector\Api\QueueRepositoryInterface;
+use Remarkety\Mgconnector\Helper\ConfigHelper;
+use Remarkety\Mgconnector\Helper\Data as DataHelper;
+use Remarkety\Mgconnector\Helper\DataOverride;
+use Remarkety\Mgconnector\Helper\Recovery;
+use Remarkety\Mgconnector\Helper\RewardPointsFactory;
+use Remarkety\Mgconnector\Model\Api\Data\StoreSettingsContact;
 use Remarkety\Mgconnector\Model\ResourceModel\Queue\Collection;
 use Remarkety\Mgconnector\Observer\EventMethods;
-use Remarkety\Mgconnector\Helper\Data as DataHelper;
-use Magento\ConfigurableProduct\Model\Product\Type\Configurable;
-use Magento\Catalog\Model\ProductRepository;
-use Magento\CatalogInventory\Api\StockRegistryInterface;
-use Remarkety\Mgconnector\Helper\Recovery;
+use Remarkety\Mgconnector\Resolver\ProductDataResolver;
 use Remarkety\Mgconnector\Serializer\AddressSerializer;
 use Remarkety\Mgconnector\Serializer\CheckSubscriberTrait;
 
 class Data implements DataInterface
 {
-
     use CheckSubscriberTrait;
 
-    private $_productCache = [];
-    protected $eventMethods;
-    protected $queueRepo;
-    protected $queueCollection;
-    protected $productCollection = false;
-    protected $productCollectionFactory = false;
-    protected $collectionFactory;
-    protected $objectManager;
-    protected $categoryFactory;
-    protected $categoryMapCache = [];
-    protected $imageFactory;
-    protected $customerGroupFactory;
-    protected $_salesOrderAddressModel;
-    protected $_storeManagerInterface;
-    protected $_catalogProductTypeConfigurable;
-    protected $productFactory;
-    protected $customerFactory;
-    protected $salesOrderCollectionFactory;
-    protected $entryFactory;
-    protected $adressFactory;
-    protected $scopeConfig;
-    protected $statusFactory;
-    protected $_customerCollectionFactory;
-    protected $_salesOrderResourceCollectionFactory;
-    protected $quoteFactory;
-    protected $ruleFactory;
-    protected $couponFactory;
-    protected $resourceConfig;
-    protected $cacheTypeList;
-    protected $dataHelper;
-    protected $productRepository;
-    protected $stockRegistry;
-    protected $recoveryHelper;
-    protected $addressSerializer;
-    protected $subscriberFactory;
-    /**
-     * @var \Magento\Newsletter\Model\Subscriber
-     */
-    protected $subscriber;
-
-    protected $response_mask = [
+    private const RESPONSE_MASK = [
         'products' => [
             'body_html' => 'description',
             'categories' => [
@@ -283,89 +244,220 @@ class Data implements DataInterface
         ]
     ];
 
-    private $configHelper;
-    private $dataOverride;
+    /**
+     * @var EventMethods
+     */
+    private $eventMethods;
 
-    private $pos_id_attribute_code;
+    /**
+     * @var QueueRepositoryInterface
+     */
+    private $queueRepository;
+
+    /**
+     * @var Collection
+     */
+    private $queueCollection;
+
+    /**
+     * @var CollectionFactory
+     */
+    private $collectionFactory;
+
+    /**
+     * @var StoreManagerInterface
+     */
+    private $storeManager;
+
+    /**
+     * @var CustomerFactory
+     */
+    private $customerFactory;
+
+    /**
+     * @var ScopeConfigInterface
+     */
+    private $scopeConfig;
+
+    /**
+     * @var QuoteFactory
+     */
+    private $quoteFactory;
+
+    /**
+     * @var StatusFactory
+     */
+    private $statusFactory;
+
+    /**
+     * @var CouponFactory
+     */
+    private $couponFactory;
+
+    /**
+     * @var ConfigInterface
+     */
+    private $resourceConfig;
+
+    /**
+     * @var TypeListInterface
+     */
+    private $cacheTypeList;
+
+    /**
+     * @var DataHelper
+     */
+    private $dataHelper;
+
+    /**
+     * @var ProductRepositoryInterface
+     */
+    private $productRepository;
+
+    /**
+     * @var StockRegistryInterface
+     */
+    private $stockRegistry;
+
+    /**
+     * @var Recovery
+     */
+    private $recoveryHelper;
+
+    /**
+     * @var AddressSerializer
+     */
+    private $addressSerializer;
+
+    /**
+     * @var SubscriberFactory
+     */
+    protected $subscriberFactory;
+
+    /**
+     * @var Subscriber
+     */
+    private $subscriber;
+
+    /**
+     * @var ConfigHelper
+     */
+    private $configHelper;
+
+    /**
+     * @var DataOverride
+     */
+    private $dataOverride;
 
     /**
      * @var CustomerRewardPointsManagementInterface
      */
     private $customerRewardPointsService;
 
+    /**
+     * @var ProductDataResolver
+     */
+    private $productDataResolver;
+
+    /**
+     * @var GroupRepositoryInterface
+     */
+    private $groupRepository;
+
+    /**
+     * @var ConfigurableResource
+     */
+    private $configurableResource;
+
+    /**
+     * @var OrderCollectionFactory
+     */
+    private $orderCollectionFactory;
+
+    /**
+     * @var RuleRepositoryInterface
+     */
+    private $ruleRepository;
+
+    /**
+     * @var CustomerCollectionFactory
+     */
+    private $customerCollectionFactory;
+
+    /**
+     * @param CollectionFactory $collectionFactory
+     * @param CustomerFactory $customerFactory
+     * @param QuoteFactory $quoteFactory
+     * @param StatusFactory $statusFactory
+     * @param ScopeConfigInterface $scopeConfig
+     * @param GroupRepositoryInterface $groupRepository
+     * @param StoreManagerInterface $storeManager
+     * @param ConfigurableResource $configurableResource
+     * @param CustomerCollectionFactory $customerCollectionFactory
+     * @param OrderCollectionFactory $orderCollectionFactory
+     * @param RuleRepositoryInterface $ruleRepository
+     * @param CouponFactory $couponFactory
+     * @param ConfigInterface $resourceConfig
+     * @param TypeListInterface $cacheTypeList
+     * @param Collection $queueCollection
+     * @param QueueRepositoryInterface $queueRepository
+     * @param EventMethods $eventMethods
+     * @param DataHelper $dataHelper
+     * @param ProductRepositoryInterface $productRepository
+     * @param StockRegistryInterface $stockRegistry
+     * @param Recovery $recoveryHelper
+     * @param AddressSerializer $addressSerializer
+     * @param ConfigHelper $configHelper
+     * @param DataOverride $dataOverride
+     * @param RewardPointsFactory $rewardPointsFactory
+     * @param SubscriberFactory $subscriberFactory
+     * @param ProductDataResolver $productDataResolver
+     */
     public function __construct(
-        ProductFactory $productFactory,
-        \Remarkety\Mgconnector\Api\Data\ProductCollectionInterfaceFactory $searchResultFactory,
-        \Remarkety\Mgconnector\Api\Data\CustomerCollectionInterfaceFactory $customerResultFactory,
-        \Magento\Catalog\Model\ResourceModel\Product\CollectionFactory $collectionFactory,
-        \Magento\Catalog\Model\Product $productModelCollection,
+        CollectionFactory $collectionFactory,
         CustomerFactory $customerFactory,
-        OrderFactory $salesOrderCollectionFactory,
         QuoteFactory $quoteFactory,
         StatusFactory $statusFactory,
         ScopeConfigInterface $scopeConfig,
-        \Magento\Catalog\Model\CategoryFactory $categoryFactory,
-        \Magento\Framework\ObjectManagerInterface $interface,
-        \Magento\Catalog\Model\Product\ImageFactory $imageFactory,
-        \Magento\Catalog\Model\Product\Gallery\GalleryManagement $entryFactory,
-        AddressFactory $addressFactory,
-        AddressDataFactory $addressDataFactory,
-        \Magento\Customer\Model\Group $customerGroupModel,
-        Customer $customer,
-        \Magento\Newsletter\Model\Subscriber $subscriber,
-        \Magento\Sales\Model\Order\Address $salesOrderAddress,
-        \Magento\Store\Model\StoreManagerInterface $storeManager,
-        \Magento\ConfigurableProduct\Model\ResourceModel\Product\Type\Configurable $catalogProductTypeConfigurable,
+        GroupRepositoryInterface $groupRepository,
+        StoreManagerInterface $storeManager,
+        ConfigurableResource $configurableResource,
         CustomerCollectionFactory $customerCollectionFactory,
-        \Magento\Sales\Model\ResourceModel\Order\CollectionFactory $salesOrderResourceCollectionFactory,
-        RuleFactory $ruleFactory,
+        OrderCollectionFactory $orderCollectionFactory,
+        RuleRepositoryInterface $ruleRepository,
         CouponFactory $couponFactory,
-        Config $resourceConfig,
+        ConfigInterface $resourceConfig,
         TypeListInterface $cacheTypeList,
         Collection $queueCollection,
-        QueueRepository $queueRepository,
+        QueueRepositoryInterface $queueRepository,
         EventMethods $eventMethods,
         DataHelper $dataHelper,
-        ProductRepository $productRepository,
+        ProductRepositoryInterface $productRepository,
         StockRegistryInterface $stockRegistry,
         Recovery $recoveryHelper,
         AddressSerializer $addressSerializer,
         ConfigHelper $configHelper,
         DataOverride $dataOverride,
         RewardPointsFactory $rewardPointsFactory,
-        SubscriberFactory $subscriberFactory
+        SubscriberFactory $subscriberFactory,
+        ProductDataResolver $productDataResolver
     ) {
         $this->dataHelper = $dataHelper;
         $this->eventMethods = $eventMethods;
-        $this->queueRepo = $queueRepository;
+        $this->queueRepository = $queueRepository;
         $this->queueCollection = $queueCollection;
         $this->cacheTypeList = $cacheTypeList;
         $this->resourceConfig = $resourceConfig;
-        $this->productFactory = $productFactory;
-        $this->productCollectionFactory = $searchResultFactory;
         $this->customerFactory = $customerFactory;
-        $this->salesOrderCollectionFactory = $salesOrderCollectionFactory;
         $this->quoteFactory = $quoteFactory;
         $this->statusFactory = $statusFactory;
         $this->collectionFactory = $collectionFactory;
-        $this->customerResultFactory = $customerResultFactory;
         $this->scopeConfig = $scopeConfig;
-        $this->product = $productModelCollection;
-        $this->objectManager = $interface;
-        $this->categoryFactory = $categoryFactory;
-        $this->imageFactory = $imageFactory;
-        $this->entryFactory = $entryFactory;
-        $this->adressFactory = $addressFactory;
-        $this->adressDataFactory = $addressDataFactory;
-        $this->customer = $customer;
-        $this->customerGroupFactory = $customerGroupModel;
-        $this->subscriber = $subscriber;
-        $this->_salesOrderAddressModel = $salesOrderAddress;
-        $this->_storeManagerInterface = $storeManager;
-        $this->_catalogProductTypeConfigurable = $catalogProductTypeConfigurable;
-        $this->_customerCollectionFactory = $customerCollectionFactory;
-        $this->_salesOrderResourceCollectionFactory = $salesOrderResourceCollectionFactory;
-        $this->ruleFactory = $ruleFactory;
+        $this->storeManager = $storeManager;
+        $this->configurableResource = $configurableResource;
+        $this->customerCollectionFactory = $customerCollectionFactory;
+        $this->orderCollectionFactory = $orderCollectionFactory;
+        $this->ruleRepository = $ruleRepository;
         $this->couponFactory = $couponFactory;
         $this->stockRegistry = $stockRegistry;
         $this->productRepository = $productRepository;
@@ -373,9 +465,10 @@ class Data implements DataInterface
         $this->addressSerializer = $addressSerializer;
         $this->configHelper = $configHelper;
         $this->dataOverride = $dataOverride;
-        $this->pos_id_attribute_code = $this->configHelper->getPOSAttributeCode();
         $this->customerRewardPointsService = $rewardPointsFactory->create();
         $this->subscriberFactory = $subscriberFactory;
+        $this->productDataResolver = $productDataResolver;
+        $this->groupRepository = $groupRepository;
     }
 
     /**
@@ -391,7 +484,8 @@ class Data implements DataInterface
      * @param string|null $created_at_max
      * @param int|null $product_id
      * @param bool $enabled_only
-     * @return DataObject $collection
+     *
+     * @return DataObject
      */
     public function getProducts(
         $mage_store_id,
@@ -405,7 +499,7 @@ class Data implements DataInterface
         $product_id = null,
         $enabled_only = false
     ) {
-        $this->_storeManagerInterface->setCurrentStore($mage_store_id);
+        $this->storeManager->setCurrentStore($mage_store_id);
 
         $pageNumber = null;
         $pageSize = null;
@@ -461,14 +555,13 @@ class Data implements DataInterface
             $collection->setPage($pageNumber, $pageSize);
         }
 
-
         $vendorAttr = $collection->getResource()->getAttribute('vendor');
         if (!$vendorAttr) {
             $vendorAttr = $collection->getResource()->getAttribute('brand');
         }
         $manufacturerAttr = $collection->getResource()->getAttribute('manufacturer');
 
-        $map = $this->response_mask;
+        $map = static::RESPONSE_MASK;
         $productsArray = [];
         foreach ($collection as $row) {
             $prod = [];
@@ -493,39 +586,29 @@ class Data implements DataInterface
             $status = array_key_exists('status', $mappedArray) ? $mappedArray['status'] : 1;
 
             $active = true;
-            if ($status == Status::STATUS_DISABLED || $visibility == Visibility::VISIBILITY_NOT_VISIBLE) {
+            if ($status === Status::STATUS_DISABLED || $visibility === Visibility::VISIBILITY_NOT_VISIBLE) {
                 $active = false;
             }
+            $parentId = $this->dataHelper->getParentId($row->getId());
+
             $prod['product_exists'] = $active;
-
             $prod['image'] = $this->dataHelper->getImage($row);
-            $prod['images'] = $this->dataHelper->getMediaGalleryImages($row);
-
+            $prod['images'] = $this->productDataResolver->getImages($parentId, $row);
             $prod['body_html'] = $row->getDescription();
             $prod['id'] = $row->getId();
             $prod['sale_price_with_tax'] = $this->getFinalPrice($row);
-
-            $parent_id = $this->dataHelper->getParentId($row->getId());
-            if ($row->getTypeId() == 'simple' && $parent_id) {
-                $parentProductData = $this->productFactory->create()->load($parent_id);
-                if ($parentProductData->getId()) {
-                    $prod['url'] = $parentProductData->getProductUrl();
-                    $prod['title'] = $parentProductData->getName();
-                    $prod['parent_id'] = $parent_id;
-                }
-            } else {
-                $prod['url'] = $row->getProductUrl();
-                $prod['title'] = $row->getName();
-            }
+            $prod['title'] = $this->productDataResolver->getTitle($parentId, $row);
+            $prod['url'] = $this->productDataResolver->getUrl($parentId, $row);
+            !$parentId ?: $prod['parent_id'] = $parentId;
 
             $variants = [];
             if ($row->getTypeId() == Configurable::TYPE_CODE) {
                 //configurable products sends variants
-                $childrenIdsGroups = $this->_catalogProductTypeConfigurable->getChildrenIds($row->getId());
+                $childrenIdsGroups = $this->configurableResource->getChildrenIds($row->getId());
                 if (isset($childrenIdsGroups[0])) {
                     $childrenIds = $childrenIdsGroups[0];
                     foreach ($childrenIds as $childId) {
-                        $childProd = $this->loadProduct($childId);
+                        $childProd = $this->productRepository->getById($childId);
                         $stock = $this->stockRegistry->getStockItem($childId);
 
                         $created_at_child = new \DateTime($childProd->getCreatedAt());
@@ -576,10 +659,6 @@ class Data implements DataInterface
         return $object;
     }
 
-    private function loadProduct($product_id)
-    {
-        return $this->productRepository->getById($product_id);
-    }
     /**
      * Get All products from catalog
      *
@@ -590,7 +669,8 @@ class Data implements DataInterface
      * @param int|null $page
      * @param int|null $since_id
      * @param int|null $customer_id
-     * @return array $customerData
+     *
+     * @return DataObject
      */
     public function getCustomers(
         $mage_store_id,
@@ -601,16 +681,15 @@ class Data implements DataInterface
         $since_id = null,
         $customer_id = null
     ) {
-
         $pageNumber = null;
         $pageSize = null;
 
-        $customerData = $this->_customerCollectionFactory->create();
+        $customerData = $this->customerCollectionFactory->create();
 
         if ($customer_id !== null) {
             $customerData->addFieldToFilter('entity_id', $customer_id);
         }
-        $customerData->addFieldToFilter('store_id', ['eq' => $mage_store_id]); //$mage_store_id));
+        $customerData->addFieldToFilter('store_id', ['eq' => $mage_store_id]);
         if ($updated_at_min != null) {
             $customerData->addAttributeToFilter('updated_at', ['gt' => $this->convertTime($updated_at_min)]);
         }
@@ -637,24 +716,25 @@ class Data implements DataInterface
         if (!is_null($pageSize)) {
             $customerData->setPage($pageNumber, $pageSize);
         }
-        $pos_id_attribute_code = $this->configHelper->getPOSAttributeCode();
 
-        if (!empty($pos_id_attribute_code)) {
+        $posIdAttributeCode = $this->configHelper->getPOSAttributeCode();
+
+        if (!empty($posIdAttributeCode)) {
             //make sure we get the POS id attribute
-            $customerData->addAttributeToSelect([$pos_id_attribute_code]);
+            $customerData->addAttributeToSelect([$posIdAttributeCode]);
         }
 
         $customerArray = [];
-        $map = $this->response_mask;
+        $map = static::RESPONSE_MASK;
 
-        $aw_rewards_integrate = false;
+        $awRewardsIntegrate = false;
         if ($this->customerRewardPointsService) {
             if ($this->configHelper->isAheadworksRewardPointsEnabled()) {
-                $aw_rewards_integrate = true;
+                $awRewardsIntegrate = true;
             }
         }
         /**
-         * @var \Magento\Customer\Model\Customer\Interceptor[] $customerData
+         * @var CustomerInterface $customer
          */
         foreach ($customerData as $customer) {
             $customers = [];
@@ -679,28 +759,27 @@ class Data implements DataInterface
                 }
             }
             $customers['default_address'] = $this->dataHelper->getCustomerAddresses($customer);
-            $group = $this->customerGroupFactory->load($customer->getGroupId());
-            $customers['groups'] = [];
+            $group = $this->groupRepository->getById($customer->getGroupId());
             $customers['groups'][] = [
                 'id' => $group->getId(),
-                'name' => $group->getCustomerGroupCode(),
+                'name' => $group->getCode(),
             ];
 
-            $pos_id = null;
-            if (!empty($pos_id_attribute_code)) {
-                if (isset($mappedCustomer[$pos_id_attribute_code])) {
-                    $pos_id = $mappedCustomer[$pos_id_attribute_code];
-                }
-            }
-            $customers['pos_id'] = $pos_id;
-            $customers['accepts_marketing'] = $this->checkSubscriber($customer->getEmail(), $customer->getId());
-            if ($aw_rewards_integrate) {
+            $customers['pos_id'] = !empty($posIdAttributeCode) && isset($mappedCustomer[$posIdAttributeCode]) ?
+                $mappedCustomer[$posIdAttributeCode] : null;
+            $customers['accepts_marketing'] = $this->checkSubscriber(
+                $customer->getEmail(),
+                $customer->getId(),
+                $this->storeManager->getStore($mage_store_id)->getWebsiteId()
+            );
+            if ($awRewardsIntegrate) {
                 $customers['rewards_points'] = $this->customerRewardPointsService->getCustomerRewardPointsBalance($customer->getId());
             }
             $customerArray[] = $this->dataOverride->customer($customer, $customers);
         }
         $object = new DataObject();
         $object->setCustomers($customerArray);
+
         return $object;
     }
 
@@ -729,19 +808,14 @@ class Data implements DataInterface
         return $addressData;
     }
 
-    public function mapCustomer($customer, $isObject = false)
+    public function mapCustomer($customerId, $mage_store_id)
     {
-        if ($isObject) {
-            $customerData = $customer;
-        } else {
-            $customerData = $this->customerFactory->create()->load($customer);
-        }
-        $customer_id = $customerData->getId();
+        $customer = $this->customerFactory->create()->load($customerId);
         $customers = [];
-        $mappedCustomer = $customerData->getData();
-        $mappedCustomer['id'] = $customer_id;
+        $mappedCustomer = $customer->getData();
+        $mappedCustomer['id'] = $customerId;
 
-        foreach ($this->response_mask['customers'] as $element => $value) {
+        foreach (static::RESPONSE_MASK['customers'] as $element => $value) {
             if (!is_array($value)) {
                 if (array_key_exists($value, $mappedCustomer)) {
                     if ($element == 'gender' && $mappedCustomer['gender'] == '0') {
@@ -757,32 +831,16 @@ class Data implements DataInterface
                 }
             }
         }
-        $pos_id = null;
-        if (!empty($this->pos_id_attribute_code)) {
-            if (isset($mappedCustomer[$this->pos_id_attribute_code])) {
-                $pos_id = $mappedCustomer[$this->pos_id_attribute_code];
-            }
-        }
-        $customers['pos_id'] = $pos_id;
-        $customers['accepts_marketing'] = $this->checkSubscriber($customerData->getEmail(), $customer_id);
-        $customers['default_address'] = $this->dataHelper->getCustomerAddresses($customerData);
-        return $this->dataOverride->customer($customerData, $customers);
-    }
+        $customers['pos_id'] = !empty($posIdAttributeCode) && $mappedCustomer[$posIdAttributeCode] ?
+            $mappedCustomer[$posIdAttributeCode] : null;
+        $customers['accepts_marketing'] = $this->checkSubscriber(
+            $customer->getEmail(),
+            $customerId,
+            $this->storeManager->getStore($mage_store_id)->getWebsiteId()
+        );
+        $customers['default_address'] = $this->dataHelper->getCustomerAddresses($customer);
 
-    public function getCustomerDataById($id = false)
-    {
-        $customerData = $this->customerFactory->create()->load($id);
-        $customerArray = [];
-
-        if ($customerData->getId()) {
-            $customerArray = $this->mapCustomer($customerData, true);
-        }
-        return $customerArray;
-    }
-
-    public function getGuestBillingAddressData($billingAddressId)
-    {
-        return $this->_salesOrderAddressModel->load($billingAddressId);
+        return $this->dataOverride->customer($customer, $customers);
     }
 
     /**
@@ -798,7 +856,8 @@ class Data implements DataInterface
      * @param string|null $created_at_max
      * @param string|null $order_status
      * @param int|null $order_id
-     * @return array $orders
+     *
+     * @return DataObject
      */
     public function getOrders(
         $mage_store_id,
@@ -818,7 +877,7 @@ class Data implements DataInterface
         /**
          * @var Order[] $orders
          */
-        $orders = $this->_salesOrderResourceCollectionFactory->create();
+        $orders = $this->orderCollectionFactory->create();
 
         $orders->addFieldToFilter('main_table.store_id', ['eq' => $mage_store_id]);
         if ($updated_at_min != null) {
@@ -861,10 +920,9 @@ class Data implements DataInterface
 
         if (!is_null($pageSize)) {
             $orders->setPage($pageNumber, $pageSize);
-
         }
 
-        $map = $this->response_mask;
+        $map = static::RESPONSE_MASK;
         $ordersArray = [];
         foreach ($orders as $order) {
             $ord = [];
@@ -878,26 +936,22 @@ class Data implements DataInterface
             }
             $ord['id'] = empty($order->getOriginalIncrementId()) ? $order->getIncrementId() : $order->getOriginalIncrementId();
             if ($order->getCustomerId()) {
-                $ord['customer'] = $this->getCustomerDataById($order->getCustomerId());
+                $ord['customer'] = $this->mapCustomer($order->getCustomerId(), $mage_store_id);
             } else {
-                $addressId = $order->getBillingAddressId();
-                if ($this->configHelper->getCustomerAddressType() === ConfigHelper::CUSTOMER_ADDRESS_SHIPPING) {
-                    $addressId = $order->getShippingAddressId();
-                }
-                /**
-                 * @var Order\Address $billingAddressData
-                 */
-                $billingAddressData = $this->getGuestBillingAddressData($addressId);
-                $address = $this->getAddressData($billingAddressData);
+                $billingAddress = $this->configHelper->getCustomerAddressType() === ConfigHelper::CUSTOMER_ADDRESS_SHIPPING ?
+                    $order->getBillingAddress() : $order->getShippingAddress();
 
-                $ord['customer']['email'] = $billingAddressData->getEmail();
-                $ord['customer']['accepts_marketing'] = $this->checkSubscriber($billingAddressData->getEmail(), null);
+                $ord['customer']['email'] = $billingAddress->getEmail();
+                $ord['customer']['accepts_marketing'] = $this->checkSubscriber(
+                    $billingAddress->getEmail(),
+                    null,
+                    $this->storeManager->getStore($mage_store_id)->getWebsiteId()
+                );
                 $ord['customer']['guest'] = true;
-                $ord['customer']['first_name'] = $billingAddressData->getFirstname();
-                $ord['customer']['last_name'] = $billingAddressData->getLastname();
-                $ord['customer']['title'] = $billingAddressData->getPrefix();
-
-                $ord['customer']['default_address'] = $address;
+                $ord['customer']['first_name'] = $billingAddress->getFirstname();
+                $ord['customer']['last_name'] = $billingAddress->getLastname();
+                $ord['customer']['title'] = $billingAddress->getPrefix();
+                $ord['customer']['default_address'] = $this->getAddressData($billingAddress);
             }
             $ord['line_items'] = [];
             /**
@@ -947,24 +1001,25 @@ class Data implements DataInterface
 
         $object = new DataObject();
         $object->setOrders($ordersArray);
+
         return $object;
     }
     /**
      * Get All customers from catalog
      *
      * @param int|null $mage_store_id
-     * @return int customers.
+     *
+     * @return DataObject
      */
     public function getProductsCount($mage_store_id)
     {
         $collection = $this->collectionFactory->create();
         $collection->addAttributeToSelect('entity_id');
         $collection->addStoreFilter($mage_store_id);
-        //$collection->addStoreFilter($mage_store_id);
-//        $collection->addFieldToFilter('main_table.store_id', array('eq' => $mage_store_id));
 
         $object = new DataObject();
         $object->setCount(count($collection));
+
         return $object;
     }
 
@@ -972,29 +1027,32 @@ class Data implements DataInterface
      * Get All customers from catalog
      *
      * @param int|null $mage_store_id
-     * @return int customers.
+     * @return DataObject
      */
     public function getCustomersCount($mage_store_id)
     {
-        $customerData = $this->_customerCollectionFactory->create();
+        $customerData = $this->customerCollectionFactory->create();
         $customerData->addFieldToFilter('store_id', ['eq' => $mage_store_id]);
+
         $object = new DataObject();
         $object->setCount(count($customerData));
+
         return $object;
     }
     /**
      * Get All customers from catalog
      *
      * @param int|null $mage_store_id
-     * @return int customers.
+     * @return DataObject
      */
     public function getOrdersCount($mage_store_id)
     {
-        $orders = $this->_salesOrderResourceCollectionFactory->create();
+        $orders = $this->orderCollectionFactory->create();
         $orders->addFieldToFilter('store_id', ['eq' => $mage_store_id]);
 
         $object = new DataObject();
         $object->setCount(count($orders));
+
         return $object;
     }
     /**
@@ -1062,11 +1120,10 @@ class Data implements DataInterface
         if ($quote_id !== null) {
             $quotes->addFieldToFilter('entity_id', $quote_id);
         }
-        $map = $this->response_mask;
+        $map = static::RESPONSE_MASK;
 
         $quoteCartArray = [];
         foreach ($quotes as $quote) {
-
             $quoteData = $quote->getData();
             $quoteArray = [];
             foreach ($map['carts'] as $element => $value) {
@@ -1085,7 +1142,6 @@ class Data implements DataInterface
             $defaultShipping = $quote->getShippingAddress()->getData();
             foreach ($map['carts']['billing_address'] as $element => $value) {
                 if (!is_array($value)) {
-
                     if (array_key_exists($value, $defaultBilling)) {
                         $quoteArray['billing_address'][$element] = $defaultBilling[$value];
                     }
@@ -1101,7 +1157,7 @@ class Data implements DataInterface
             $quoteArray['total_shipping'] = empty($defaultShipping['shipping_amount']) ? 0 : (float)$defaultShipping['shipping_amount'];
             $itemsCollection = $quote->getItemsCollection();
             if ($quote->getCustomerId()) {
-                $customer = $this->mapCustomer($quote->getCustomerId());
+                $customer = $this->mapCustomer($quote->getCustomerId(), $mage_store_id);
                 $quoteArray['customer'] = $customer;
             } else {
                 $quoteArray['customer'] = null;
@@ -1150,6 +1206,7 @@ class Data implements DataInterface
         }
         $object = new DataObject();
         $object->setCarts($quoteCartArray);
+
         return $object;
     }
 
@@ -1163,7 +1220,7 @@ class Data implements DataInterface
 
         /** @var \Magento\Framework\ObjectManagerInterface $om */
         $om = \Magento\Framework\App\ObjectManager::getInstance();
-        /** @var \Magento\Store\Model\StoreManagerInterface $manager */
+        /** @var StoreManagerInterface $manager */
         $manager = $om->get('Magento\Store\Model\StoreManagerInterface');
         /**
          * @var \Magento\Store\Model\Store;
@@ -1238,7 +1295,6 @@ class Data implements DataInterface
 
     public function getStoreOrderStatusesByCode($code)
     {
-
         $statuses = $this->getStoreOrderStatuses();
         foreach ($statuses as $status) {
             if ($status['code'] == $code) {
@@ -1258,42 +1314,38 @@ class Data implements DataInterface
      */
     public function createCoupon($ruleId, $couponCode, $expiration = null)
     {
-        $error_message = null;
+        $errorMessage = null;
         try {
-            $rule = $this->ruleFactory->create()->load($ruleId);
+            $rule = $this->ruleRepository->getById($ruleId);
 
-            if (!empty($rule->getId())) {
-                $coupon = $this->couponFactory->create();
-                $coupon->setRule($rule)
-                    ->setIsPrimary(false)
-                    ->setCode($couponCode)
-                    ->setAddedByRemarkety(1)
-                    ->setUsageLimit($rule->getUsesPerCoupon())
-                    ->setUsagePerCustomer($rule->getUsesPerCustomer())
-                    ->setCreatedAt(date("Y-m-d H:i:s"))
-                    ->setType(Coupon::COUPON_TYPE_SPECIFIC_AUTOGENERATED);
+            $coupon = $this->couponFactory->create();
+            $coupon->setRule($rule)
+                ->setIsPrimary(false)
+                ->setCode($couponCode)
+                ->setAddedByRemarkety(1)
+                ->setUsageLimit($rule->getUsesPerCoupon())
+                ->setUsagePerCustomer($rule->getUsesPerCustomer())
+                ->setCreatedAt(date("Y-m-d H:i:s"))
+                ->setType(Coupon::COUPON_TYPE_SPECIFIC_AUTOGENERATED);
 
-                if ($expiration != null) {
-                    $coupon->setExpirationDate($this->convertTime($expiration));
-                } else {
-                    $coupon->setExpirationDate($rule->getToDate());
-                }
-                $coupon->save();
+            if ($expiration != null) {
+                $coupon->setExpirationDate($this->convertTime($expiration));
             } else {
-                throw new LocalizedException(__('Rule with id '.$ruleId.' dosent found.'));
+                $coupon->setExpirationDate($rule->getToDate());
             }
+            $coupon->save();
+
             $status = true;
         } catch (LocalizedException $e) {
             $status = false;
-            $error_message = $e->getMessage();
-
+            $errorMessage = $e->getMessage();
         }
 
         $response = [
             'response' => [
                 'status' => $status,
                 'error'  => [
-                    'message' => $error_message
+                    'message' => $errorMessage
                 ]
             ]
         ];
@@ -1343,7 +1395,6 @@ class Data implements DataInterface
         $this->cacheTypeList->cleanType('config');
         return 1;
     }
-
 
     /**
      * @return string
@@ -1406,7 +1457,7 @@ class Data implements DataInterface
     {
         $sel = $this->queueCollection
             ->getSelect();
-        $sel->where('store_id = '. $mage_store_id)
+        $sel->where('store_id = ' . $mage_store_id)
             ->order('queue_id asc');
 
         if (is_numeric($minId)) {
@@ -1420,7 +1471,7 @@ class Data implements DataInterface
         $itemsDeleted = 0;
         foreach ($this->queueCollection as $item) {
             try {
-                $this->queueRepo->delete($item);
+                $this->queueRepository->delete($item);
                 $itemsDeleted++;
             } catch (\Exception $ex) {
             }
@@ -1440,13 +1491,14 @@ class Data implements DataInterface
      * @param int|null $page
      * @param int|null $minId
      * @param int|null $maxId
-     * @return int
+     *
+     * @return array
      */
     public function retryQueueItems($mage_store_id, $limit = null, $page = null, $minId = null, $maxId = null)
     {
         $sel = $this->queueCollection
             ->getSelect();
-        $sel->where('store_id = '. $mage_store_id)
+        $sel->where('store_id = ' . $mage_store_id)
             ->order('queue_id asc');
 
         if (is_numeric($minId)) {
@@ -1484,18 +1536,18 @@ class Data implements DataInterface
                     $item->getQueueId()
                 )) {
                     $itemsSent++;
-                    $this->queueRepo->delete($item);
+                    $this->queueRepository->delete($item);
                 }
             } catch (\Exception $ex) {
             }
         }
-        $ret = [
+
+        return [
             'response' => [
                 'totalMatching' => $this->queueCollection->count(),
                 'sentSuccessfully' => $itemsSent
             ]
         ];
-        return $ret;
     }
 
     public function unsubscribe($mage_store_id, $email)
@@ -1514,7 +1566,7 @@ class Data implements DataInterface
         }
 
         if ($result->getStatus() == 'error') {
-            throw new \Magento\Framework\Webapi\Exception(__($result->getMessage()), 400);
+            throw new Exception(__($result->getMessage()), 400);
         }
 
         $email = strtolower(trim($email));

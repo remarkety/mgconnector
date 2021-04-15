@@ -1,21 +1,39 @@
 <?php
+
 namespace Remarkety\Mgconnector\Model;
 
-use Remarkety\Mgconnector\Api\QueueRepositoryInterface;
-use Remarkety\Mgconnector\Api\Data\QueueInterface;
-use Remarkety\Mgconnector\Model\QueueFactory;
-use Remarkety\Mgconnector\Model\ResourceModel\Queue\CollectionFactory;
-
 use Magento\Framework\Api\SearchCriteriaInterface;
+use Magento\Framework\Api\SearchResultsInterfaceFactory;
+use Magento\Framework\Api\SortOrder;
+use Magento\Framework\Exception\CouldNotDeleteException;
 use Magento\Framework\Exception\CouldNotSaveException;
 use Magento\Framework\Exception\NoSuchEntityException;
-use Magento\Framework\Exception\CouldNotDeleteException;
-use Magento\Framework\Api\SearchResultsInterfaceFactory;
+use Remarkety\Mgconnector\Api\Data\QueueInterface;
+use Remarkety\Mgconnector\Api\QueueRepositoryInterface;
+use Remarkety\Mgconnector\Model\ResourceModel\Queue\CollectionFactory;
 
-class QueueRepository implements \Remarkety\Mgconnector\Api\QueueRepositoryInterface
+class QueueRepository implements QueueRepositoryInterface
 {
-    protected $objectFactory;
-    protected $collectionFactory;
+    /**
+     * @var QueueFactory
+     */
+    private $objectFactory;
+
+    /**
+     * @var CollectionFactory
+     */
+    private $collectionFactory;
+
+    /**
+     * @var SearchResultsInterfaceFactory
+     */
+    private $searchResultsFactory;
+
+    /**
+     * @param QueueFactory $objectFactory
+     * @param CollectionFactory $collectionFactory
+     * @param SearchResultsInterfaceFactory $searchResultsFactory
+     */
     public function __construct(
         QueueFactory $objectFactory,
         CollectionFactory $collectionFactory,
@@ -25,7 +43,7 @@ class QueueRepository implements \Remarkety\Mgconnector\Api\QueueRepositoryInter
         $this->collectionFactory    = $collectionFactory;
         $this->searchResultsFactory = $searchResultsFactory;
     }
-    
+
     public function save(QueueInterface $object)
     {
         try {
@@ -86,7 +104,6 @@ class QueueRepository implements \Remarkety\Mgconnector\Api\QueueRepositoryInter
         $searchResults->setTotalCount($collection->getSize());
         $sortOrders = $criteria->getSortOrders();
         if ($sortOrders) {
-            /** @var SortOrder $sortOrder */
             foreach ($sortOrders as $sortOrder) {
                 $collection->addOrder(
                     $sortOrder->getField(),
