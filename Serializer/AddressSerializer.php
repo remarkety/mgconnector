@@ -35,16 +35,11 @@ class AddressSerializer
                 $countryName = $country->getName();
             }
         }
-        $region = null;
         $regionStr = null;
-        if ($address instanceof \Magento\Sales\Model\Order\Address) {
-            $region = $address->getRegionCode();
-        } else {
-            $region = $address->getRegion();
-        }
+        $region = $address->getRegion();
         if (!empty($region)) {
             if (is_object($region)) {
-                $regionStr = $region->getRegionCode();
+                $regionStr = $region->getRegion();
             } else {
                 $regionStr = $region;
             }
