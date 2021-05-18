@@ -3,6 +3,7 @@
 namespace Remarkety\Mgconnector\Serializer;
 
 use Magento\Customer\Model\ResourceModel\CustomerRepository;
+use Magento\Sales\Model\OrderRepository;
 use Magento\Newsletter\Model\Subscriber;
 use Magento\Sales\Model\Order\Shipment;
 use Magento\ConfigurableProduct\Model\Product\Type\Configurable;
@@ -15,6 +16,7 @@ class OrderSerializer
     use CheckSubscriberTrait;
 
     private $customerRepository;
+    private $orderRepository;
     private $statusCollection;
     private $remarketyHelper;
 
@@ -26,6 +28,7 @@ class OrderSerializer
 
     public function __construct(
         CustomerRepository $customerRepository,
+        OrderRepository $orderRepository,
         \Magento\Sales\Model\ResourceModel\Order\Status\Collection $statusCollection,
         \Remarkety\Mgconnector\Helper\Data $remarketyHelper,
         AddressSerializer $addressSerializer,
@@ -42,6 +45,7 @@ class OrderSerializer
         $this->subscriber = $subscriber;
         $this->dataOverride = $dataOverride;
         $this->configHelper = $configHelper;
+        $this->orderRepository = $orderRepository;
     }
 
     public function serialize(\Magento\Sales\Model\Order $order)
@@ -93,7 +97,6 @@ class OrderSerializer
                 $itemTax = 0;
             }
             $itemArr = [
-                //'product_parent_id' => $rmCore->getProductParentId($item->getProduct()),
                 'product_id' => $item->getProductId(),
                 'sku' => $item->getSku(),
                 'quantity' => $lineQty,
@@ -114,7 +117,13 @@ class OrderSerializer
         $updated_at = new \DateTime($order->getUpdatedAt());
 
         if (!$order->getCustomerIsGuest()) {
-            $customer = $this->customerRepository->getById($order->getCustomerId());
+            if(empty($order->getCustomerId())){
+                //When updating an order using the POST /rest/V1/orders API we are not getting customer id on the object
+                $tmpOrder = $this->orderRepository->get($order->getEntityId());
+                $customer = $this->customerRepository->getById($tmpOrder->getCustomerId());
+            } else {
+                $customer = $this->customerRepository->getById($order->getCustomerId());
+            }
             $customerInfo = $this->customerSerializer->serialize($customer);
         } else {
             if ($this->configHelper->getCustomerAddressType() === ConfigHelper::CUSTOMER_ADDRESS_BILLING) {
