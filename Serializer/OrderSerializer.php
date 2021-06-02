@@ -65,6 +65,12 @@ class OrderSerializer
                 ];
             }
         }
+
+        if($order->getGrandTotal() === null){
+            //reloading the full entity as a workaround for a bug when updating orders from the REST API
+            $order = $this->orderRepository->get($order->getEntityId());
+        }
+
         /**
          * @var $items \Magento\Sales\Model\Order\Item[]
          */
@@ -117,13 +123,7 @@ class OrderSerializer
         $updated_at = new \DateTime($order->getUpdatedAt());
 
         if (!$order->getCustomerIsGuest()) {
-            if(empty($order->getCustomerId())){
-                //When updating an order using the POST /rest/V1/orders API we are not getting customer id on the object
-                $tmpOrder = $this->orderRepository->get($order->getEntityId());
-                $customer = $this->customerRepository->getById($tmpOrder->getCustomerId());
-            } else {
-                $customer = $this->customerRepository->getById($order->getCustomerId());
-            }
+            $customer = $this->customerRepository->getById($order->getCustomerId());
             $customerInfo = $this->customerSerializer->serialize($customer);
         } else {
             if ($this->configHelper->getCustomerAddressType() === ConfigHelper::CUSTOMER_ADDRESS_BILLING) {
