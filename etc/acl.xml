@@ -3,10 +3,15 @@
     <acl>
         <resources>
             <resource id="Magento_Backend::admin">
-                <resource id="Remarkety_Mgconnector::admin" title="Remarkety" translate="title" sortOrder="60">
+                <resource id="Remarkety_Mgconnector::admin" title="Remarkety API" translate="title" sortOrder="60">
                     <resource id="Remarkety_Mgconnector::admin_version" title="Get plugin version" translate="title" sortOrder="40" />
                     <resource id="Remarkety_Mgconnector::admin_queue" title="Manage webhooks queue" translate="title" sortOrder="41" />
                     <resource id="Remarkety_Mgconnector::admin_config" title="Change plugin config" translate="title" sortOrder="42" />
+                </resource>
+                <resource id="Remarkety_Mgconnector::mgconnector_content" title="Remarkety Settings" translate="title" sortOrder="61">
+                    <resource id="Remarkety_Mgconnector::installation" title="Installation" translate="title" sortOrder="60" />
+                    <resource id="Remarkety_Mgconnector::queue" title="Webhooks Queue" translate="title" sortOrder="70" />
+                    <resource id="Remarkety_Mgconnector::settings" title="Settings" translate="title" sortOrder="70" />
                 </resource>
             </resource>
         </resources>
