@@ -251,7 +251,7 @@ class Data implements DataInterface
             "accepts_marketing",
             "cart_token",
             "created_at" => "created_at",
-            "currency" => "global_currency_code",
+            "currency" => "quote_currency_code",
             "coupon_code" => "coupon_code",
             "email" => 'customer_email',
             "fulfillment_status",
