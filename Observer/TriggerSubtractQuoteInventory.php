@@ -33,6 +33,7 @@ class TriggerSubtractQuoteInventory extends EventMethods implements ObserverInte
                         foreach ($storeIds as $storeId) {
                             if ($this->isWebhooksEnabled($storeId)) {
                                 $data = $this->productSerializer->serialize($product, $storeId);
+                                $this->removePriceFromData($data);
                                 $this->makeRequest(self::EVENT_PRODUCTS_UPDATED, $data, $storeId);
                             }
                         }
