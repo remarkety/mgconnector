@@ -210,6 +210,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         }
         $str = str_replace(' ', '', ucwords(str_replace('_', ' ', $string)));
         if (!$capitalizeFirstCharacter) {
+            $str[0] = empty($str[0]) ? '' : $str[0];
             $str[0] = strtolower($str[0]);
         }
         return $str;

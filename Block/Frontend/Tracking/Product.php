@@ -64,7 +64,9 @@ class Product extends Base
 
         foreach ($categoryIds as $categoryId) {
             $category = $this->dataHelper->getCategory($categoryId);
-            $result[] = $category['name'];
+            if (is_array($category)) {
+                $result[] = $category['name'];
+            }
         }
 
         return json_encode($result);

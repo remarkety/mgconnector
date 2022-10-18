@@ -7,6 +7,7 @@ trait CheckSubscriberTrait
 {
     private function cleanEmail($email)
     {
+        $email = empty($email) ? '' : $email;
         return trim(strtolower($email));
     }
 
