@@ -247,6 +247,18 @@ class EventMethods
             }
             $payload = array_merge($payload, $this->_getPayloadBase($eventType));
 
+            if (empty($queueId)) {
+                $trace = debug_backtrace();
+                if (isset($trace[1])) {
+                    $payload['calling_function'] = str_replace(
+                            'Remarkety\\Mgconnector\\',
+                            '',
+                            get_class($trace[1]['object'])
+                        ) . '::' . $trace[1]['function'];
+                    unset($trace);
+                }
+            }
+
             $sync = $forceSync || ($this->_forceSyncWebhooks && $this->_countEvents < 3);
             if (empty($queueId) && !$sync) {
                 //batch update, push to queue
