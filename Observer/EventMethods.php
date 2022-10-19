@@ -421,4 +421,24 @@ class EventMethods
         }
         return false;
     }
+
+    /**
+     * Removing price fields from data
+     * Sometimes the product's price being affected by the current order's price,
+     * We only need to update the product's inventory quantity
+     *
+     * @param array $data
+     * @return void
+     */
+    protected function removePriceFromData(array &$data)
+    {
+        unset($data['price']);
+        unset($data['salePrice']);
+        if (isset($data['variants']) && is_array($data['variants'])) {
+            foreach ($data['variants'] as & $variant) {
+                unset($variant['price']);
+                unset($variant['salePrice']);
+            }
+        }
+    }
 }
