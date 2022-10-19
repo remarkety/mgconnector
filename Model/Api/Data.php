@@ -1517,9 +1517,11 @@ class Data implements DataInterface
             throw new \Magento\Framework\Webapi\Exception(__($result->getMessage()), 400);
         }
 
+        $email = empty($email) ? '' : $email;
         $email = strtolower(trim($email));
         $subscriber = $this->subscriberFactory->create()->loadByEmail($email);
-        $found_email = strtolower(trim($subscriber->getEmail()));
+        $subscriberEmail = empty($subscriber->getEmail()) ? '' : $subscriber->getEmail();
+        $found_email = strtolower(trim($subscriberEmail));
         if ($found_email == $email) {
             $subscriber->unsubscribe();
             $result->setMessage('Customer unsubscribed successfuly');

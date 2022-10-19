@@ -308,14 +308,14 @@ class EventMethods
                 $queueModel = $this->queueFactory->create();
                 $this->_remarketyQueueRepo->save($queueModel);
                 $queueModel->setData([
-                    'event_type' => $eventType,
-                    'payload' => json_encode($payload),
-                    'attempts' => $attempt,
-                    'last_attempt' => date("Y-m-d H:i:s", $now),
-                    'next_attempt' => date("Y-m-d H:i:s", $nextAttempt),
-                    'status' => 1,
-                    'store_id' => $storeId
-                ]);
+                                         'event_type' => $eventType,
+                                         'payload' => json_encode($payload),
+                                         'attempts' => $attempt,
+                                         'last_attempt' => date("Y-m-d H:i:s", $now),
+                                         'next_attempt' => date("Y-m-d H:i:s", $nextAttempt),
+                                         'status' => 1,
+                                         'store_id' => $storeId
+                                     ]);
                 if (!empty($err)) {
                     $queueModel->setLastErrorMessage($err);
                 }
@@ -387,6 +387,7 @@ class EventMethods
         if (!$this->_enableWebhooksTiming) {
             return;
         }
+        $eventName = empty($eventName) ? '' : $eventName;
         $eventName = trim(strtolower($eventName));
         $this->_timings[$eventName] = microtime(true);
     }
@@ -396,6 +397,7 @@ class EventMethods
         if (!$this->_enableWebhooksTiming || !$this->_webhooksTimingLogger) {
             return;
         }
+        $eventName = empty($eventName) ? '' : $eventName;
         $eventName = trim(strtolower($eventName));
         if (!isset($this->_timings[$eventName])) {
             return;
