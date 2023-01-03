@@ -85,9 +85,18 @@ class Recovery extends \Magento\Framework\App\Action\Action
         if(array_key_exists('cart', $params)){
             unset($params['cart']);
         }
+
+        // Preserve any additional URI before our /mgconnector route when redirecting to the cart checkout page
+        // Most common example is the language param, e.g. https://website.com/he/mgconnector/frontend/recovery/cart/<hash>
+        $additionalUri = isset($_SERVER['REQUEST_URI']) ? substr(
+            $_SERVER['REQUEST_URI'],
+            0,
+            strpos($_SERVER['REQUEST_URI'], '/mgconnector')
+        ) : '';
+
         $query = http_build_query($params);
         $resultRedirect = $this->resultRedirect->create(ResultFactory::TYPE_REDIRECT);
-        $resultRedirect->setUrl('/checkout/cart/index?' . $query);
+        $resultRedirect->setUrl($additionalUri . '/checkout/cart/index?' . $query);
 
         return $resultRedirect;
     }
