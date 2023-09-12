@@ -17,6 +17,7 @@ class Complete extends \Magento\Backend\App\Action
 {
     protected $resultPageFactory;
     protected $installModel;
+    protected $_messageManager;
 
     public function __construct(
         Context $context,

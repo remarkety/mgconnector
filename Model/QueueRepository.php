@@ -16,6 +16,7 @@ class QueueRepository implements \Remarkety\Mgconnector\Api\QueueRepositoryInter
 {
     protected $objectFactory;
     protected $collectionFactory;
+    protected $searchResultsFactory;
     public function __construct(
         QueueFactory $objectFactory,
         CollectionFactory $collectionFactory,

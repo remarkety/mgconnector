@@ -49,6 +49,8 @@ class EventMethods
     protected $_origAddressData = null;
 
     protected $_coreRegistry;
+    protected $subscriber;
+    protected $scopeConfigInterface;
     protected $_customerGroup;
     protected $_remarketyQueueRepo;
     protected $_store;

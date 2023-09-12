@@ -21,7 +21,8 @@ class Request
     const REMARKETY_VERSION = 0.9;
     const REMARKETY_PLATFORM = 'MAGENTO_2';
 
-
+    private $store;
+    private $session;
     private $serialize;
     public function __construct(
         Store $store,

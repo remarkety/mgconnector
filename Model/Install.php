@@ -93,6 +93,17 @@ class Install extends \Magento\Framework\Model\AbstractModel
 
     protected $_cache;
 
+    protected $context;
+    protected $scopeConfigInterface;
+    protected $integration;
+    protected $role;
+    protected $rules;
+    protected $user;
+    protected $store;
+    protected $mgconnectorRequest;
+    protected $moduleResource;
+    protected $config;
+    protected $oauthService;
     private $serialize;
 
     public function __construct(
