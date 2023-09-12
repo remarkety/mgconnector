@@ -18,6 +18,10 @@ class Reinstall extends \Magento\Backend\App\Action
 {
     protected $resultPageFactory;
     protected $installModel;
+    protected $_messageManager;
+    protected $config;
+    protected $storeManager;
+    protected $session;
     private $configHelper;
 
     public function __construct(

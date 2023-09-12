@@ -5,6 +5,7 @@ use Remarkety\Mgconnector\Helper\ConfigHelper;
 
 class Install extends \Magento\Framework\View\Element\Template
 {
+    private $remarketyHelper;
     public $configHelper;
 
     public function __construct(

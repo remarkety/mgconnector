@@ -54,6 +54,10 @@ class Data implements DataInterface
     protected $productCollection = false;
     protected $productCollectionFactory = false;
     protected $collectionFactory;
+    protected $customerResultFactory;
+    protected $product;
+    protected $adressDataFactory;
+    protected $customer;
     protected $objectManager;
     protected $categoryFactory;
     protected $categoryMapCache = [];

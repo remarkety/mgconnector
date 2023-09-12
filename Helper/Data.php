@@ -18,6 +18,10 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
     protected $categoryFactory;
     protected $configHelper;
     protected $addressSerializer;
+    protected $integration;
+    protected $moduleResource;
+    protected $session;
+    protected $installModel;
     public function __construct(
         \Magento\Framework\App\Helper\Context $context,
         \Magento\Framework\Module\ModuleResource $moduleResource,
