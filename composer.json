@@ -6,10 +6,11 @@
     "magento/module-backend": ">=100.1.0",
     "magento/module-media-storage": ">=100.1.0",
     "magento/framework": ">=100.1.0",
+    "magento/zendframework1": "^1.15",
     "lib-libxml": "*"
   },
   "type": "magento2-module",
-  "version": "2.6.1",
+  "version": "2.7.0",
   "license": [
     "OSL-3.0",
     "AFL-3.0"
