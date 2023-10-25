@@ -18,12 +18,13 @@ use Remarkety\Mgconnector\Serializer\CustomerSerializer;
 use Remarkety\Mgconnector\Serializer\OrderSerializer;
 use Remarkety\Mgconnector\Serializer\ProductSerializer;
 use Psr\Log\LoggerInterface;
+use \Laminas;
 
 class EventMethods
 {
 
     const REMARKETY_EVENTS_ENDPOINT = 'https://webhooks.remarkety.com/webhooks';
-    const REMARKETY_METHOD = 'POST';
+    const REMARKETY_METHOD = Laminas\Http\Request::METHOD_POST;
     const REMARKETY_TIMEOUT = 2;
     const REMARKETY_VERSION = 0.9;
     const REMARKETY_PLATFORM = 'MAGENTO_2';
@@ -177,21 +178,11 @@ class EventMethods
         return $this;
     }
 
-    protected function _getRequestConfig($eventType, $async = false)
+    protected function _getHttpClientConfig($eventType, $async = false)
     {
-        $config = [
-            'adapter' => 'Zend_Http_Client_Adapter_Curl',
-            'timeout' => self::REMARKETY_TIMEOUT,
-            'request_timeout' => self::REMARKETY_TIMEOUT,
-            'curloptions' => [
-                CURLOPT_HEADER => true
-            ]
+        return [
+            'timeout' => $async ? 10 : self::REMARKETY_TIMEOUT,
         ];
-        if ($async) {
-            $config['timeout'] = 10;
-            $config['request_timeout'] = 10;
-        }
-        return $config;
     }
 
     protected function _getHeaders($eventType, $payload, $storeId = null)
@@ -203,15 +194,15 @@ class EventMethods
             $storeId = $payload['storeId'];
         }
 
-        $headers = [
-            'X-Domain: ' . $domain,
-            'X-Token: ' . $this->_token,
-            'X-Event-Type: ' . $eventType,
-            'X-Platform: ' . self::REMARKETY_PLATFORM,
-            'X-Version: ' . self::REMARKETY_VERSION,
-            'X-Magento-Store-Id: ' . (empty($storeId) ? $this->_store->getId() : $storeId)
+        return [
+            'Content-Type'       => 'application/json',
+            'X-Domain'           => $domain,
+            'X-Token'            => $this->_token,
+            'X-Event-Type'       => $eventType,
+            'X-Platform'         => self::REMARKETY_PLATFORM,
+            'X-Version'          => self::REMARKETY_VERSION,
+            'X-Magento-Store-Id' => (empty($storeId) ? $this->_store->getId() : $storeId)
         ];
-        return $headers;
     }
 
     protected function shouldSendEvent($eventType, $payload, $storeId)
@@ -272,13 +263,28 @@ class EventMethods
             $json = json_encode($payload);
 
             $isAsync = !is_null($queueId);
-            $client = new \Zend_Http_Client($url, $this->_getRequestConfig($eventType, $isAsync));
-            $response = $client
-                ->setHeaders($this->_getHeaders($eventType, $payload, $storeId))
-                ->setRawData($json, 'application/json')
-                ->request(self::REMARKETY_METHOD);
 
-            switch ($response->getStatus()) {
+            /**
+             * Docs: https://docs.laminas.dev/laminas-http/client/intro/
+             */
+            $client = new Laminas\Http\Client();
+            $client->setOptions($this->_getHttpClientConfig($eventType, $isAsync));
+
+            /**
+             * Docs: https://docs.laminas.dev/laminas-http/request/
+             */
+            $request = new Laminas\Http\Request();
+            $request->setMethod(self::REMARKETY_METHOD);
+            $request->setUri($url);
+            $request->setContent($json);
+            $request->getHeaders()->addHeaders($this->_getHeaders($eventType, $payload, $storeId));
+
+            /**
+             * Docs: https://docs.laminas.dev/laminas-http/response/
+             */
+            $response = $client->send($request);
+
+            switch ($response->getStatusCode()) {
                 case '200':
                     $this->endTiming('makeRequest_'.$eventType);
                     return true;
@@ -287,7 +293,7 @@ class EventMethods
                 case '401':
                     throw new \Exception('Request failed, probably wrong API key or inactive account.');
                 default:
-                    $err = $response->getStatus() . ' - ' . $response->getRawBody();
+                    $err = $response->getStatusCode() . ' - ' . $response->getBody();
                     $this->_queueRequest($eventType, $payload, $attempt+1, $queueId, $storeId, $err);
             }
         } catch (\Exception $e) {

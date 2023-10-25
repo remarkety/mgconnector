@@ -12,12 +12,12 @@ namespace Remarkety\Mgconnector\Model;
 use Magento\Framework\UrlInterface;
 use \Magento\Store\Model\Store;
 use \Magento\Customer\Model\Session;
-use \Laminas\Http;
+use \Laminas;
 
 class Request
 {
     const REMARKETY_URI = 'https://app.remarkety.com/public/install/notify';
-    const REMARKETY_METHOD = 'POST';
+    const REMARKETY_METHOD = Laminas\Http\Request::METHOD_POST;
     const REMARKETY_TIMEOUT = 10;
     const REMARKETY_VERSION = 0.9;
     const REMARKETY_PLATFORM = 'MAGENTO_2';
@@ -68,14 +68,14 @@ class Request
             /**
              * Docs: https://docs.laminas.dev/laminas-http/client/intro/
              */
-            $client = new Http\Client();
+            $client = new Laminas\Http\Client();
             $client->setOptions($this->_getHttpClientConfig());
 
             /**
              * Docs: https://docs.laminas.dev/laminas-http/request/
              */
-            $request = new Http\Request();
-            $request->setMethod(Http\Request::METHOD_POST);
+            $request = new Laminas\Http\Request();
+            $request->setMethod(self::REMARKETY_METHOD);
             $request->setUri(self::REMARKETY_URI);
             foreach ($payload as $key => $value) {
                 $request->getPost()->set($key, $value);
