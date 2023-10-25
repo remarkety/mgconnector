@@ -12,6 +12,7 @@ namespace Remarkety\Mgconnector\Model;
 use Magento\Framework\UrlInterface;
 use \Magento\Store\Model\Store;
 use \Magento\Customer\Model\Session;
+use \Laminas\Http;
 
 class Request
 {
@@ -34,17 +35,10 @@ class Request
         $this->serialize = $serialize;
     }
 
-    protected function _getRequestConfig()
+    protected function _getHttpClientConfig()
     {
         return [
-            'adapter' => 'Zend_Http_Client_Adapter_Curl',
-            'curloptions' => [
-//                CURLOPT_FOLLOWLOCATION => true,
-                CURLOPT_HEADER => true,
-                CURLOPT_CONNECTTIMEOUT => self::REMARKETY_TIMEOUT,
-//                CURLOPT_SSL_CIPHER_LIST => "RC4-SHA"
-//                CURLOPT_SSL_VERIFYPEER => false,
-            ],
+            'timeout' => self::REMARKETY_TIMEOUT,
         ];
     }
 
@@ -71,27 +65,38 @@ class Request
         try {
             $payload = array_merge($payload, $this->_getPayloadBase());
 
-            $client = new \Zend_Http_Client(
-                self::REMARKETY_URI,
-                $this->_getRequestConfig()
-            );
+            /**
+             * Docs: https://docs.laminas.dev/laminas-http/client/intro/
+             */
+            $client = new Http\Client();
+            $client->setOptions($this->_getHttpClientConfig());
 
-            $client->setParameterPost($payload);
+            /**
+             * Docs: https://docs.laminas.dev/laminas-http/request/
+             */
+            $request = new Http\Request();
+            $request->setMethod(Http\Request::METHOD_POST);
+            $request->setUri(self::REMARKETY_URI);
+            foreach ($payload as $key => $value) {
+                $request->getPost()->set($key, $value);
+            }
 
-            $response = $client->request(self::REMARKETY_METHOD);
+            /**
+             * Docs: https://docs.laminas.dev/laminas-http/response/
+             */
+            $response = $client->send($request);
 
             $body = (array)json_decode($response->getBody());
-            $this->session->setRemarketyLastResponseStatus($response->getStatus() === 200 ? 1 : 0);
+            $this->session->setRemarketyLastResponseStatus($response->getStatusCode() === 200 ? 1 : 0);
             $this->session->setRemarketyLastResponseMessage($this->serialize->serialize($body));
 
-
-            switch ($response->getStatus()) {
+            switch ($response->getStatusCode()) {
                 case '200':
                     return $body;
                 case '400':
                     throw new \Exception('Request failed. ' . $body['message']);
                 default:
-                    throw new \Exception('Request to remarkety servers failed ('.$response->getStatus().')');
+                    throw new \Exception('Request to remarkety servers failed ('.$response->getStatusCode().')');
             }
 
         } catch (\Exception $e) {
