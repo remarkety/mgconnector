@@ -6,7 +6,7 @@
     "magento/module-backend": ">=100.1.0",
     "magento/module-media-storage": ">=100.1.0",
     "magento/framework": ">=100.1.0",
-    "magento/zendframework1": "^1.15",
+    "laminas/laminas-http": "^2.18",
     "lib-libxml": "*"
   },
   "type": "magento2-module",
