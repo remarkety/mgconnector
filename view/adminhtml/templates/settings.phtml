@@ -179,5 +179,129 @@
         </div>
     </fieldset>
 
+		<fieldset class="admin__fieldset">
+			<legend class="admin__legend">Email Consent on Checkout Page</legend>
+			<div class="admin__field">
+				<label for="" class="admin__field-label">
+					<span><?php echo __('Collect Email consent in checkout page') ?></span>
+				</label>
+
+				<div class="admin__field-control _with-tooltip">
+					<select id="email_consent" name="email_consent" class="admin__control-select">
+							<?php foreach ($this->getEnabledDisabledOptions() as $code => $name): ?>
+								<option
+									value="<?php echo $code; ?>"
+										<?php if ($code && $this->getEmailConsentEnabled()) { echo 'selected="selected"'; } ?>
+								><?php echo $name; ?></option>
+							<?php endforeach; ?>
+					</select>
+					<div class="admin__field-tooltip">
+						<span class="admin__field-tooltip-action action-help"></span>
+						<div class="admin__field-tooltip-content">Enabling the "Collect email consent on checkout page"
+							will insert a checkbox on the checkout page, allowing customers to opt into marketing
+							communications via text messages.</div>
+					</div>
+				</div>
+			</div>
+			<div class="admin__field">
+				<label for="" class="admin__field-label">
+					<span><?php echo __('Email consent checkbox position') ?></span>
+				</label>
+
+				<div class="admin__field-control _with-tooltip">
+					<select id="email_consent_checkbox_position" name="email_consent_checkbox_position" class="admin__control-select">
+							<?php foreach ($this->getFormFieldPositions() as $code => $name): ?>
+								<option
+									value="<?php echo $name; ?>"
+										<?php if ($name == $this->getEmailConsentCheckboxPosition()) { echo 'selected="selected"'; } ?>
+								><?php echo $name; ?></option>
+							<?php endforeach; ?>
+					</select>
+					<div class="admin__field-tooltip">
+						<span class="admin__field-tooltip-action action-help"></span>
+						<div class="admin__field-tooltip-content">The placement of the consent checkbox within the checkout form,
+							a lower number indicates that the checkbox will be positioned at the top of the form.</div>
+					</div>
+				</div>
+			</div>
+			<div class="admin__field">
+				<label for="" class="admin__field-label">
+					<span><?php echo __('Email consent checkbox label') ?></span>
+				</label>
+
+				<div class="admin__field-control _with-tooltip">
+					<input type="text" id="email_consent_checkbox_lable_value" name="email_consent_checkbox_lable_value"
+								 class="admin__control-text"
+								 value="<?php echo $this->getEmailConsentCheckboxLabelValue();?>">
+					<div class="admin__field-tooltip">
+						<span class="admin__field-tooltip-action action-help"></span>
+						<div class="admin__field-tooltip-content">Consent label value</div>
+					</div>
+				</div>
+			</div>
+		</fieldset>
+
+		<fieldset class="admin__fieldset">
+			<legend class="admin__legend">SMS Consent on Checkout Page</legend>
+			<div class="admin__field">
+				<label for="" class="admin__field-label">
+					<span><?php echo __('Collect SMS consent in checkout page') ?></span>
+				</label>
+
+				<div class="admin__field-control _with-tooltip">
+					<select id="sms_consent" name="sms_consent" class="admin__control-select">
+							<?php foreach ($this->getEnabledDisabledOptions() as $code => $name): ?>
+								<option
+									value="<?php echo $code; ?>"
+										<?php if ($code && $this->getSmsConsentEnabled()) { echo 'selected="selected"'; } ?>
+								><?php echo $name; ?></option>
+							<?php endforeach; ?>
+					</select>
+					<div class="admin__field-tooltip">
+						<span class="admin__field-tooltip-action action-help"></span>
+						<div class="admin__field-tooltip-content">Enabling the "Collect sms consent on checkout page"
+							will insert a checkbox on the checkout page, allowing customers to opt into marketing
+							communications via text messages.</div>
+					</div>
+				</div>
+			</div>
+			<div class="admin__field">
+				<label for="" class="admin__field-label">
+					<span><?php echo __('SMS consent checkbox position') ?></span>
+				</label>
+
+				<div class="admin__field-control _with-tooltip">
+					<select id="sms_consent_checkbox_position" name="sms_consent_checkbox_position" class="admin__control-select">
+							<?php foreach ($this->getFormFieldPositions() as $code => $name): ?>
+								<option
+									value="<?php echo $name; ?>"
+										<?php if ($name == $this->getSMSConsentCheckboxPosition()) { echo 'selected="selected"'; } ?>
+								><?php echo $name; ?></option>
+							<?php endforeach; ?>
+					</select>
+					<div class="admin__field-tooltip">
+						<span class="admin__field-tooltip-action action-help"></span>
+						<div class="admin__field-tooltip-content">The placement of the consent checkbox within the checkout form,
+							a lower number indicates that the checkbox will be positioned at the top of the form.</div>
+					</div>
+				</div>
+			</div>
+			<div class="admin__field">
+				<label for="" class="admin__field-label">
+					<span><?php echo __('SMS consent checkbox label') ?></span>
+				</label>
+
+				<div class="admin__field-control _with-tooltip">
+					<input type="text" id="sms_consent_checkbox_lable_value" name="sms_consent_checkbox_lable_value"
+								 class="admin__control-text"
+								 value="<?php echo $this->getSMSConsentCheckboxLabelValue();?>">
+					<div class="admin__field-tooltip">
+						<span class="admin__field-tooltip-action action-help"></span>
+						<div class="admin__field-tooltip-content">Consent label value</div>
+					</div>
+				</div>
+			</div>
+		</fieldset>
+
     <input name="form_key" type="hidden" value="<?php echo $this->getFormKey() ?>" />
 </form>
