@@ -107,20 +107,22 @@ class TriggerOrderPlacedFinished extends EventMethods implements ObserverInterfa
             }
 
             if (!empty($rm_email_consent) || !empty($rm_sms_consent)) {
-                $customer = $this->customerRepository->get($order->getCustomerEmail()); // get by email and not by id since if the customer is not loged in we will not find him
-                if (!empty($rm_email_consent)) {
-                    $subscriber = $this->subscriberFactory->create()->loadByEmail($customer->getEmail());
-                    if ($subscriber) {
-                        $subscriber->setStoreId($customer->getStoreId());
-                        $subscriber->setCustomerId($customer->getId());
-                        $subscriber->setEmail($customer->getEmail());
-                        $subscriber->setStatus(\Magento\Newsletter\Model\Subscriber::STATUS_SUBSCRIBED);
-                        $subscriber->save();
+                $customer = $this->customerRepository->get($order->getCustomerEmail()); // get by email and not by id since if the customer is not longed in we will not find him
+                if ($customer) {
+                    if (!empty($rm_email_consent)) {
+                        $subscriber = $this->subscriberFactory->create()->loadByEmail($customer->getEmail());
+                        if ($subscriber) {
+                            $subscriber->setStoreId($customer->getStoreId());
+                            $subscriber->setCustomerId($customer->getId());
+                            $subscriber->setEmail($customer->getEmail());
+                            $subscriber->setStatus(\Magento\Newsletter\Model\Subscriber::STATUS_SUBSCRIBED);
+                            $subscriber->save();
+                        }
                     }
-                }
-                if (!empty($rm_sms_consent)) {
-                    $customer->setCustomAttribute('rm_sms_consent', $rm_sms_consent);
-                    $this->customerRepository->save($customer);
+                    if (!empty($rm_sms_consent)) {
+                        $customer->setCustomAttribute('rm_sms_consent', $rm_sms_consent);
+                        $this->customerRepository->save($customer);
+                    }
                 }
             }
             $this->endTiming(self::class);
