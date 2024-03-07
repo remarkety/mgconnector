@@ -232,7 +232,7 @@
 				<div class="admin__field-control _with-tooltip">
 					<input type="text" id="email_consent_checkbox_lable_value" name="email_consent_checkbox_lable_value"
 								 class="admin__control-text"
-								 value="<?php echo $this->getEmailConsentCheckboxLabelValue();?>">
+								 value="<?php echo !empty($this->getEmailConsentCheckboxLabelValue()) ? $this->getEmailConsentCheckboxLabelValue() : 'Subscribe to receiving exclusive discounts via sms ';?>">
 					<div class="admin__field-tooltip">
 						<span class="admin__field-tooltip-action action-help"></span>
 						<div class="admin__field-tooltip-content">Consent label value</div>
@@ -294,7 +294,7 @@
 				<div class="admin__field-control _with-tooltip">
 					<input type="text" id="sms_consent_checkbox_lable_value" name="sms_consent_checkbox_lable_value"
 								 class="admin__control-text"
-								 value="<?php echo $this->getSMSConsentCheckboxLabelValue();?>">
+								 value="<?php echo !empty($this->getSMSConsentCheckboxLabelValue()) ? $this->getSMSConsentCheckboxLabelValue() :  'Subscribe to receiving exclusive discounts via sms ';?>">
 					<div class="admin__field-tooltip">
 						<span class="admin__field-tooltip-action action-help"></span>
 						<div class="admin__field-tooltip-content">Consent label value</div>

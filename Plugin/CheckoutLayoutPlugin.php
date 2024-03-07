@@ -30,7 +30,7 @@ class CheckoutLayoutPlugin
         if($this->remarketyConfigHelper->getValue(ConfigHelper::EMAIL_CONSENT_ENABLED) == 1) {
             $fields[] = [
                 'id' => 'rm_email_consent',
-                'label' => $this->remarketyConfigHelper->getValue(ConfigHelper::EMAIL_CONSENT_CHECKBOX_LABEL_VALUE) ?? 'Email marketing consent',
+                'label' => $this->remarketyConfigHelper->getValue(ConfigHelper::EMAIL_CONSENT_CHECKBOX_LABEL_VALUE) ?? 'Subscribe to receiving exclusive discounts via email',
                 'sortOrder' => $this->remarketyConfigHelper->getValue(ConfigHelper::EMAIL_CONSENT_CHECKBOX_POSITION) ?? 900,
             ];
         }
@@ -38,7 +38,7 @@ class CheckoutLayoutPlugin
         if($this->remarketyConfigHelper->getValue(ConfigHelper::SMS_CONSENT_ENABLED) == 1) {
             $fields[] = [
                 'id' => 'rm_sms_consent',
-                'label' => $this->remarketyConfigHelper->getValue(ConfigHelper::SMS_CONSENT_CHECKBOX_LABEL_VALUE) ?? 'SMS marketing consent',
+                'label' => $this->remarketyConfigHelper->getValue(ConfigHelper::SMS_CONSENT_CHECKBOX_LABEL_VALUE) ?? 'Subscribe to receiving exclusive discounts via sms',
                 'sortOrder' => $this->remarketyConfigHelper->getValue(ConfigHelper::SMS_CONSENT_CHECKBOX_POSITION) ?? 900,
             ];
         }
@@ -46,21 +46,14 @@ class CheckoutLayoutPlugin
         foreach ($fields as $key => $field) {
             $newField = [
                 'component' => 'Magento_Ui/js/form/element/abstract',
-//                'component' => 'Remarkety_Mgconnector/js/form/element/checkbox',
                 'config' => [
                     'id' => $field['id'],
-//                    'customScope' => 'shippingAddress.custom_attributes',
                     'customScope' => 'shippingAddress',
-//                    'customEntry' => null,
                     'template' => 'ui/form/field',
                     'elementTmpl' => 'ui/form/element/checkbox',
                     'description' => $field['label'],
                 ],
-//                'dataScope' => 'shippingAddress.custom_attributes.' . $field['id'],
-//                'dataScope' => 'shippingAddress.' . $field['id'],
                 'dataScope' => 'shippingAddress.extension_attributes.' . $field['id'],
-//                'dataScope' => 'customCheckoutForm.' . $field['id'],
-//                'label' => $field['label'],
                 'description' => $field['label'],
                 'provider' => 'checkoutProvider',
                 'validation' => [
