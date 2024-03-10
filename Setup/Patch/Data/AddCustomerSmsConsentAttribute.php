@@ -87,9 +87,6 @@ class AddCustomerSmsConsentAttribute implements DataPatchInterface, PatchReverta
         $attribute = $customerSetup->getEavConfig()->getAttribute(Customer::ENTITY, $attributeCode);
         $attribute->addData([
             'used_in_forms' => [
-                'adminhtml_customer',
-                'customer_account_create',
-                'customer_account_edit',
                 'adminhtml_checkout'
             ]
         ]);

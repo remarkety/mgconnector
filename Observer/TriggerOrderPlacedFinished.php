@@ -78,8 +78,6 @@ class TriggerOrderPlacedFinished extends EventMethods implements ObserverInterfa
     public function execute(\Magento\Framework\Event\Observer $observer)
     {
         try {
-            $objectManager = \Magento\Framework\App\ObjectManager::getInstance();
-            $logger = $objectManager->create(\Psr\Log\LoggerInterface::class);
             $this->startTiming(self::class);
             /**
              * @var $order Order
@@ -107,19 +105,23 @@ class TriggerOrderPlacedFinished extends EventMethods implements ObserverInterfa
             }
 
             if (!empty($rm_email_consent) || !empty($rm_sms_consent)) {
-                $customer = $this->customerRepository->get($order->getCustomerEmail()); // get by email and not by id since if the customer is not longed in we will not find him
-                if ($customer) {
-                    if (!empty($rm_email_consent)) {
-                        $subscriber = $this->subscriberFactory->create()->loadByEmail($customer->getEmail());
-                        if ($subscriber) {
-                            $subscriber->setStoreId($customer->getStoreId());
-                            $subscriber->setCustomerId($customer->getId());
-                            $subscriber->setEmail($customer->getEmail());
-                            $subscriber->setStatus(\Magento\Newsletter\Model\Subscriber::STATUS_SUBSCRIBED);
-                            $subscriber->save();
-                        }
+                $email = $order->getCustomerEmail();
+                $customer = null;
+                $subscriber = $this->subscriberFactory->create()->loadByEmail($email);
+                try {
+                    $customer = $this->customerRepository->get($email); // get by email and not by id since if the customer is not logged in we will not find him
+                } catch (\Exception $e) {}
+                if (!empty($rm_email_consent) && $subscriber) {
+                    if ($customer) {
+                        $subscriber->setCustomerId($customer->getId());
                     }
-                    if (!empty($rm_sms_consent)) {
+                    $subscriber->setStoreId($order->getStoreId());
+                    $subscriber->setEmail($email);
+                    $subscriber->setStatus(\Magento\Newsletter\Model\Subscriber::STATUS_SUBSCRIBED);
+                    $subscriber->save();
+                }
+                if (!empty($rm_sms_consent)) {
+                    if ($customer) {
                         $customer->setCustomAttribute('rm_sms_consent', $rm_sms_consent);
                         $this->customerRepository->save($customer);
                     }
