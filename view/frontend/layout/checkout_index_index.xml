@@ -1,8 +1,9 @@
 <page xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="../../../../../../../lib/internal/Magento/Framework/View/Layout/etc/page_configuration.xsd">
     <body>
         <referenceContainer name="before.body.end">
-            <block class="Remarkety\Mgconnector\Block\Frontend\Tracking\Quote" name="remarkety.tracking.checkout" template="quote.phtml">
-            </block>
+            <block class="Remarkety\Mgconnector\Block\Frontend\Tracking\Quote" name="remarkety.tracking.checkout" template="quote.phtml"></block>
         </referenceContainer>
+        <referenceBlock name="checkout.root">
+        </referenceBlock>
     </body>
 </page>

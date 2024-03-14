@@ -39,6 +39,12 @@ class Form extends Template
         $this->is_fpt_enabled = $configHelper->getWithFixedProductTax();
         $this->is_cart_auto_coupon_enabled = $configHelper->isCartAutoCouponEnabled();
         $this->is_aw_points_enabled = $configHelper->isAheadworksRewardPointsEnabled();
+        $this->email_consent_enabled = $configHelper->getValue(ConfigHelper::EMAIL_CONSENT_ENABLED);
+        $this->email_consent_checkbox_position = $configHelper->getValue(ConfigHelper::EMAIL_CONSENT_CHECKBOX_POSITION);
+        $this->email_consent_checkbox_lable_value = $configHelper->getValue(ConfigHelper::EMAIL_CONSENT_CHECKBOX_LABEL_VALUE);
+        $this->sms_consent_enabled = $configHelper->getValue(ConfigHelper::SMS_CONSENT_ENABLED);
+        $this->sms_consent_checkbox_position = $configHelper->getValue(ConfigHelper::SMS_CONSENT_CHECKBOX_POSITION);
+        $this->sms_consent_checkbox_lable_value = $configHelper->getValue(ConfigHelper::SMS_CONSENT_CHECKBOX_LABEL_VALUE);
         $aw_service = $rewardPointsFactory->create();
         if ($aw_service) {
             $this->is_aw_points_plugin_exists = true;
@@ -131,5 +137,61 @@ class Form extends Template
     public function getCartAutoCouponEnabled()
     {
         return $this->is_cart_auto_coupon_enabled;
+    }
+
+    /**
+     * @return int|mixed
+     */
+    public function getEmailConsentEnabled()
+    {
+        return $this->email_consent_enabled;
+    }
+
+    /**
+     * @return int|mixed
+     */
+    public function getEmailConsentCheckboxPosition()
+    {
+        return $this->email_consent_checkbox_position;
+    }
+
+    /**
+     * @return int|mixed
+     */
+    public function getEmailConsentCheckboxLabelValue()
+    {
+        return $this->email_consent_checkbox_lable_value;
+    }
+
+    /**
+     * @return int|mixed
+     */
+    public function getSMSConsentEnabled()
+    {
+        return $this->sms_consent_enabled;
+    }
+
+    /**
+     * @return int|mixed
+     */
+    public function getSMSConsentCheckboxPosition()
+    {
+        return $this->sms_consent_checkbox_position;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getSMSConsentCheckboxLabelValue()
+    {
+        return $this->sms_consent_checkbox_lable_value;
+    }
+
+    /**
+     * @return array
+     */
+    public function getFormFieldPositions()
+    {
+        return range(0 , 1000, 10);
     }
 }

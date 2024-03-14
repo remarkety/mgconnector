@@ -610,6 +610,8 @@ class Data implements DataInterface
         $pageSize = null;
 
         $customerData = $this->_customerCollectionFactory->create();
+        $objectManager = \Magento\Framework\App\ObjectManager::getInstance();
+        $customerRepository = $objectManager->get('Magento\Customer\Api\CustomerRepositoryInterface');
 
         if ($customer_id !== null) {
             $customerData->addFieldToFilter('entity_id', $customer_id);
@@ -642,6 +644,7 @@ class Data implements DataInterface
             $customerData->setPage($pageNumber, $pageSize);
         }
         $pos_id_attribute_code = $this->configHelper->getPOSAttributeCode();
+        $should_get_shopper_consent_data = $this->configHelper->shouldGetShopperConsentAttribute();
 
         if (!empty($pos_id_attribute_code)) {
             //make sure we get the POS id attribute
@@ -701,6 +704,18 @@ class Data implements DataInterface
             if ($aw_rewards_integrate) {
                 $customers['rewards_points'] = $this->customerRewardPointsService->getCustomerRewardPointsBalance($customer->getId());
             }
+
+            if ($should_get_shopper_consent_data) {
+                /**
+                 * @var CustomerInterface $customerInterface
+                 */
+                $customerInterface = $customerRepository->getById($customer->getId());
+                if ($customerInterface) {
+                    $rm_sms_consent = $customerInterface->getCustomAttribute('rm_sms_consent');
+                    $customers['rm_sms_consent'] = $rm_sms_consent ? $rm_sms_consent->getValue() : null;
+                }
+            }
+
             $customerArray[] = $this->dataOverride->customer($customer, $customers);
         }
         $object = new DataObject();
@@ -780,6 +795,20 @@ class Data implements DataInterface
 
         if ($customerData->getId()) {
             $customerArray = $this->mapCustomer($customerData, true);
+            $should_get_shopper_consent_data = $this->configHelper->shouldGetShopperConsentAttribute();
+            if ($should_get_shopper_consent_data) {
+                $objectManager = \Magento\Framework\App\ObjectManager::getInstance();
+
+                $customerRepository = $objectManager->get('Magento\Customer\Api\CustomerRepositoryInterface');
+                /**
+                 * @var CustomerInterface $customerInterface
+                 */
+                $customerInterface = $customerRepository->getById($id);
+                if ($customerInterface) {
+                    $rm_sms_consent = $customerInterface->getCustomAttribute('rm_sms_consent');
+                    $customerArray['rm_sms_consent'] = $rm_sms_consent ? $rm_sms_consent->getValue() : null;
+                }
+            }
         }
         return $customerArray;
     }
@@ -1354,7 +1383,7 @@ class Data implements DataInterface
      */
     public function getVersion()
     {
-        return '2.8.0';
+        return '2.8.1';
     }
 
     /**

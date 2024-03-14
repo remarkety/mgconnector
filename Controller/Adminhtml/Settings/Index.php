@@ -100,6 +100,30 @@ class Index extends \Magento\Backend\App\Action
             $this->configHelper->setCustomerAddressType($data['customer_address']);
         }
 
+        if (isset($data['email_consent'])) {
+            $this->configHelper->setValue(ConfigHelper::EMAIL_CONSENT_ENABLED, $data['email_consent'] == 1);
+        }
+
+        if (isset($data['email_consent_checkbox_position'])) {
+            $this->configHelper->setValue(ConfigHelper::EMAIL_CONSENT_CHECKBOX_POSITION, $data['email_consent_checkbox_position']);
+        }
+
+        if (isset($data['email_consent_checkbox_lable_value'])) {
+            $this->configHelper->setValue(ConfigHelper::EMAIL_CONSENT_CHECKBOX_LABEL_VALUE, $data['email_consent_checkbox_lable_value']);
+        }
+
+        if (isset($data['sms_consent'])) {
+            $this->configHelper->setValue(ConfigHelper::SMS_CONSENT_ENABLED, $data['sms_consent'] == 1);
+        }
+
+        if (isset($data['sms_consent_checkbox_position'])) {
+            $this->configHelper->setValue(ConfigHelper::SMS_CONSENT_CHECKBOX_POSITION, $data['sms_consent_checkbox_position']);
+        }
+
+        if (isset($data['sms_consent_checkbox_lable_value'])) {
+            $this->configHelper->setValue(ConfigHelper::SMS_CONSENT_CHECKBOX_LABEL_VALUE, $data['sms_consent_checkbox_lable_value']);
+        }
+
         return true;
     }
 }

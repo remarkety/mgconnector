@@ -32,6 +32,17 @@ class ConfigHelper
     const ENABLE_AHEADWORKS_REWARD_POINTS = 'remarkety/mgconnector/aheadworks_reward_points';
     const CUSTOMER_ADDRESS_TO_USE = 'remarkety/mgconnector/customer_address_to_use';
     const CART_AUTO_COUPON_ENABLED = 'remarkety/mgconnector/cart_auto_coupon_enabled';
+    const EMAIL_CONSENT_ENABLED = 'remarkety/mgconnector/email_consent_enabled';
+    const EMAIL_CONSENT_CHECKBOX_POSITION = 'remarkety/mgconnector/email_consent_checkbox_position';
+    const EMAIL_CONSENT_CHECKBOX_LABEL_VALUE = 'remarkety/mgconnector/email_consent_checkbox_lable_value';
+    const SMS_CONSENT_ENABLED = 'remarkety/mgconnector/sms_consent_enabled';
+    const SMS_CONSENT_CHECKBOX_POSITION = 'remarkety/mgconnector/sms_consent_checkbox_position';
+    const SMS_CONSENT_CHECKBOX_LABEL_VALUE = 'remarkety/mgconnector/sms_consent_checkbox_lable_value';
+    /**
+     * should we get marketing consent saved in shopper attribute, if set to 0 then we don't get the data
+     * added this setting just in case we see performance degradation in production stores
+     */
+    const GET_SHOPPER_MARKETING_CONSENT = 'remarkety/mgconnector/get_shopper_marketing_consent';
 
     const ASYNC_MODE_OFF = 0;
     const ASYNC_MODE_ON = 1;
@@ -337,5 +348,46 @@ class ConfigHelper
             ScopeInterface::SCOPE_WEBSITES,
             $customer->getWebsiteId()
         );
+    }
+
+    public function getEmailConsentEnabled()
+    {
+        return $this->_scopeConfig->getValue(self::EMAIL_CONSENT_ENABLED);
+    }
+
+    public function getEmailConsentCheckBoxPosition()
+    {
+        return $this->_scopeConfig->getValue(self::EMAIL_CONSENT_CHECKBOX_POSITION);
+    }
+
+
+    public function setValue($path, $value)
+    {
+        $this->configResource->saveConfig(
+            $path,
+            $value,
+            ScopeConfigInterface::SCOPE_TYPE_DEFAULT,
+            0
+        );
+        $this->cacheTypeList->cleanType('config');
+    }
+
+    public function getValue($path)
+    {
+        return $this->_scopeConfig->getValue($path);
+    }
+
+    /**
+     * check if the setting to get shopper marketing consent attribute is set to disabled
+     * @return bool
+     */
+    public function shouldGetShopperConsentAttribute()
+    {
+        $getShopperMarketingConsent = $this->getValue(self::GET_SHOPPER_MARKETING_CONSENT);
+
+        if ($getShopperMarketingConsent === 0 || $getShopperMarketingConsent === '0') {
+            return false;
+        }
+        return true;
     }
 }
