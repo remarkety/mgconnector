@@ -15,4 +15,16 @@
             g.src = 'https://d3ryumxhbd2uw7.cloudfront.net/webtracking/track.js';
             s.parentNode.insertBefore(g, s);
         }(document, 'script'));</script>
+	<?php if ($block->isPopupEnabled()): ?>
+		<script language="javascript">
+				var appId='<?php echo $block->getRemarketyPublicId(); ?>';
+				function loadScript(src, callback) {
+						var s,r,t;r = false;s = document.createElement('script');
+						s.type = 'text/javascript';s.src = src;
+						s.onload = s.onreadystatechange = function(){
+								if (!r && (!this.readyState || this.readyState == 'complete')){r = true;callback();}
+						};t = document.getElementsByTagName('script')[0];t.parentNode.insertBefore(s, t); }
+				loadScript("https://d3ryumxhbd2uw7.cloudfront.net/popup/bee_popup.js", function(){});
+		</script>
+	<?php endif; ?>
 <?php endif; ?>

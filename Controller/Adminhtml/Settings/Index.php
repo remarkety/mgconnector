@@ -124,6 +124,10 @@ class Index extends \Magento\Backend\App\Action
             $this->configHelper->setValue(ConfigHelper::SMS_CONSENT_CHECKBOX_LABEL_VALUE, $data['sms_consent_checkbox_lable_value']);
         }
 
+        if (isset($data['popup_enabled'])) {
+            $this->configHelper->setValue(ConfigHelper::POPUP_ENABLED, $data['popup_enabled']);
+        }
+
         return true;
     }
 }

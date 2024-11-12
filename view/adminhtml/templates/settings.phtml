@@ -179,6 +179,26 @@
         </div>
     </fieldset>
 
+	<fieldset class="admin__fieldset">
+		<legend class="admin__legend">Popup</legend>
+		<div class="admin__field">
+			<label for="popup_enabled" class="admin__field-label">
+				<span><?php echo __('Popup Enabled') ?></span>
+			</label>
+
+			<div class="admin__field-control _with-tooltip">
+				<select id="popup_enabled" name="popup_enabled" class="admin__control-select">
+            <?php foreach ($this->getEnabledDisabledOptions() as $code => $name): ?>
+							<option
+								value="<?php echo $code; ?>"
+                  <?php if ($code && $this->getPopupEnabled()) { echo 'selected="selected"'; } ?>
+							><?php echo $name; ?></option>
+            <?php endforeach; ?>
+				</select>
+			</div>
+		</div>
+	</fieldset>
+
 		<fieldset class="admin__fieldset">
 			<legend class="admin__legend">Email Consent on Checkout Page</legend>
 			<div class="admin__field">
