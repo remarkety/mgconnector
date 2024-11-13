@@ -38,6 +38,8 @@ class ConfigHelper
     const SMS_CONSENT_ENABLED = 'remarkety/mgconnector/sms_consent_enabled';
     const SMS_CONSENT_CHECKBOX_POSITION = 'remarkety/mgconnector/sms_consent_checkbox_position';
     const SMS_CONSENT_CHECKBOX_LABEL_VALUE = 'remarkety/mgconnector/sms_consent_checkbox_lable_value';
+    const POPUP_ENABLED = 'remarkety/mgconnector/popup_enabled';
+
     /**
      * should we get marketing consent saved in shopper attribute, if set to 0 then we don't get the data
      * added this setting just in case we see performance degradation in production stores
@@ -153,6 +155,11 @@ class ConfigHelper
     {
         $category_view_code = $this->_scopeConfig->getValue(self::EVENT_CATEGORY_VIEW_ENABLED);
         return $category_view_code == 1;
+    }
+
+    public function isPopupEnabled()
+    {
+        return $this->_scopeConfig->getValue(self::POPUP_ENABLED) == 1;
     }
 
     /**
