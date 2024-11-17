@@ -8,6 +8,7 @@ use Remarkety\Mgconnector\Helper\Data;
 use \Remarkety\Mgconnector\Model\Webtracking;
 use \Magento\Customer\Model\Session;
 use Magento\Catalog\Model\Product as ProductModel;
+use \Remarkety\Mgconnector\Helper\ConfigHelper;
 
 class Product extends Base
 {
@@ -38,9 +39,10 @@ class Product extends Base
         Webtracking $webtracking,
         Session $session,
         Registry $registry,
-        Data $dataHelper
+        Data $dataHelper,
+        ConfigHelper $config_helper
     ) {
-        parent::__construct($context, $data, $sManager, $webtracking, $session);
+        parent::__construct($context, $data, $sManager, $webtracking, $session, $config_helper);
 
         $this->activeProduct = $registry->registry('current_product');
         $this->dataHelper = $dataHelper;
