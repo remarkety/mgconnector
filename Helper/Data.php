@@ -99,10 +99,15 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
 
     public function getMediaGalleryImages(ProductInterface $product)
     {
-        /**
-         * @var $images ProductAttributeMediaGalleryEntryInterface[]
-         */
-        $images = $this->galleryManagement->getList($product->getSku());
+        try {
+            /**
+             * @var $images ProductAttributeMediaGalleryEntryInterface[]
+             */
+            $images = $this->galleryManagement->getList($product->getSku());
+        } catch (\Exception $e) {
+            return [];
+        }
+
         $ret = [];
         $imagesData = [];
         if ($images) {
@@ -131,7 +136,11 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
 
     public function getImage($product)
     {
-        $images = $this->galleryManagement->getList($product->getSku());
+        try {
+            $images = $this->galleryManagement->getList($product->getSku());
+        } catch (\Exception $e) {
+            return null;
+        }
         $imageDet = [];
         $imagesData = [];
         if ($images) {
