@@ -39,6 +39,7 @@ class ConfigHelper
     const SMS_CONSENT_CHECKBOX_POSITION = 'remarkety/mgconnector/sms_consent_checkbox_position';
     const SMS_CONSENT_CHECKBOX_LABEL_VALUE = 'remarkety/mgconnector/sms_consent_checkbox_lable_value';
     const POPUP_ENABLED = 'remarkety/mgconnector/popup_enabled';
+    const NOT_VISIBLE_INDIVIDUALLY_ENABLED = 'remarkety/mgconnector/not_visible_individually_enabled';
 
     /**
      * should we get marketing consent saved in shopper attribute, if set to 0 then we don't get the data

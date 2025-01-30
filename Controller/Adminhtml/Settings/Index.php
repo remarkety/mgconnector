@@ -128,6 +128,10 @@ class Index extends \Magento\Backend\App\Action
             $this->configHelper->setValue(ConfigHelper::POPUP_ENABLED, $data['popup_enabled']);
         }
 
+        if (isset($data['not_visible_individually_enabled'])) {
+            $this->configHelper->setValue(ConfigHelper::NOT_VISIBLE_INDIVIDUALLY_ENABLED, $data['not_visible_individually_enabled']);
+        }
+
         return true;
     }
 }
