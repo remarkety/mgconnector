@@ -46,6 +46,7 @@ class Form extends Template
         $this->sms_consent_checkbox_position = $configHelper->getValue(ConfigHelper::SMS_CONSENT_CHECKBOX_POSITION);
         $this->sms_consent_checkbox_lable_value = $configHelper->getValue(ConfigHelper::SMS_CONSENT_CHECKBOX_LABEL_VALUE);
         $this->popup_enabled = $configHelper->getValue(ConfigHelper::POPUP_ENABLED);
+        $this->not_visible_individually_enabled = $configHelper->getValue(ConfigHelper::NOT_VISIBLE_INDIVIDUALLY_ENABLED);
         $aw_service = $rewardPointsFactory->create();
         if ($aw_service) {
             $this->is_aw_points_plugin_exists = true;
@@ -202,5 +203,13 @@ class Form extends Template
     public function getPopupEnabled()
     {
         return $this->popup_enabled;
+    }
+
+    /**
+     * @return int|mixed
+     */
+    public function getNotVisibleIndividuallyEnabled()
+    {
+        return $this->not_visible_individually_enabled;
     }
 }

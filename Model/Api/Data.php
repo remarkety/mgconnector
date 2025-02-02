@@ -496,10 +496,15 @@ class Data implements DataInterface
             $visibility = array_key_exists('visibility', $mappedArray) ? $mappedArray['visibility'] : 1;
             $status = array_key_exists('status', $mappedArray) ? $mappedArray['status'] : 1;
 
-            $active = true;
-            if ($status == Status::STATUS_DISABLED || $visibility == Visibility::VISIBILITY_NOT_VISIBLE) {
+            $not_visible_individually_enabled = $this->scopeConfig->getValue(ConfigHelper::NOT_VISIBLE_INDIVIDUALLY_ENABLED) == 1;
+            if ($status == Status::STATUS_DISABLED) {
                 $active = false;
+            } elseif ($not_visible_individually_enabled && $visibility == Visibility::VISIBILITY_NOT_VISIBLE) {
+                $active = false;
+            } else {
+                $active = true;
             }
+
             $prod['product_exists'] = $active;
 
             $prod['image'] = $this->dataHelper->getImage($row);
