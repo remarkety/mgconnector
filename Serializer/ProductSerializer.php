@@ -82,14 +82,7 @@ class ProductSerializer
         $created_at = new \DateTime($product->getCreatedAt());
         $updated_at = new \DateTime($product->getUpdatedAt());
 
-        $not_visible_individually_enabled = $this->scopeConfig->getValue(ConfigHelper::NOT_VISIBLE_INDIVIDUALLY_ENABLED) == 1;
-        if ($product->getStatus() == Status::STATUS_DISABLED) {
-            $enabled = false;
-        } elseif ($not_visible_individually_enabled && $product->getVisibility() == Visibility::VISIBILITY_NOT_VISIBLE) {
-            $enabled = false;
-        } else {
-            $enabled = true;
-        }
+        $enabled = $product->getStatus() == Status::STATUS_ENABLED && $product->getVisibility() != Visibility::VISIBILITY_NOT_VISIBLE;
 
         $variants = [];
 

@@ -198,29 +198,7 @@
 			</div>
 		</div>
 	</fieldset>
-	<fieldset class="admin__fieldset">
-		<legend class="admin__legend">Products</legend>
-		<div class="admin__field">
-			<label for="popup_enabled" class="admin__field-label">
-				<span><?php echo __('Consider "Not Visible Individually" as Disabled') ?></span>
-			</label>
 
-			<div class="admin__field-control _with-tooltip">
-				<select id="not_visible_individually_enabled" name="not_visible_individually_enabled" class="admin__control-select">
-            <?php foreach ($this->getEnabledDisabledOptions() as $code => $name): ?>
-							<option
-								value="<?php echo $code; ?>"
-                  <?php if ($code && $this->getNotVisibleIndividuallyEnabled()) { echo 'selected="selected"'; } ?>
-							><?php echo $name; ?></option>
-            <?php endforeach; ?>
-				</select>
-				<div class="admin__field-tooltip">
-					<span class="admin__field-tooltip-action action-help"></span>
-					<div class="admin__field-tooltip-content">When a product is Enabled but set to Not Visible Individually in Magento, it will be marked as Disabled in Remarkety if this checkbox is checked.</div>
-				</div>
-			</div>
-		</div>
-	</fieldset>
 		<fieldset class="admin__fieldset">
 			<legend class="admin__legend">Email Consent on Checkout Page</legend>
 			<div class="admin__field">
