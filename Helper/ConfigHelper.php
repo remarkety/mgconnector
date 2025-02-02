@@ -39,7 +39,8 @@ class ConfigHelper
     const SMS_CONSENT_CHECKBOX_POSITION = 'remarkety/mgconnector/sms_consent_checkbox_position';
     const SMS_CONSENT_CHECKBOX_LABEL_VALUE = 'remarkety/mgconnector/sms_consent_checkbox_lable_value';
     const POPUP_ENABLED = 'remarkety/mgconnector/popup_enabled';
-    const NOT_VISIBLE_INDIVIDUALLY_ENABLED = 'remarkety/mgconnector/not_visible_individually_enabled';
+    // If a product is enabled and non visible in Magento, the plugin will send enabled to Remarkety if this setting is enabled
+    const IS_NOT_VISIBLE_PRODUCT_ENABLED = 'remarkety/mgconnector/is_not_visible_product_enabled';
 
     /**
      * should we get marketing consent saved in shopper attribute, if set to 0 then we don't get the data
