@@ -1,4 +1,5 @@
 <?php
+
 namespace Remarkety\Mgconnector\Block\Adminhtml\Settings;
 
 use Magento\Framework\View\Element\Template;
@@ -19,6 +20,14 @@ class Form extends Template
     private $event_search_view;
     private $event_category_view;
     private $is_cart_auto_coupon_enabled;
+    private $email_consent_enabled;
+    private $email_consent_checkbox_position;
+    private $email_consent_checkbox_lable_value;
+    private $sms_consent_enabled;
+    private $sms_consent_checkbox_position;
+    private $sms_consent_checkbox_lable_value;
+    private $popup_enabled;
+    private $is_not_visible_product_enabled;
 
     public function __construct(
         Template\Context $context,
@@ -46,6 +55,7 @@ class Form extends Template
         $this->sms_consent_checkbox_position = $configHelper->getValue(ConfigHelper::SMS_CONSENT_CHECKBOX_POSITION);
         $this->sms_consent_checkbox_lable_value = $configHelper->getValue(ConfigHelper::SMS_CONSENT_CHECKBOX_LABEL_VALUE);
         $this->popup_enabled = $configHelper->getValue(ConfigHelper::POPUP_ENABLED);
+        $this->is_not_visible_product_enabled = $configHelper->getValue(ConfigHelper::IS_NOT_VISIBLE_PRODUCT_ENABLED);
         $aw_service = $rewardPointsFactory->create();
         if ($aw_service) {
             $this->is_aw_points_plugin_exists = true;
@@ -193,7 +203,7 @@ class Form extends Template
      */
     public function getFormFieldPositions()
     {
-        return range(0 , 1000, 10);
+        return range(0, 1000, 10);
     }
 
     /**
@@ -202,5 +212,13 @@ class Form extends Template
     public function getPopupEnabled()
     {
         return $this->popup_enabled;
+    }
+
+    /**
+     * @return int|mixed
+     */
+    public function isNotVisibleProductEnabled()
+    {
+        return $this->is_not_visible_product_enabled;
     }
 }
