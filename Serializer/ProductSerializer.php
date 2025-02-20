@@ -82,7 +82,7 @@ class ProductSerializer
         $created_at = new \DateTime($product->getCreatedAt());
         $updated_at = new \DateTime($product->getUpdatedAt());
 
-        $is_not_visible_product_enabled = $this->scopeConfig->getValue(ConfigHelper::IS_NOT_VISIBLE_PRODUCT_ENABLED) == 1;
+        $is_not_visible_product_enabled = $this->configHelper->getValue(ConfigHelper::IS_NOT_VISIBLE_PRODUCT_ENABLED) == 1;
         if ($product->getStatus() == Status::STATUS_DISABLED) {
             $enabled = false;
         } elseif ($product->getVisibility() == Visibility::VISIBILITY_NOT_VISIBLE) {
