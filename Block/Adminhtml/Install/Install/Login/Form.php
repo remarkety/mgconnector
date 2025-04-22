@@ -88,7 +88,7 @@ class Form extends Generic
         ]);
 
         $fieldset->addField('http_password', 'password', [
-            'label' =>__('Website Basic Auth Username:'),
+            'label' =>__('Website Basic Auth Password:'),
             'name' => 'data[http_password]',
             'required' => false,
             'class' => 'admin__control-text'
