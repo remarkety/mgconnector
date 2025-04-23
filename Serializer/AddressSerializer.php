@@ -53,7 +53,8 @@ class AddressSerializer
             'country' => $countryName,
             'zip' => $address->getPostcode(),
             'phone' => $address->getTelephone(),
-            'region' => $regionStr
+            'region' => $regionStr,
+            'company' => $address->getCompany(),
         ];
         return $data;
     }
