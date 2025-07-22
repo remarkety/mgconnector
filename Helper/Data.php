@@ -101,7 +101,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
     {
         try {
             /**
-             * @var $images ProductAttributeMediaGalleryEntryInterface[]
+             * @var ProductAttributeMediaGalleryEntryInterface[] $images 
              */
             $images = $this->galleryManagement->getList($product->getSku());
         } catch (\Exception $e) {
@@ -117,14 +117,18 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
                     if (empty($types)) {
                         $imagesData['id'] = $imageAttr->getId();
                         $imagesData['product_id'] = $imageAttr->getEntityId();
-                        $imagesData['src'] = $this->getMediaUrl() . 'catalog/product' . $imageAttr->getFile();
+                        $file = $imageAttr->getFile();
+                        $file = '/' . ltrim($file, '/'); // ensure leading slash
+                        $imagesData['src'] = $this->getMediaUrl() . 'catalog/product' . $file;
                         $ret[] = $imagesData;
                     } else {
                         foreach ($types as $type) {
                             $imagesData['id'] = $imageAttr->getId();
                             $imagesData['type'] = $type;
                             $imagesData['product_id'] = $imageAttr->getEntityId();
-                            $imagesData['src'] = $this->getMediaUrl() . 'catalog/product' . $imageAttr->getFile();
+                            $file = $imageAttr->getFile();
+                            $file = '/' . ltrim($file, '/'); // ensure leading slash
+                            $imagesData['src'] = $this->getMediaUrl() . 'catalog/product' . $file;
                             $ret[] = $imagesData;
                         }
                     }
@@ -150,10 +154,11 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
                         if ($type == 'image') {
                             $imagesData['id'] = $imageAttr['id'];
                             $imagesData['product_id'] = $imageAttr['entity_id'];
-                            $imagesData['src'] = $this->getMediaUrl() . 'catalog/product' . $imageAttr['file'];
+                            $file = $imageAttr['file'];
+                            $file = '/' . ltrim($file, '/'); // ensure leading slash
+                            $imagesData['src'] = $this->getMediaUrl() . 'catalog/product' . $file;
                             $imageDet = $imagesData;
                         }
-
                     }
                 }
             }
