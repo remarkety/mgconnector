@@ -9,7 +9,7 @@ class OrderCollection implements \Remarkety\Mgconnector\Api\Data\OrderCollection
         return $this->_items;
     }
 
-    public function setOrders(array $items = null)
+    public function setOrders(?array $items = null)
     {
         $this->_items = $items;
     }

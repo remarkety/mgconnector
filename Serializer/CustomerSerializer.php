@@ -15,6 +15,7 @@ use Magento\Customer\Api\GroupRepositoryInterface as CustomerGroupRepository;
 use Remarkety\Mgconnector\Helper\ConfigHelper;
 use Remarkety\Mgconnector\Helper\Data;
 use Remarkety\Mgconnector\Helper\DataOverride;
+use Psr\Log\LoggerInterface;
 
 class CustomerSerializer
 {
@@ -34,10 +35,10 @@ class CustomerSerializer
         AddressSerializer $addressSerializer,
         CustomerGroupRepository $customerGroupRepository,
         RequestInterface $request,
-        \Psr\Log\LoggerInterface $logger = null,
         ConfigHelper $configHelper,
         DataOverride $dataOverride,
-        Data $dataHelper
+        Data $dataHelper,
+        ?LoggerInterface $logger = null,
     ) {
         $this->subscriber = $subscriber;
         $this->addressSerializer = $addressSerializer;
