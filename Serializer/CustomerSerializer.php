@@ -35,10 +35,10 @@ class CustomerSerializer
         AddressSerializer $addressSerializer,
         CustomerGroupRepository $customerGroupRepository,
         RequestInterface $request,
-        ?LoggerInterface $logger = null,
         ConfigHelper $configHelper,
         DataOverride $dataOverride,
-        Data $dataHelper
+        Data $dataHelper,
+        ?LoggerInterface $logger = null,
     ) {
         $this->subscriber = $subscriber;
         $this->addressSerializer = $addressSerializer;
