@@ -20,5 +20,5 @@ interface CustomerCollectionInterface
      * @param \Remarkety\Mgconnector\Api\Data\CustomerInterface[] $items
      * @return $this
      */
-    public function setCustomers(array $items = null);
+    public function setCustomers(?array $items = null);
 }

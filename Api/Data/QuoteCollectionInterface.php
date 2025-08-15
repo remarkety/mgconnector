@@ -20,5 +20,5 @@ interface QuoteCollectionInterface
      * @param \Remarkety\Mgconnector\Api\Data\QuoteInterface[] $items
      * @return $this
      */
-    public function setCarts(array $items = null);
+    public function setCarts(?array $items = null);
 }

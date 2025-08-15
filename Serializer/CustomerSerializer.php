@@ -15,7 +15,7 @@ use Magento\Customer\Api\GroupRepositoryInterface as CustomerGroupRepository;
 use Remarkety\Mgconnector\Helper\ConfigHelper;
 use Remarkety\Mgconnector\Helper\Data;
 use Remarkety\Mgconnector\Helper\DataOverride;
-
+use Psr\Log\LoggerInterface
 class CustomerSerializer
 {
     use CheckSubscriberTrait;
@@ -34,7 +34,7 @@ class CustomerSerializer
         AddressSerializer $addressSerializer,
         CustomerGroupRepository $customerGroupRepository,
         RequestInterface $request,
-        \Psr\Log\LoggerInterface $logger = null,
+        ?LoggerInterface $logger = null,
         ConfigHelper $configHelper,
         DataOverride $dataOverride,
         Data $dataHelper

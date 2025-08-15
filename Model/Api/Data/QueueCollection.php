@@ -9,7 +9,7 @@ class QueueCollection implements \Remarkety\Mgconnector\Api\Data\QueueCollection
         return $this->_items;
     }
 
-    public function setQueueItems(array $items = null)
+    public function setQueueItems(?array $items = null)
     {
         $this->_items = $items;
     }

@@ -20,5 +20,5 @@ interface StoreSettingsCollectionInterface
      * @param \Remarkety\Mgconnector\Api\Data\StoreSettingsInterface[] $items
      * @return $this
      */
-    public function setItems(array $items = null);
+    public function setItems(?array $items = null);
 }
