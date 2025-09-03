@@ -16,6 +16,7 @@ use \Magento\Customer\Model\Customer;
 use \Magento\Customer\Model\AddressFactory;
 use \Magento\Customer\Model\ResourceModel\Address\CollectionFactory as AddressDataFactory;
 use \Magento\Customer\Model\ResourceModel\Customer\CollectionFactory as CustomerCollectionFactory;
+use \Magento\Newsletter\Model\ResourceModel\Subscriber\CollectionFactory as SubscriberCollectionFactory;
 use \Magento\Sales\Model\OrderFactory;
 use \Magento\Quote\Model\QuoteFactory;
 use \Magento\Sales\Model\Order\StatusFactory;
@@ -74,6 +75,7 @@ class Data implements DataInterface
     protected $scopeConfig;
     protected $statusFactory;
     protected $_customerCollectionFactory;
+    protected $_subscriberCollectionFactory;
     protected $_salesOrderResourceCollectionFactory;
     protected $quoteFactory;
     protected $ruleFactory;
@@ -177,6 +179,15 @@ class Data implements DataInterface
             "tags",
             "title" => 'prefix',
             "verified_email" => 'confirmation'
+        ],
+        'subscribers' => [
+            "id",
+            "email",
+            "accepts_marketing",
+            "updated_at",
+            "subscriber_status",
+            "store_id",
+            "customer_id"
         ],
         'orders' => [
             "created_at" => 'created_at',
@@ -321,6 +332,7 @@ class Data implements DataInterface
         \Magento\Store\Model\StoreManagerInterface $storeManager,
         \Magento\ConfigurableProduct\Model\ResourceModel\Product\Type\Configurable $catalogProductTypeConfigurable,
         CustomerCollectionFactory $customerCollectionFactory,
+        SubscriberCollectionFactory $subscriberCollectionFactory,
         \Magento\Sales\Model\ResourceModel\Order\CollectionFactory $salesOrderResourceCollectionFactory,
         RuleFactory $ruleFactory,
         CouponFactory $couponFactory,
@@ -368,6 +380,7 @@ class Data implements DataInterface
         $this->_storeManagerInterface = $storeManager;
         $this->_catalogProductTypeConfigurable = $catalogProductTypeConfigurable;
         $this->_customerCollectionFactory = $customerCollectionFactory;
+        $this->_subscriberCollectionFactory = $subscriberCollectionFactory;
         $this->_salesOrderResourceCollectionFactory = $salesOrderResourceCollectionFactory;
         $this->ruleFactory = $ruleFactory;
         $this->couponFactory = $couponFactory;
@@ -726,6 +739,70 @@ class Data implements DataInterface
         $object = new DataObject();
         $object->setCustomers($customerArray);
         return $object;
+    }
+
+    /**
+     * Get All newsletter subscribers (with all statuses)
+     *
+     * @param int|null $mage_store_id
+     * @param string|null $updated_at_min
+     * @param string|null $updated_at_max
+     * @param int|null $limit
+     * @param int|null $page
+     * @param int|null $since_id
+     * @param string|null $email
+     * @return array
+     */
+    public function getSubscribers(
+        $mage_store_id,
+        $updated_at_min = null,
+        $updated_at_max = null,
+        $limit = null,
+        $page = null,
+        $since_id = null,
+        $email = null
+    ) {
+        $subscriberCollection = $this->_subscriberCollectionFactory->create();
+
+        if ($since_id !== null) {
+            $subscriberCollection->addFieldToFilter('entity_id', $since_id);
+        }
+
+        if ($updated_at_min != null) {
+            $subscriberCollection->addFieldToFilter('change_status_at', ['gt' => $this->convertTime($updated_at_min)]);
+        }
+
+        if ($updated_at_max != null) {
+            $subscriberCollection->addFieldToFilter('change_status_at', ['lt' => $this->convertTime($updated_at_max)]);
+        }
+
+        if ($email != null) {
+            $subscriberCollection->addFieldToFilter('subscriber_email', ['like' => '%' . $email . '%']);
+        }
+
+        if ($limit != null) {
+            $subscriberCollection->setPageSize($limit);
+        }
+
+        if ($page){
+            $subscriberCollection->setCurPage($page + 1); // Note that page numbers begin at 1 in Magento
+        }
+
+        $subscriberArray = [];
+        foreach ($subscriberCollection as $subscriber) {
+            $mappedSubscriber = $subscriber->getData();
+            $subscriberData = [];
+            $subscriberData['id'] = $mappedSubscriber['subscriber_id'];
+            $subscriberData['email'] = $mappedSubscriber['subscriber_email'];
+            $subscriberData['accepts_marketing'] = ($mappedSubscriber['subscriber_status'] == 1);
+            $subscriberData['updated_at'] = $mappedSubscriber['change_status_at'];
+            $subscriberData['subscriber_status'] = $mappedSubscriber['subscriber_status'];
+            $subscriberData['store_id'] = $mappedSubscriber['store_id'];
+            $subscriberData['customer_id'] = $mappedSubscriber['customer_id'];
+
+            $subscriberArray[] = $subscriberData;
+        }
+        return $subscriberArray;
     }
 
     /**

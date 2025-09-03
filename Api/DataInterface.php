@@ -203,4 +203,26 @@ interface DataInterface
      * @return \Remarkety\Mgconnector\Api\Data\UnsubscribeResponseInterface
      */
     public function unsubscribe($mage_store_id, $email);
+
+    /**
+     * Get All newsletter subscribers
+     *
+     * @param int|null $mage_store_id
+     * @param string|null $updated_at_min
+     * @param string|null $updated_at_max
+     * @param int|null $limit
+     * @param int|null $page
+     * @param int|null $since_id
+     * @param string|null $email
+     * @return \Remarkety\Mgconnector\Api\Data\CustomerCollectionInterface
+     */
+    public function getSubscribers(
+        $mage_store_id,
+        $updated_at_min = null,
+        $updated_at_max = null,
+        $limit = null,
+        $page = null,
+        $since_id = null,
+        $email = null
+    );
 }
