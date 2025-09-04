@@ -792,13 +792,12 @@ class Data implements DataInterface
         foreach ($subscriberCollection as $subscriber) {
             $mappedSubscriber = $subscriber->getData();
             $subscriberData = [];
-            $subscriberData['id'] = $mappedSubscriber['subscriber_id'];
+            $subscriberData['id'] = $mappedSubscriber['customer_id'] ?: null;
             $subscriberData['email'] = $mappedSubscriber['subscriber_email'];
             $subscriberData['accepts_marketing'] = ($mappedSubscriber['subscriber_status'] == 1);
             $subscriberData['updated_at'] = $mappedSubscriber['change_status_at'];
             $subscriberData['subscriber_status'] = $mappedSubscriber['subscriber_status'];
             $subscriberData['store_id'] = $mappedSubscriber['store_id'];
-            $subscriberData['customer_id'] = $mappedSubscriber['customer_id'];
 
             $subscriberArray[] = $subscriberData;
         }
