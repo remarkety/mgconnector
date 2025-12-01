@@ -41,6 +41,7 @@ class ConfigHelper
     const POPUP_ENABLED = 'remarkety/mgconnector/popup_enabled';
     // If a product is enabled and non visible in Magento, the plugin will send enabled to Remarkety if this setting is enabled
     const IS_NOT_VISIBLE_PRODUCT_ENABLED = 'remarkety/mgconnector/is_not_visible_product_enabled';
+    const CUSTOMER_GROUP_FOR_PRICE_RULES = 'remarkety/mgconnector/customer_group_for_price_rules';
 
     /**
      * should we get marketing consent saved in shopper attribute, if set to 0 then we don't get the data
@@ -398,5 +399,16 @@ class ConfigHelper
             return false;
         }
         return true;
+    }
+
+    /**
+     * Get the customer group ID to use for price rules calculation
+     * @return int
+     */
+    public function getCustomerGroupForPriceRules()
+    {
+        $groupId = $this->_scopeConfig->getValue(self::CUSTOMER_GROUP_FOR_PRICE_RULES);
+        // Fallback to 0 (Not Logged In) if config is empty or not set
+        return $groupId !== null && $groupId !== '' ? (int)$groupId : 0;
     }
 }
