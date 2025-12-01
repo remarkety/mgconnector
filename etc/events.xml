@@ -61,4 +61,12 @@
     <event name="sales_order_place_after">
         <observer name="remarkety_sales_order_place_after_observer" instance="Remarkety\Mgconnector\Observer\TriggerOrderPlacedFinished"/>
     </event>
+
+    <event name="indexer_catalogrule_apply_all_before">
+        <observer name="remarkety_catalogrule_snapshot_prices" instance="Remarkety\Mgconnector\Observer\BeforeIndexObserver"/>
+    </event>
+
+    <event name="indexer_catalogrule_apply_all_after">
+        <observer name="remarkety_catalogrule_sync_price_changes" instance="Remarkety\Mgconnector\Observer\AfterIndexObserver"/>
+    </event>
 </config>
