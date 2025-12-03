@@ -28,18 +28,23 @@ class Form extends Template
     private $sms_consent_checkbox_lable_value;
     private $popup_enabled;
     private $is_not_visible_product_enabled;
+    private $groupCollectionFactory;
+    private $customerGroups = null;
+    private $customer_group_for_price_rules;
 
     public function __construct(
         Template\Context $context,
         array $data,
         \Magento\Framework\Data\Form\FormKey $formKey,
         \Magento\Customer\Model\ResourceModel\Attribute\Collection $attributesCollection,
+        \Magento\Customer\Model\ResourceModel\Group\CollectionFactory $groupCollectionFactory,
         ConfigHelper $configHelper,
         RewardPointsFactory $rewardPointsFactory
     ) {
         parent::__construct($context, $data);
         $this->formKey = $formKey;
         $this->attributesCollection = $attributesCollection;
+        $this->groupCollectionFactory = $groupCollectionFactory;
         $this->configHelper = $configHelper;
         $this->current_pos_id = $configHelper->getPOSAttributeCode();
         $this->event_cart_view = $configHelper->isEventCartViewEnabled();
@@ -56,6 +61,7 @@ class Form extends Template
         $this->sms_consent_checkbox_lable_value = $configHelper->getValue(ConfigHelper::SMS_CONSENT_CHECKBOX_LABEL_VALUE);
         $this->popup_enabled = $configHelper->getValue(ConfigHelper::POPUP_ENABLED);
         $this->is_not_visible_product_enabled = $configHelper->getValue(ConfigHelper::IS_NOT_VISIBLE_PRODUCT_ENABLED);
+        $this->customer_group_for_price_rules = $configHelper->getValue(ConfigHelper::CUSTOMER_GROUP_FOR_PRICE_RULES);
         $aw_service = $rewardPointsFactory->create();
         if ($aw_service) {
             $this->is_aw_points_plugin_exists = true;
@@ -220,5 +226,34 @@ class Form extends Template
     public function isNotVisibleProductEnabled()
     {
         return $this->is_not_visible_product_enabled;
+    }
+
+    /**
+     * Get customer groups
+     *
+     * @return array
+     */
+    public function getCustomerGroups()
+    {
+        $this->customerGroups = [];
+
+        try {
+            $collection = $this->groupCollectionFactory->create();
+            foreach ($collection as $group) {
+                $this->customerGroups[$group->getId()] = $group->getCode();
+            }
+        } catch (\Exception $e) {
+            $this->customerGroups = [];
+        }
+
+        return $this->customerGroups;
+    }
+
+    /**
+     * @return int|mixed
+     */
+    public function getCustomerGroupForPriceRules()
+    {
+        return $this->customer_group_for_price_rules;
     }
 }
