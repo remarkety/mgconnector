@@ -222,7 +222,7 @@
 		</div>
 		<div class="admin__field">
 			<label for="customer_group_for_price_rules" class="admin__field-label">
-				<span><?php echo __('Default product price customer groups') ?></span>
+				<span><?php echo __('Customer group used for Remarkety sale price') ?></span>
 			</label>
 
 			<div class="admin__field-control _with-tooltip">
@@ -236,7 +236,10 @@
 				</select>
 				<div class="admin__field-tooltip">
 					<span class="admin__field-tooltip-action action-help"></span>
-					<div class="admin__field-tooltip-content">...........</div>
+					<div class="admin__field-tooltip-content">
+						Which product sale price should we show in emails?<br>
+						If you select "NOT LOGGED IN" Remarkety will sync and display the "NOT LOGGED IN" price for products in your emails,
+						even if the email recipient is a retail customer.</div>
 				</div>
 			</div>
 		</div>
