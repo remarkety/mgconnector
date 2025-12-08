@@ -132,6 +132,10 @@ class Index extends \Magento\Backend\App\Action
             $this->configHelper->setValue(ConfigHelper::IS_NOT_VISIBLE_PRODUCT_ENABLED, $data['is_not_visible_product_enabled']);
         }
 
+        if (isset($data['customer_group_for_price_rules'])) {
+            $this->configHelper->setValue(ConfigHelper::CUSTOMER_GROUP_FOR_PRICE_RULES, $data['customer_group_for_price_rules']);
+        }
+
         return true;
     }
 }

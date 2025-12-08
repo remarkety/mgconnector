@@ -74,7 +74,7 @@ class ProductSerializer
         $store = $this->storeManager->getStore($storeId);
         $product->setStoreId($storeId);
         $product->setWebsiteId($store->getWebsiteId());
-        $product->setCustomerGroupId(0);
+        $product->setCustomerGroupId($this->configHelper->getCustomerGroupForPriceRules());
 
         //makes sure the final price is re-calculated based on the current store
         $product->setFinalPrice(null);
@@ -121,7 +121,7 @@ class ProductSerializer
                         $childProd = $this->loadProduct($childId, $storeId);
                         $childProd->setStoreId($storeId);
                         $childProd->setWebsiteId($store->getWebsiteId());
-                        $childProd->setCustomerGroupId(0);
+                        $childProd->setCustomerGroupId($this->configHelper->getCustomerGroupForPriceRules());
 
                         $stock = $this->stockRegistry->getStockItem($childId);
 

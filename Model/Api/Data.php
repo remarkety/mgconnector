@@ -525,6 +525,9 @@ class Data implements DataInterface
 
             $prod['body_html'] = $row->getDescription();
             $prod['id'] = $row->getId();
+
+            // set customer group for price rules to get correct final price
+            $row->setcustomer_group_id($this->configHelper->getCustomerGroupForPriceRules());
             $prod['sale_price_with_tax'] = $this->getFinalPrice($row);
 
             $parent_id = $this->dataHelper->getParentId($row->getId());
@@ -552,6 +555,9 @@ class Data implements DataInterface
 
                         $created_at_child = new \DateTime($childProd->getCreatedAt());
                         $updated_at_child = new \DateTime($childProd->getUpdatedAt());
+
+                        // set customer group for price rules to get correct final price
+                        $childProd->setcustomer_group_id($this->configHelper->getCustomerGroupForPriceRules());
 
                         $variants[] = [
                             'id' => $childProd->getId(),

@@ -189,10 +189,10 @@
 			<div class="admin__field-control _with-tooltip">
 				<select id="popup_enabled" name="popup_enabled" class="admin__control-select">
             <?php foreach ($this->getEnabledDisabledOptions() as $code => $name): ?>
-							<option
-								value="<?php echo $code; ?>"
+						<option
+							value="<?php echo $code; ?>"
                   <?php if ($code && $this->getPopupEnabled()) { echo 'selected="selected"'; } ?>
-							><?php echo $name; ?></option>
+						><?php echo $name; ?></option>
             <?php endforeach; ?>
 				</select>
 			</div>
@@ -208,15 +208,38 @@
 			<div class="admin__field-control _with-tooltip">
 				<select id="is_not_visible_product_enabled" name="is_not_visible_product_enabled" class="admin__control-select">
             <?php foreach ($this->getEnabledDisabledOptions() as $code => $name): ?>
-							<option
-								value="<?php echo $code; ?>"
+						<option
+							value="<?php echo $code; ?>"
                   <?php if ($code && $this->isNotVisibleProductEnabled()) { echo 'selected="selected"'; } ?>
-							><?php echo $name; ?></option>
+						><?php echo $name; ?></option>
             <?php endforeach; ?>
 				</select>
 				<div class="admin__field-tooltip">
 					<span class="admin__field-tooltip-action action-help"></span>
 					<div class="admin__field-tooltip-content">When a product is Enabled but set to Not Visible Individually in Magento, it will be marked as Enabled in Remarkety if this checkbox is checked and Disabled otherwise.</div>
+				</div>
+			</div>
+		</div>
+		<div class="admin__field">
+			<label for="customer_group_for_price_rules" class="admin__field-label">
+				<span><?php echo __('Customer group used for Remarkety sale price') ?></span>
+			</label>
+
+			<div class="admin__field-control _with-tooltip">
+				<select id="customer_group_for_price_rules" name="customer_group_for_price_rules" class="admin__control-select">
+            <?php foreach ($this->getCustomerGroups() as $id => $name): ?>
+						<option
+							value="<?php echo $id; ?>"
+                  <?php if ((string)$id === (string)$this->getCustomerGroupForPriceRules()) { echo 'selected="selected"'; } ?>
+						><?php echo $name; ?></option>
+            <?php endforeach; ?>
+				</select>
+				<div class="admin__field-tooltip">
+					<span class="admin__field-tooltip-action action-help"></span>
+					<div class="admin__field-tooltip-content">
+						Which product sale price should we show in emails?<br>
+						If you select "NOT LOGGED IN" Remarkety will sync and display the "NOT LOGGED IN" price for products in your emails,
+						even if the email recipient is a retail customer.</div>
 				</div>
 			</div>
 		</div>
@@ -234,7 +257,7 @@
 								<option
 									value="<?php echo $code; ?>"
 										<?php if ($code && $this->getEmailConsentEnabled()) { echo 'selected="selected"'; } ?>
-								><?php echo $name; ?></option>
+									><?php echo $name; ?></option>
 							<?php endforeach; ?>
 					</select>
 					<div class="admin__field-tooltip">
@@ -255,8 +278,8 @@
 							<?php foreach ($this->getFormFieldPositions() as $code => $name): ?>
 								<option
 									value="<?php echo $name; ?>"
-										<?php if ($name == $this->getEmailConsentCheckboxPosition()) { echo 'selected="selected"'; } ?>
-								><?php echo $name; ?></option>
+									<?php if ($name == $this->getEmailConsentCheckboxPosition()) { echo 'selected="selected"'; } ?>
+									><?php echo $name; ?></option>
 							<?php endforeach; ?>
 					</select>
 					<div class="admin__field-tooltip">
@@ -273,8 +296,8 @@
 
 				<div class="admin__field-control _with-tooltip">
 					<input type="text" id="email_consent_checkbox_lable_value" name="email_consent_checkbox_lable_value"
-								 class="admin__control-text"
-								 value="<?php echo !empty($this->getEmailConsentCheckboxLabelValue()) ? $this->getEmailConsentCheckboxLabelValue() : 'Subscribe to receiving exclusive discounts via email ';?>">
+							 class="admin__control-text"
+							 value="<?php echo !empty($this->getEmailConsentCheckboxLabelValue()) ? $this->getEmailConsentCheckboxLabelValue() : 'Subscribe to receiving exclusive discounts via email ';?>">
 					<div class="admin__field-tooltip">
 						<span class="admin__field-tooltip-action action-help"></span>
 						<div class="admin__field-tooltip-content">Consent label value</div>
@@ -296,7 +319,7 @@
 								<option
 									value="<?php echo $code; ?>"
 										<?php if ($code && $this->getSmsConsentEnabled()) { echo 'selected="selected"'; } ?>
-								><?php echo $name; ?></option>
+									><?php echo $name; ?></option>
 							<?php endforeach; ?>
 					</select>
 					<div class="admin__field-tooltip">
@@ -317,8 +340,8 @@
 							<?php foreach ($this->getFormFieldPositions() as $code => $name): ?>
 								<option
 									value="<?php echo $name; ?>"
-										<?php if ($name == $this->getSMSConsentCheckboxPosition()) { echo 'selected="selected"'; } ?>
-								><?php echo $name; ?></option>
+									<?php if ($name == $this->getSMSConsentCheckboxPosition()) { echo 'selected="selected"'; } ?>
+									><?php echo $name; ?></option>
 							<?php endforeach; ?>
 					</select>
 					<div class="admin__field-tooltip">
@@ -335,8 +358,8 @@
 
 				<div class="admin__field-control _with-tooltip">
 					<input type="text" id="sms_consent_checkbox_lable_value" name="sms_consent_checkbox_lable_value"
-								 class="admin__control-text"
-								 value="<?php echo !empty($this->getSMSConsentCheckboxLabelValue()) ? $this->getSMSConsentCheckboxLabelValue() :  'Subscribe to receiving exclusive discounts via sms ';?>">
+							 class="admin__control-text"
+							 value="<?php echo !empty($this->getSMSConsentCheckboxLabelValue()) ? $this->getSMSConsentCheckboxLabelValue() :  'Subscribe to receiving exclusive discounts via sms ';?>">
 					<div class="admin__field-tooltip">
 						<span class="admin__field-tooltip-action action-help"></span>
 						<div class="admin__field-tooltip-content">Consent label value</div>
