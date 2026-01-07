@@ -188,7 +188,7 @@ class EventMethods
     protected function _getHeaders($eventType, $payload, $storeId = null)
     {
         $domain = $this->_store->getBaseUrl(UrlInterface::URL_TYPE_WEB);
-        $domain = substr($domain, 7, -1);
+        $domain = parse_url($domain, PHP_URL_HOST);
 
         if (empty($storeId) && isset($payload['storeId'])) {
             $storeId = $payload['storeId'];
