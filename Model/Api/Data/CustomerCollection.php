@@ -9,7 +9,7 @@ class CustomerCollection implements \Remarkety\Mgconnector\Api\Data\CustomerColl
         return $this->_items;
     }
 
-    public function setCustomers(array $items = null)
+    public function setCustomers(?array $items = null)
     {
         $this->_items = $items;
     }

@@ -9,7 +9,7 @@ class QuoteCollection implements \Remarkety\Mgconnector\Api\Data\QuoteCollection
         return $this->_items;
     }
 
-    public function setCarts(array $items = null)
+    public function setCarts(?array $items = null)
     {
         $this->_items = $items;
     }

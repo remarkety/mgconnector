@@ -9,7 +9,7 @@ class StoreSettingsCollection implements \Remarkety\Mgconnector\Api\Data\StoreSe
         return $this->_items;
     }
 
-    public function setItems(array $items = null)
+    public function setItems(?array $items = null)
     {
         $this->_items = $items;
     }

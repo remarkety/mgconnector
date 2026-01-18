@@ -20,5 +20,5 @@ interface QueueCollectionInterface
      * @param \Remarkety\Mgconnector\Api\Data\QueueInterface[] $items
      * @return $this
      */
-    public function setQueueItems(array $items = null);
+    public function setQueueItems(?array $items = null);
 }

@@ -9,7 +9,7 @@ class StoreOrderStatusesCollection implements \Remarkety\Mgconnector\Api\Data\St
         return $this->_items;
     }
 
-    public function setItems(array $items = null)
+    public function setItems(?array $items = null)
     {
         $this->_items = $items;
     }

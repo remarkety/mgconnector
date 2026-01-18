@@ -20,5 +20,5 @@ interface OrderCollectionInterface
      * @param \Remarkety\Mgconnector\Api\Data\OrderInterface[] $items
      * @return $this
      */
-    public function setOrders(array $items = null);
+    public function setOrders(?array $items = null);
 }
